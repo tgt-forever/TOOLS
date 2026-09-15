@@ -1,0 +1,1468 @@
+<title>종합 작업 도구</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Gowun+Batang:wght@400;700&family=IBM+Plex+Sans+KR:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+<style>
+  :root{
+    --bg:#F4EEE1;
+    --bg-soft:#ECE3CD;
+    --surface:#FFFFFF;
+    --surface-2:#FBF8F1;
+    --ink:#221D16;
+    --ink-soft:#6B6252;
+    --line:#E1D6BD;
+    --line-strong:#CBBE9E;
+    --accent:#3D6D5C;
+    --accent-dark:#28473C;
+    --accent-soft:#E3ECE7;
+    --gold:#B4863E;
+    --gold-soft:#F6ECD6;
+    --danger:#AE4430;
+    --danger-soft:#F8E6E0;
+    --sidebar-bg:#221D16;
+    --sidebar-ink:#F4EEE1;
+    --sidebar-sub:#A79A82;
+    --sidebar-line:#39301F;
+    --sidebar-accent:#7FC3A6;
+    --shadow: 0 1px 0 rgba(34,29,22,.04), 0 14px 32px -24px rgba(34,29,22,.35);
+    --font-display:'Gowun Batang', 'Noto Serif KR', serif;
+    --font-body:'IBM Plex Sans KR','Noto Sans KR',-apple-system,'Malgun Gothic',sans-serif;
+    --font-mono:'IBM Plex Mono','JetBrains Mono',monospace;
+  }
+  /* 밝은 베이지 톤 고정 — 다크모드 미적용 */
+
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    background:var(--bg);
+    color:var(--ink);
+    font-family:var(--font-body);
+    line-height:1.55;
+  }
+  h1,h2{ text-wrap:balance; }
+  .app{
+    display:grid;
+    grid-template-columns: 262px 1fr;
+    min-height:100dvh;
+  }
+  @media (max-width:860px){
+    .app{ grid-template-columns:1fr; }
+  }
+
+  /* ---------- sidebar ---------- */
+  .sidebar{
+    background:var(--sidebar-bg);
+    color:var(--sidebar-ink);
+    padding:30px 22px 22px;
+    display:flex;
+    flex-direction:column;
+    gap:26px;
+    border-right:1px solid var(--sidebar-line);
+  }
+  @media (max-width:860px){
+    .sidebar{
+      flex-direction:row;
+      align-items:center;
+      gap:18px;
+      padding:16px 18px;
+      overflow-x:auto;
+    }
+    .sidebar-foot{ display:none; }
+    .brand{ flex:0 0 auto; }
+    .brand-tag{ display:none; }
+  }
+  .brand-eyebrow{
+    font-family:var(--font-mono);
+    font-size:11px;
+    letter-spacing:.16em;
+    color:var(--accent-dark);
+    text-transform:uppercase;
+  }
+  .sidebar .brand-eyebrow{ color:var(--sidebar-accent); }
+  .brand-title{
+    font-family:var(--font-display);
+    font-size:23px;
+    font-weight:700;
+    margin:4px 0 6px;
+    letter-spacing:-0.01em;
+  }
+  .brand-tag{
+    font-size:12.5px;
+    color:var(--sidebar-sub);
+    line-height:1.6;
+    max-width:26ch;
+  }
+  .nav{
+    display:flex;
+    flex-direction:column;
+    gap:6px;
+  }
+  @media (max-width:860px){
+    .nav{ flex-direction:row; }
+  }
+  .nav-item{
+    display:flex;
+    align-items:center;
+    gap:12px;
+    padding:11px 12px;
+    border-radius:10px;
+    border:1px solid transparent;
+    background:transparent;
+    color:var(--sidebar-ink);
+    cursor:pointer;
+    text-align:left;
+    font-family:var(--font-body);
+    white-space:nowrap;
+  }
+  .nav-item:hover{ background:rgba(244,238,225,.06); }
+  .nav-item.active{
+    background:rgba(111,171,147,.16);
+    border-color:rgba(111,171,147,.4);
+  }
+  .nav-index{
+    font-family:var(--font-mono);
+    font-size:11px;
+    color:var(--sidebar-sub);
+    border:1px solid var(--sidebar-line);
+    border-radius:6px;
+    width:26px;
+    height:26px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    flex:0 0 auto;
+  }
+  .nav-item.active .nav-index{
+    color:var(--sidebar-bg);
+    background:var(--sidebar-accent);
+    border-color:var(--sidebar-accent);
+  }
+  .nav-name{ font-size:13.5px; font-weight:600; }
+  .sidebar-foot{
+    margin-top:auto;
+    font-size:11.5px;
+    color:var(--sidebar-sub);
+    line-height:1.7;
+    border-top:1px solid var(--sidebar-line);
+    padding-top:16px;
+  }
+
+  /* ---------- main ---------- */
+  .main{
+    padding:44px clamp(20px,4vw,58px) 72px;
+    max-width:960px;
+  }
+  .panel{ display:none; }
+  .panel.active{ display:block; }
+  .panel-head{ margin-bottom:30px; }
+  .eyebrow{
+    font-family:var(--font-mono);
+    font-size:11.5px;
+    letter-spacing:.14em;
+    color:var(--accent);
+    text-transform:uppercase;
+  }
+  .panel-head h1{
+    font-family:var(--font-display);
+    font-size:29px;
+    font-weight:700;
+    margin:8px 0 10px;
+    letter-spacing:-0.01em;
+  }
+  .lead{
+    color:var(--ink-soft);
+    font-size:14.5px;
+    max-width:64ch;
+    line-height:1.7;
+  }
+  .lead b{ color:var(--ink); }
+
+  .card{
+    background:var(--surface);
+    border:1px solid var(--line);
+    border-radius:14px;
+    padding:26px 28px;
+    margin-bottom:20px;
+    box-shadow:var(--shadow);
+  }
+  .card-head{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    margin-bottom:6px;
+  }
+  .card-num{
+    width:24px; height:24px;
+    border-radius:50%;
+    background:var(--accent);
+    color:#fff;
+    font-family:var(--font-mono);
+    font-size:12px;
+    display:flex; align-items:center; justify-content:center;
+    flex:0 0 auto;
+  }
+  .card-title{ font-size:16px; font-weight:700; margin:0; }
+  .card-desc{
+    color:var(--ink-soft);
+    font-size:13px;
+    line-height:1.7;
+    margin:0 0 18px;
+  }
+  .card-desc b{ color:var(--ink); }
+
+  .row{ display:flex; gap:16px; flex-wrap:wrap; margin-bottom:14px; }
+  .field{ flex:1; min-width:220px; }
+  .field-label{ font-size:12.5px; font-weight:600; display:block; margin-bottom:6px; color:var(--ink); }
+  input[type="file"]{
+    width:100%;
+    font-size:13px;
+    font-family:var(--font-body);
+    border:1px solid var(--line);
+    border-radius:8px;
+    padding:9px 10px;
+    background:var(--surface-2);
+    color:var(--ink);
+  }
+  input[type="text"], input[type="number"], input[type="password"]{
+    width:100%;
+    font-size:13.5px;
+    font-family:var(--font-mono);
+    border:1px solid var(--line);
+    border-radius:8px;
+    padding:9px 10px;
+    background:var(--surface-2);
+    color:var(--ink);
+  }
+  input[type="text"]:focus, input[type="number"]:focus, input[type="password"]:focus, input[type="range"]:focus, button:focus-visible, .nav-item:focus-visible, .drop:focus-within{
+    outline:2px solid var(--accent);
+    outline-offset:2px;
+  }
+  .order-choice, .radio-group{ display:flex; gap:10px; margin-bottom:14px; flex-wrap:wrap; }
+  .order-choice label, .radio-group label{
+    flex:1;
+    min-width:180px;
+    border:1px solid var(--line);
+    border-radius:9px;
+    padding:10px 12px;
+    font-size:13px;
+    cursor:pointer;
+    display:flex;
+    align-items:center;
+    gap:8px;
+    background:var(--surface-2);
+  }
+  .order-choice input, .radio-group input, .checkbox-row input{ accent-color:var(--accent); }
+  .checkbox-row{ display:flex; align-items:center; gap:8px; margin-bottom:14px; font-size:13px; }
+
+  button.primary{
+    background:var(--accent);
+    color:#fff;
+    border:none;
+    border-radius:9px;
+    padding:11px 20px;
+    font-size:14px;
+    font-weight:700;
+    cursor:pointer;
+    font-family:var(--font-body);
+  }
+  button.primary:hover{ background:var(--accent-dark); }
+  button.primary:disabled{ background:var(--line-strong); color:var(--surface); cursor:not-allowed; }
+  button.dark{
+    background:var(--ink);
+    color:var(--bg);
+    border:none;
+    border-radius:9px;
+    padding:11px 20px;
+    font-size:13.5px;
+    font-weight:700;
+    cursor:pointer;
+    font-family:var(--font-body);
+  }
+  button.dark:hover{ opacity:.86; }
+  button.ghost{
+    background:transparent;
+    color:var(--ink-soft);
+    border:1px solid var(--line);
+    border-radius:8px;
+    padding:6px 12px;
+    font-size:12px;
+    cursor:pointer;
+    font-family:var(--font-body);
+  }
+  button.ghost:hover{ border-color:var(--danger); color:var(--danger); }
+
+  .status{
+    margin-top:14px;
+    font-size:13px;
+    line-height:1.6;
+    padding:11px 13px;
+    border-radius:9px;
+    display:none;
+  }
+  .status.ok{ display:block; background:var(--accent-soft); color:var(--accent-dark); }
+  .status.warn{ display:block; background:var(--gold-soft); color:var(--gold); }
+  .status.error{ display:block; background:var(--danger-soft); color:var(--danger); }
+  .hint{ font-size:11.5px; color:var(--ink-soft); margin-top:8px; }
+
+  /* dropzones (tool 2 / 3 / 4) */
+  .grid-2{ display:grid; grid-template-columns:1fr 1fr; gap:16px; }
+  @media (max-width:640px){ .grid-2{ grid-template-columns:1fr; } }
+  .drop{
+    border:1.5px dashed var(--line-strong);
+    background:var(--surface-2);
+    border-radius:11px;
+    padding:20px 16px;
+    display:flex;
+    align-items:center;
+    gap:12px;
+    cursor:pointer;
+    position:relative;
+  }
+  .drop:hover, .drop.drag{ border-color:var(--accent); background:var(--accent-soft); }
+  .drop.filled{ border-color:var(--accent); border-style:solid; }
+  .drop input[type="file"]{ position:absolute; inset:0; opacity:0; cursor:pointer; width:100%; height:100%; padding:0; border:none; }
+  .drop-icon{
+    flex:0 0 auto;
+    width:34px; height:34px;
+    display:flex; align-items:center; justify-content:center;
+    background:var(--ink); color:var(--bg);
+    font-family:var(--font-mono); font-size:10px; font-weight:700;
+    border-radius:7px;
+  }
+  .drop.filled .drop-icon{ background:var(--accent); color:#fff; }
+  .drop-text{ flex:1; min-width:0; }
+  .drop-name{ font-size:13px; font-weight:600; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .drop-meta{ font-size:11.5px; color:var(--ink-soft); margin-top:2px; }
+  .colspec{ font-size:11px; color:var(--ink-soft); margin-top:6px; line-height:1.6; }
+
+  .summary{ display:flex; gap:12px; margin:20px 0 16px; flex-wrap:wrap; }
+  .stat{
+    background:var(--surface-2);
+    border:1px solid var(--line);
+    border-radius:10px;
+    padding:12px 16px;
+    flex:1; min-width:110px;
+  }
+  .stat .num{ font-family:var(--font-mono); font-size:21px; font-weight:700; font-variant-numeric:tabular-nums; }
+  .stat .lbl{ font-size:11.5px; color:var(--ink-soft); margin-top:2px; }
+  .stat.gold .num{ color:var(--gold); }
+  .stat.danger .num{ color:var(--danger); }
+
+  .legend{ display:flex; gap:18px; font-size:11.5px; color:var(--ink-soft); margin:2px 0 14px; flex-wrap:wrap; }
+  .swatch{ display:inline-block; width:11px; height:11px; border-radius:3px; margin-right:6px; vertical-align:-1px; }
+  .swatch.gold{ background:var(--gold-soft); border:1px solid var(--gold); }
+  .swatch.danger{ background:var(--danger-soft); border:1px solid var(--danger); }
+
+  .tablewrap{ max-height:360px; overflow:auto; border:1px solid var(--line); border-radius:10px; }
+  table{ width:100%; border-collapse:collapse; font-size:12.5px; }
+  thead th{
+    text-align:left; font-size:11px; color:var(--ink-soft); font-weight:700;
+    border-bottom:1px solid var(--line); padding:9px 10px;
+    position:sticky; top:0; background:var(--surface);
+  }
+  tbody td{ padding:8px 10px; border-bottom:1px solid var(--line); }
+  tbody tr.error-row td{ background:var(--danger-soft); color:var(--danger); font-weight:600; }
+  tbody tr.multi-row td{ background:var(--gold-soft); }
+  .more-note{ font-size:11.5px; color:var(--ink-soft); margin-top:8px; }
+
+  /* tool 4 image */
+  .upload-zone{
+    border:1.5px dashed var(--line-strong);
+    background:var(--surface-2);
+    border-radius:12px;
+    padding:34px 20px;
+    text-align:center;
+    cursor:pointer;
+    position:relative;
+  }
+  .upload-zone:hover, .upload-zone.drag{ border-color:var(--accent); background:var(--accent-soft); }
+  .upload-zone input{ position:absolute; inset:0; opacity:0; cursor:pointer; }
+  .upload-zone .u-title{ font-size:14px; font-weight:700; margin-bottom:4px; }
+  .upload-zone .u-sub{ font-size:12.5px; color:var(--ink-soft); }
+
+  .thumb-grid{ display:grid; grid-template-columns:repeat(auto-fill, minmax(150px,1fr)); gap:12px; margin-top:16px; }
+  .thumb-card{ border:1px solid var(--line); border-radius:10px; overflow:hidden; background:var(--surface-2); }
+  .thumb-img{ width:100%; height:96px; object-fit:cover; display:block; background:var(--bg-soft); }
+  .thumb-meta{ padding:9px 10px; }
+  .thumb-name{ font-size:11.5px; font-weight:600; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .thumb-size{ font-size:11px; color:var(--ink-soft); margin-top:2px; font-family:var(--font-mono); }
+  .thumb-foot{ display:flex; justify-content:flex-end; padding:0 8px 8px; }
+
+  .settings-grid{ display:grid; grid-template-columns:1fr 1fr; gap:20px; }
+  @media (max-width:640px){ .settings-grid{ grid-template-columns:1fr; } }
+  .settings-col .field-label{ margin-top:2px; }
+  .slider-row{ display:flex; align-items:center; gap:12px; }
+  input[type="range"]{ flex:1; accent-color:var(--accent); }
+  .slider-val{ font-family:var(--font-mono); font-size:13px; width:44px; text-align:right; font-variant-numeric:tabular-nums; }
+  .subfield-row{ display:flex; gap:10px; align-items:center; }
+  .subfield-row input[type="number"]{ width:90px; }
+  .divider-note{ font-size:11.5px; color:var(--ink-soft); margin:2px 0 14px; }
+
+  .result-grid{ display:grid; grid-template-columns:repeat(auto-fill, minmax(190px,1fr)); gap:12px; margin-top:6px; }
+  .result-card{ border:1px solid var(--line); border-radius:10px; overflow:hidden; background:var(--surface-2); }
+  .result-img{ width:100%; height:110px; object-fit:cover; display:block; }
+  .result-meta{ padding:10px 12px; }
+  .result-name{ font-size:11.5px; font-weight:600; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .result-diff{ font-size:11px; color:var(--ink-soft); margin-top:3px; font-family:var(--font-mono); }
+  .result-diff .down{ color:var(--accent-dark); font-weight:600; }
+  .result-dl{
+    display:block; width:calc(100% - 20px); text-align:center; margin:0 10px 10px; padding:8px 0;
+    background:var(--ink); color:var(--bg); border:none; border-radius:7px; text-decoration:none;
+    font-size:12px; font-weight:700; cursor:pointer; font-family:var(--font-body);
+  }
+  .result-dl:hover{ opacity:.86; }
+  .toolbar{ display:flex; gap:10px; align-items:center; margin-top:16px; flex-wrap:wrap; }
+
+  /* access gate */
+  .gate-overlay{
+    position:fixed; inset:0; z-index:9999;
+    background:var(--bg);
+    display:flex; align-items:center; justify-content:center;
+    padding:24px;
+  }
+  .gate-card{
+    width:100%; max-width:360px;
+    background:var(--surface); border:1px solid var(--line); border-radius:14px;
+    padding:34px 30px; box-shadow:var(--shadow); text-align:center;
+  }
+  .gate-eyebrow{
+    font-family:var(--font-mono); font-size:11px; letter-spacing:.16em;
+    color:var(--accent); text-transform:uppercase;
+  }
+  .gate-title{ font-family:var(--font-display); font-size:22px; font-weight:700; margin:8px 0 6px; }
+  .gate-sub{ font-size:13px; color:var(--ink-soft); margin:0 0 20px; line-height:1.6; }
+  .gate-input{
+    width:100%; font-size:16px; font-family:var(--font-mono); text-align:center; letter-spacing:.3em;
+    border:1px solid var(--line); border-radius:8px; padding:13px 10px;
+    background:var(--surface-2); color:var(--ink); box-sizing:border-box;
+  }
+  .gate-input:focus{ outline:2px solid var(--accent); outline-offset:2px; }
+</style>
+
+<div class="gate-overlay" id="gateOverlay">
+  <div class="gate-card">
+    <div class="gate-eyebrow">ACCESS</div>
+    <h1 class="gate-title">비밀번호 확인</h1>
+    <p class="gate-sub">종합 작업 도구는 비밀번호로 보호되어 있어요.</p>
+    <input type="password" id="gatePassword" class="gate-input" placeholder="••••" autocomplete="off" inputmode="numeric">
+    <button class="primary" id="gateSubmit" type="button" style="width:100%;margin-top:12px;">확인</button>
+    <div class="status" id="gateStatus"></div>
+  </div>
+</div>
+<script>
+(function(){
+  var GATE_HASH = '9dc6abc967dad3e2d115d25bdcb5b998f06ebda87c5f784800698d7cc1b2273d';
+  var overlay = document.getElementById('gateOverlay');
+  var input = document.getElementById('gatePassword');
+  var statusEl = document.getElementById('gateStatus');
+
+  function alreadyUnlocked(){
+    try{ return localStorage.getItem('wb_unlocked_v1') === '1'; }catch(e){ return false; }
+  }
+  if(alreadyUnlocked()){ overlay.style.display = 'none'; }
+
+  async function sha256Hex(str){
+    var enc = new TextEncoder().encode(str);
+    var buf = await crypto.subtle.digest('SHA-256', enc);
+    return Array.from(new Uint8Array(buf)).map(function(b){ return b.toString(16).padStart(2,'0'); }).join('');
+  }
+
+  async function tryUnlock(){
+    var val = input.value;
+    if(!val){ return; }
+    statusEl.className = 'status';
+    statusEl.textContent = '';
+    try{
+      var hash = await sha256Hex(val);
+      if(hash === GATE_HASH){
+        try{ localStorage.setItem('wb_unlocked_v1', '1'); }catch(e){}
+        overlay.style.display = 'none';
+      } else {
+        statusEl.className = 'status error';
+        statusEl.textContent = '비밀번호가 올바르지 않아요.';
+        input.value = '';
+        input.focus();
+      }
+    }catch(err){
+      statusEl.className = 'status error';
+      statusEl.textContent = '이 브라우저에서는 확인 기능을 사용할 수 없어요.';
+    }
+  }
+
+  document.getElementById('gateSubmit').addEventListener('click', tryUnlock);
+  input.addEventListener('keydown', function(e){ if(e.key === 'Enter') tryUnlock(); });
+})();
+</script>
+
+<div class="app">
+  <nav class="sidebar">
+    <div class="brand">
+      <div class="brand-eyebrow">TOOLKIT</div>
+      <div class="brand-title">종합 작업 도구</div>
+      <div class="brand-tag">엑셀 조합·매칭, 이미지 변환을 브라우저에서 바로 처리하는 작업 도구 모음</div>
+    </div>
+    <div class="nav" id="navList">
+      <button class="nav-item active" data-tab="t1">
+        <span class="nav-index">01</span>
+        <span class="nav-name">지역 키워드</span>
+      </button>
+      <button class="nav-item" data-tab="t2">
+        <span class="nav-index">02</span>
+        <span class="nav-name">제외검색어</span>
+      </button>
+      <button class="nav-item" data-tab="t3">
+        <span class="nav-index">03</span>
+        <span class="nav-name">자동입찰 키워드</span>
+      </button>
+      <button class="nav-item" data-tab="t4">
+        <span class="nav-index">04</span>
+        <span class="nav-name">이미지 편집</span>
+      </button>
+    </div>
+    <div class="sidebar-foot">모든 파일 처리는 이 브라우저 안에서만 이뤄지며, 어떤 파일도 서버로 전송되지 않습니다.</div>
+  </nav>
+
+  <main class="main">
+
+    <!-- ============ TAB 1 ============ -->
+    <section class="panel active" id="panel-t1">
+      <div class="panel-head">
+        <div class="eyebrow">TOOL 01 · EXCEL</div>
+        <h1>지역 키워드</h1>
+        <p class="lead">엑셀만 올리면 브라우저에서 바로 조합·변환해서 다운로드할 수 있어요. <b>설치가 필요 없습니다.</b></p>
+      </div>
+
+      <div class="card">
+        <div class="card-head"><span class="card-num">1</span><h2 class="card-title">지역 × 키워드 조합 생성</h2></div>
+        <p class="card-desc">지역 엑셀(A1=헤더, A2~ 지역명)과 키워드 엑셀(A1=헤더, A2~ 키워드)을 올리면, 키워드별로 열을 나눠 모든 지역과 조합한 결과 엑셀을 만들어드려요.</p>
+
+        <div class="row">
+          <div class="field">
+            <label class="field-label">지역 엑셀 파일</label>
+            <input type="file" id="t1_regionFile" accept=".xlsx,.xls">
+          </div>
+          <div class="field">
+            <label class="field-label">키워드 엑셀 파일</label>
+            <input type="file" id="t1_keywordFile" accept=".xlsx,.xls">
+          </div>
+        </div>
+
+        <label class="field-label">조합 순서</label>
+        <div class="order-choice">
+          <label><input type="radio" name="t1_order" value="region_first" checked> 지역명 + 키워드 (예: 강동구이혼변호사)</label>
+          <label><input type="radio" name="t1_order" value="keyword_first"> 키워드 + 지역명 (예: 이혼변호사강동구)</label>
+        </div>
+
+        <button class="primary" id="t1_btnStep1">조합 엑셀 만들기</button>
+        <div class="status" id="t1_statusStep1"></div>
+      </div>
+
+      <div class="card">
+        <div class="card-head"><span class="card-num">2</span><h2 class="card-title">광고그룹ID 매핑</h2></div>
+        <p class="card-desc">1단계 결과 파일을 열어 <b>맨 위에 행을 하나 추가</b>하고, 각 열에 해당 키워드의 <b>광고그룹ID</b>를 입력한 뒤 저장해서 여기 올려주세요. (같은 ID를 여러 열에 반복 입력해도 됩니다)<br>파일 구조: 1행=광고그룹ID / 2행=키워드명(원래 헤더) / 3행~=조합값</p>
+
+        <div class="field" style="margin-bottom:14px;">
+          <label class="field-label">광고그룹ID를 추가한 파일</label>
+          <input type="file" id="t1_mapFile" accept=".xlsx,.xls">
+        </div>
+
+        <div class="checkbox-row">
+          <input type="checkbox" id="t1_withHeader">
+          <label for="t1_withHeader">결과 파일에 "광고그룹ID"/"키워드" 헤더 추가</label>
+        </div>
+
+        <button class="primary" id="t1_btnStep2">최종 엑셀 만들기</button>
+        <div class="status" id="t1_statusStep2"></div>
+      </div>
+    </section>
+
+    <!-- ============ TAB 2 ============ -->
+    <section class="panel" id="panel-t2">
+      <div class="panel-head">
+        <div class="eyebrow">TOOL 02 · EXCEL</div>
+        <h1>제외검색어</h1>
+        <p class="lead">엑셀 두 개를 올리면, 광고그룹ID마다 키워드 전체를 순서대로 매칭한 결과 파일을 만들어드려요.</p>
+      </div>
+
+      <div class="card">
+        <div class="row">
+          <div class="field">
+            <div class="card-head"><span class="card-num">1</span><h2 class="card-title" style="font-size:14px;">키워드 엑셀 파일</h2></div>
+            <p class="hint" style="margin:0 0 8px;">A1 헤더, A2부터 키워드 값</p>
+            <label class="drop" id="t2_drop1">
+              <input type="file" id="t2_file1" accept=".xlsx,.xls">
+              <div class="drop-icon">XLS</div>
+              <div class="drop-text">
+                <div class="drop-name" id="t2_name1">파일을 선택하세요</div>
+                <div class="drop-meta" id="t2_meta1">클릭해서 업로드</div>
+              </div>
+            </label>
+          </div>
+          <div class="field">
+            <div class="card-head"><span class="card-num">2</span><h2 class="card-title" style="font-size:14px;">광고그룹ID 엑셀 파일</h2></div>
+            <p class="hint" style="margin:0 0 8px;">A1 헤더, A2부터 광고그룹ID 값</p>
+            <label class="drop" id="t2_drop2">
+              <input type="file" id="t2_file2" accept=".xlsx,.xls">
+              <div class="drop-icon">XLS</div>
+              <div class="drop-text">
+                <div class="drop-name" id="t2_name2">파일을 선택하세요</div>
+                <div class="drop-meta" id="t2_meta2">클릭해서 업로드</div>
+              </div>
+            </label>
+          </div>
+        </div>
+
+        <button class="primary" id="t2_runBtn" disabled style="width:100%;margin-top:8px;">매칭 실행</button>
+        <div class="status" id="t2_status"></div>
+
+        <div class="summary" id="t2_result" style="display:none;">
+          <div class="stat"><div class="num" id="t2_rKw">-</div><div class="lbl">키워드</div></div>
+          <div class="stat"><div class="num" id="t2_rId">-</div><div class="lbl">광고그룹ID</div></div>
+          <div class="stat"><div class="num" id="t2_rTotal">-</div><div class="lbl">생성된 행</div></div>
+        </div>
+        <button class="dark" id="t2_downloadBtn" type="button" style="display:none; width:fit-content; margin-top:4px;">결과 엑셀 다운로드</button>
+      </div>
+    </section>
+
+    <!-- ============ TAB 3 ============ -->
+    <section class="panel" id="panel-t3">
+      <div class="panel-head">
+        <div class="eyebrow">TOOL 03 · NAVER 파워링크</div>
+        <h1>자동입찰 키워드</h1>
+        <p class="lead">A파일(분야·캠페인·광고그룹·키워드·키워드ID·입찰가 마스터 목록)에서 B파일(분야·키워드·목표순위 목록)에 해당하는 캠페인명·광고그룹명·키워드·키워드ID·입찰가·목표순위를 찾아 결과 엑셀 파일로 만들어줍니다. 결과 파일은 <b>매칭결과 · 매칭성공 · 중복오류키워드</b> 3개 시트로 구성됩니다.</p>
+      </div>
+
+      <div class="card">
+        <div class="grid-2">
+          <label class="drop" id="t3_dropA">
+            <input type="file" id="t3_fileA" accept=".xlsx,.xls">
+            <div class="drop-icon">XLS</div>
+            <div class="drop-text">
+              <div class="drop-name">A파일 업로드</div>
+              <div class="drop-meta">분야·캠페인·광고그룹·키워드·키워드ID·입찰가</div>
+              <div class="colspec">A열 분야 · B열 캠페인 · C열 광고그룹 · D열 키워드 · E열 키워드ID · F열 입찰가 (2행부터)</div>
+              <div class="drop-name" id="t3_nameA" style="margin-top:6px;color:var(--accent-dark);"></div>
+            </div>
+          </label>
+          <label class="drop" id="t3_dropB">
+            <input type="file" id="t3_fileB" accept=".xlsx,.xls">
+            <div class="drop-icon">XLS</div>
+            <div class="drop-text">
+              <div class="drop-name">B파일 업로드</div>
+              <div class="drop-meta">매칭할 분야·키워드·목표순위</div>
+              <div class="colspec">A열 분야 · B열 키워드 · C열 목표순위 (2행부터)</div>
+              <div class="drop-name" id="t3_nameB" style="margin-top:6px;color:var(--accent-dark);"></div>
+            </div>
+          </label>
+        </div>
+
+        <button class="primary" id="t3_runBtn" disabled style="width:100%;margin-top:18px;">매칭 실행</button>
+        <div class="status" id="t3_status"></div>
+      </div>
+
+      <div class="card" id="t3_resultCard" style="display:none;">
+        <div class="summary">
+          <div class="stat"><div class="num" id="t3_statTotal">0</div><div class="lbl">B파일 키워드 수</div></div>
+          <div class="stat"><div class="num" id="t3_statRows">0</div><div class="lbl">결과 행 수</div></div>
+          <div class="stat gold"><div class="num" id="t3_statMulti">0</div><div class="lbl">중복 값 수</div></div>
+          <div class="stat danger"><div class="num" id="t3_statError">0</div><div class="lbl">오류(미매칭)</div></div>
+        </div>
+
+        <div class="legend">
+          <span><span class="swatch gold"></span>다중매칭 (동일 분야+키워드가 A파일에 여러 행 존재 → 직접 확인 필요)</span>
+          <span><span class="swatch danger"></span>오류 (미매칭)</span>
+        </div>
+
+        <div class="tablewrap">
+          <table>
+            <thead><tr><th>캠페인명</th><th>광고그룹명</th><th>키워드</th><th>키워드ID</th><th>입찰가</th><th>목표순위</th></tr></thead>
+            <tbody id="t3_resultBody"></tbody>
+          </table>
+        </div>
+        <div class="more-note" id="t3_moreNote" style="display:none;"></div>
+
+        <button class="dark" id="t3_downloadBtn" style="margin-top:16px;">결과 엑셀 다운로드</button>
+      </div>
+    </section>
+
+    <!-- ============ TAB 4 ============ -->
+    <section class="panel" id="panel-t4">
+      <div class="panel-head">
+        <div class="eyebrow">TOOL 04 · IMAGE</div>
+        <h1>이미지 편집</h1>
+        <p class="lead">여러 장을 한 번에 올려서 <b>용량, 크기, 파일 형식</b>을 원하는 대로 바꿔보세요. 모든 처리는 브라우저 안에서 끝나고, 이미지가 서버로 전송되지 않아요.</p>
+      </div>
+
+      <div class="card">
+        <div class="card-head"><span class="card-num">1</span><h2 class="card-title">이미지 업로드</h2></div>
+        <p class="card-desc">JPG, PNG, WebP 등 여러 장을 한 번에 선택하거나 끌어다 놓으세요.</p>
+        <label class="upload-zone" id="t4_uploadZone">
+          <input type="file" id="t4_fileInput" accept="image/*" multiple>
+          <div class="u-title">클릭하거나 이미지를 이곳에 끌어다 놓으세요</div>
+          <div class="u-sub">여러 장 동시 선택 가능</div>
+        </label>
+        <div class="thumb-grid" id="t4_thumbGrid"></div>
+      </div>
+
+      <div class="card">
+        <div class="card-head"><span class="card-num">2</span><h2 class="card-title">크기 · 용량 · 형식 설정</h2></div>
+        <div class="settings-grid">
+          <div class="settings-col">
+            <label class="field-label">크기 조정</label>
+            <div class="radio-group">
+              <label><input type="radio" name="t4_resizeMode" value="original" checked> 원본 크기 유지</label>
+              <label><input type="radio" name="t4_resizeMode" value="percent"> 퍼센트 조정</label>
+              <label><input type="radio" name="t4_resizeMode" value="pixel"> 픽셀 지정</label>
+            </div>
+
+            <div id="t4_percentBox" style="display:none;">
+              <div class="slider-row">
+                <input type="range" id="t4_percentRange" min="5" max="200" value="100">
+                <span class="slider-val" id="t4_percentVal">100%</span>
+              </div>
+              <div class="hint">원본 대비 비율 (예: 50%면 가로·세로 절반 크기)</div>
+            </div>
+
+            <div id="t4_pixelBox" style="display:none;">
+              <div class="subfield-row" style="margin-bottom:8px;">
+                <input type="number" id="t4_pxWidth" placeholder="가로(px)">
+                <span style="color:var(--ink-soft);">×</span>
+                <input type="number" id="t4_pxHeight" placeholder="세로(px)">
+              </div>
+              <div class="checkbox-row" style="margin-bottom:4px;">
+                <input type="checkbox" id="t4_lockAspect" checked>
+                <label for="t4_lockAspect">비율 유지 (한쪽만 입력해도 자동 계산)</label>
+              </div>
+            </div>
+          </div>
+
+          <div class="settings-col">
+            <label class="field-label">파일 형식</label>
+            <div class="radio-group">
+              <label><input type="radio" name="t4_format" value="original" checked> 원본 유지</label>
+              <label><input type="radio" name="t4_format" value="jpeg"> JPG</label>
+              <label><input type="radio" name="t4_format" value="png"> PNG</label>
+              <label><input type="radio" name="t4_format" value="webp"> WebP</label>
+            </div>
+
+            <label class="field-label">용량 조절 (품질)</label>
+            <div class="slider-row">
+              <input type="range" id="t4_quality" min="10" max="100" value="80">
+              <span class="slider-val" id="t4_qualityVal">80%</span>
+            </div>
+            <div class="divider-note">PNG은 무손실 형식이라 품질 값이 적용되지 않아요.</div>
+
+            <label class="field-label">목표 용량 (선택)</label>
+            <input type="number" id="t4_targetKB" placeholder="예: 200 (KB)">
+            <div class="hint">입력하면 위 품질 슬라이더 대신 이 용량에 최대한 맞춰 압축해요. JPG·WebP에서만 동작해요.</div>
+          </div>
+        </div>
+
+        <button class="primary" id="t4_processBtn" style="margin-top:20px;" disabled>변환 실행</button>
+        <div class="status" id="t4_status"></div>
+      </div>
+
+      <div class="card" id="t4_resultCard" style="display:none;">
+        <div class="card-head"><span class="card-num">3</span><h2 class="card-title">결과</h2></div>
+        <div class="result-grid" id="t4_resultGrid"></div>
+        <div class="toolbar">
+          <button class="dark" id="t4_zipBtn">전체 ZIP으로 다운로드</button>
+        </div>
+      </div>
+    </section>
+
+  </main>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/exceljs/4.4.0/exceljs.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+<script>
+/* ---------------- tab switching ---------------- */
+document.querySelectorAll('.nav-item').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.nav-item').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById('panel-' + btn.dataset.tab).classList.add('active');
+  });
+});
+
+/* ================= 공용: 파일 다운로드 (downloads 기능 경유, 미지원 환경은 대체 방식) ================= */
+let _downloadsPromise = null;
+function getDownloads(){
+  if(!_downloadsPromise){
+    _downloadsPromise = (async () => {
+      try{
+        if(window.claude && typeof window.claude.use === 'function'){
+          return await window.claude.use('downloads');
+        }
+      }catch(e){}
+      return null;
+    })();
+  }
+  return _downloadsPromise;
+}
+async function saveFile(filename, data){
+  const downloads = await getDownloads();
+  if(downloads){
+    return await downloads.save({ filename, data });
+  }
+  // 캡ability가 없는 환경(로컬 파일 등)에서는 기존 방식으로 대체
+  const url = URL.createObjectURL(data);
+  const a = document.createElement('a');
+  a.href = url; a.download = filename;
+  document.body.appendChild(a); a.click(); document.body.removeChild(a);
+  setTimeout(() => URL.revokeObjectURL(url), 4000);
+  return { status: 'saved' };
+}
+function downloadErrorMessage(err){
+  const code = err && err.code;
+  if(code === 'declined') return '다운로드가 취소되었습니다.';
+  if(code === 'rate_limited') return '다운로드 요청이 많습니다. 잠시 후 다시 시도해주세요.';
+  if(code === 'too_large') return '파일이 너무 커서 저장할 수 없습니다.';
+  if(code === 'rejected_extension' || code === 'extension_not_enabled') return '이 파일 형식은 이 화면에서 저장할 수 없습니다.';
+  return '다운로드 중 문제가 발생했습니다' + (err && err.message ? (': ' + err.message) : '.');
+}
+async function saveWorkbookFile(wb, filename){
+  const wbout = XLSX.write(wb, { bookType: "xlsx", type: "array" });
+  const blob = new Blob([wbout], { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" });
+  try{
+    await saveFile(filename, blob);
+    return { ok: true };
+  }catch(err){
+    return { ok: false, err };
+  }
+}
+
+/* ================= TOOL 1 : 지역 x 키워드 조합 ================= */
+(function(){
+  function readWorkbook(file) {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        try {
+          const data = new Uint8Array(e.target.result);
+          const wb = XLSX.read(data, { type: "array", cellDates: false });
+          resolve(wb);
+        } catch (err) { reject(err); }
+      };
+      reader.onerror = () => reject(new Error("파일을 읽을 수 없습니다."));
+      reader.readAsArrayBuffer(file);
+    });
+  }
+  function showStatus(el, type, html) { el.className = "status " + type; el.innerHTML = html; }
+
+  document.getElementById("t1_btnStep1").addEventListener("click", async () => {
+    const statusEl = document.getElementById("t1_statusStep1");
+    const regionInput = document.getElementById("t1_regionFile");
+    const keywordInput = document.getElementById("t1_keywordFile");
+    const order = document.querySelector('input[name="t1_order"]:checked').value;
+
+    if (!regionInput.files[0] || !keywordInput.files[0]) {
+      showStatus(statusEl, "error", "지역 파일과 키워드 파일을 모두 선택해주세요.");
+      return;
+    }
+    try {
+      const [regionWb, keywordWb] = await Promise.all([readWorkbook(regionInput.files[0]), readWorkbook(keywordInput.files[0])]);
+      const regionSheet = regionWb.Sheets[regionWb.SheetNames[0]];
+      const keywordSheet = keywordWb.Sheets[keywordWb.SheetNames[0]];
+      const regionRows = XLSX.utils.sheet_to_json(regionSheet, { header: 1 });
+      const keywordRows = XLSX.utils.sheet_to_json(keywordSheet, { header: 1 });
+      const regions = regionRows.slice(1).map(r => r[0]).filter(v => v !== undefined && String(v).trim() !== "").map(v => String(v).trim());
+      const keywords = keywordRows.slice(1).map(r => r[0]).filter(v => v !== undefined && String(v).trim() !== "").map(v => String(v).trim());
+
+      if (regions.length === 0) { showStatus(statusEl, "error", "지역 파일의 A2셀부터 지역명이 있는지 확인해주세요."); return; }
+      if (keywords.length === 0) { showStatus(statusEl, "error", "키워드 파일의 A2셀부터 키워드가 있는지 확인해주세요."); return; }
+
+      const outRows = [];
+      outRows.push(keywords.slice());
+      for (let r = 0; r < regions.length; r++) {
+        const row = [];
+        for (let c = 0; c < keywords.length; c++) {
+          row.push(order === "region_first" ? (regions[r] + keywords[c]) : (keywords[c] + regions[r]));
+        }
+        outRows.push(row);
+      }
+      const outWs = XLSX.utils.aoa_to_sheet(outRows);
+      outWs["!cols"] = keywords.map(() => ({ wch: 22 }));
+      const outWb = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(outWb, outWs, "조합결과");
+      const dl = await saveWorkbookFile(outWb, "step1_조합결과.xlsx");
+      if (dl.ok) {
+        showStatus(statusEl, "ok", `완료! 지역 ${regions.length}개 × 키워드 ${keywords.length}개 = 총 ${regions.length * keywords.length}개 조합 생성됨. 파일이 저장되었습니다.`);
+      } else {
+        showStatus(statusEl, "error", downloadErrorMessage(dl.err));
+      }
+    } catch (err) {
+      showStatus(statusEl, "error", "처리 중 오류가 발생했습니다: " + err.message);
+    }
+  });
+
+  document.getElementById("t1_btnStep2").addEventListener("click", async () => {
+    const statusEl = document.getElementById("t1_statusStep2");
+    const mapInput = document.getElementById("t1_mapFile");
+    const withHeader = document.getElementById("t1_withHeader").checked;
+
+    if (!mapInput.files[0]) { showStatus(statusEl, "error", "광고그룹ID를 추가한 파일을 선택해주세요."); return; }
+    try {
+      const wb = await readWorkbook(mapInput.files[0]);
+      const sheet = wb.Sheets[wb.SheetNames[0]];
+      const rows = XLSX.utils.sheet_to_json(sheet, { header: 1 });
+      if (rows.length < 3) { showStatus(statusEl, "error", "파일 구조를 확인해주세요. (1행=광고그룹ID, 2행=키워드명, 3행~=조합값)"); return; }
+
+      const idRow = rows[0];
+      const keywordRow = rows[1];
+      const maxCol = Math.max(idRow.length, keywordRow.length, ...rows.map(r => r.length));
+      const results = [];
+      const skipped = [];
+
+      for (let c = 0; c < maxCol; c++) {
+        const adId = idRow[c];
+        const kwName = keywordRow[c];
+        const hasId = adId !== undefined && String(adId).trim() !== "";
+        if (!hasId) {
+          if (kwName !== undefined && String(kwName).trim() !== "") skipped.push({ col: c, kw: kwName });
+          continue;
+        }
+        for (let r = 2; r < rows.length; r++) {
+          const val = rows[r][c];
+          if (val !== undefined && String(val).trim() !== "") results.push([adId, String(val).trim()]);
+        }
+      }
+
+      if (results.length === 0) { showStatus(statusEl, "error", "변환할 데이터가 없습니다. 1행에 광고그룹ID가 채워져 있는지 확인해주세요."); return; }
+
+      const outRows = withHeader ? [["광고그룹ID", "키워드"], ...results] : results;
+      const outWs = XLSX.utils.aoa_to_sheet(outRows);
+      outWs["!cols"] = [{ wch: 16 }, { wch: 26 }];
+      const outWb = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(outWb, outWs, "결과");
+      const dl = await saveWorkbookFile(outWb, "step2_최종결과.xlsx");
+      if (!dl.ok) { showStatus(statusEl, "error", downloadErrorMessage(dl.err)); return; }
+
+      let msg = `완료! 총 ${results.length}행 생성됨. 파일이 저장되었습니다.`;
+      let statusType = "ok";
+      if (skipped.length > 0) {
+        const colNames = skipped.map(s => `"${s.kw}"`).join(", ");
+        msg += `<br><b>[주의]</b> 광고그룹ID가 비어있어 건너뛴 키워드: ${colNames} — 1행에 ID를 입력했는지 확인해주세요.`;
+        statusType = "warn";
+      }
+      showStatus(statusEl, statusType, msg);
+    } catch (err) {
+      showStatus(statusEl, "error", "처리 중 오류가 발생했습니다: " + err.message);
+    }
+  });
+})();
+
+/* ================= TOOL 2 : 키워드 x 광고그룹ID 매칭 ================= */
+(function(){
+  let kwData = null, idData = null;
+  let pendingWb = null, pendingFilename = null;
+
+  function readColumnA(file, cb){
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const wb = XLSX.read(e.target.result, {type:'array'});
+      const ws = wb.Sheets[wb.SheetNames[0]];
+      const rows = XLSX.utils.sheet_to_json(ws, {header:1, raw:false, defval:''});
+      const values = [];
+      for(let i=1;i<rows.length;i++){
+        const v = rows[i] && rows[i][0] !== undefined ? String(rows[i][0]).trim() : '';
+        if(v !== '') values.push(v);
+      }
+      cb(values);
+    };
+    reader.readAsArrayBuffer(file);
+  }
+
+  function setupDrop(dropId, fileId, nameId, metaId, onLoaded){
+    const drop = document.getElementById(dropId);
+    const input = document.getElementById(fileId);
+    const nameEl = document.getElementById(nameId);
+    const metaEl = document.getElementById(metaId);
+    input.addEventListener('change', () => {
+      const file = input.files[0];
+      if(!file) return;
+      nameEl.textContent = file.name;
+      metaEl.textContent = '읽는 중...';
+      drop.classList.remove('filled');
+      readColumnA(file, (values) => {
+        metaEl.textContent = values.length.toLocaleString() + '개 값 확인됨';
+        drop.classList.add('filled');
+        onLoaded(values);
+        checkReady();
+      });
+    });
+  }
+
+  function checkReady(){
+    document.getElementById('t2_runBtn').disabled = !(kwData && idData);
+  }
+
+  setupDrop('t2_drop1','t2_file1','t2_name1','t2_meta1', (v)=>{ kwData = v; });
+  setupDrop('t2_drop2','t2_file2','t2_name2','t2_meta2', (v)=>{ idData = v; });
+
+  document.getElementById('t2_runBtn').addEventListener('click', () => {
+    const statusEl = document.getElementById('t2_status');
+    const resultEl = document.getElementById('t2_result');
+    const dlBtn = document.getElementById('t2_downloadBtn');
+    statusEl.className = 'status';
+    resultEl.style.display = 'none';
+    dlBtn.style.display = 'none';
+    pendingWb = null; pendingFilename = null;
+
+    if(!kwData || !kwData.length){ statusEl.textContent = '키워드 파일에 값이 없습니다. A2 이하를 확인해주세요.'; statusEl.className = 'status error'; return; }
+    if(!idData || !idData.length){ statusEl.textContent = '광고그룹ID 파일에 값이 없습니다. A2 이하를 확인해주세요.'; statusEl.className = 'status error'; return; }
+
+    statusEl.textContent = '매칭 생성 중...';
+
+    setTimeout(() => {
+      const aoa = [['광고그룹ID','키워드']];
+      idData.forEach(gid => { kwData.forEach(kw => { aoa.push([gid, kw]); }); });
+
+      const ws = XLSX.utils.aoa_to_sheet(aoa);
+      ws['!cols'] = [{wch:32},{wch:20}];
+      const wb = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(wb, ws, '매칭결과');
+
+      const now = new Date();
+      const pad = n => String(n).padStart(2,'0');
+      pendingWb = wb;
+      pendingFilename = `매칭결과_${now.getFullYear()}${pad(now.getMonth()+1)}${pad(now.getDate())}_${pad(now.getHours())}${pad(now.getMinutes())}.xlsx`;
+
+      dlBtn.style.display = 'inline-block';
+      document.getElementById('t2_rKw').textContent = kwData.length.toLocaleString();
+      document.getElementById('t2_rId').textContent = idData.length.toLocaleString();
+      document.getElementById('t2_rTotal').textContent = (kwData.length*idData.length).toLocaleString();
+
+      statusEl.textContent = '';
+      statusEl.className = 'status';
+      resultEl.style.display = 'flex';
+    }, 50);
+  });
+
+  document.getElementById('t2_downloadBtn').addEventListener('click', async () => {
+    if(!pendingWb) return;
+    const statusEl = document.getElementById('t2_status');
+    const res = await saveWorkbookFile(pendingWb, pendingFilename);
+    if(!res.ok){ statusEl.textContent = downloadErrorMessage(res.err); statusEl.className = 'status error'; }
+  });
+})();
+
+/* ================= TOOL 3 : 파워링크 키워드 매칭 ================= */
+(function(){
+  let workbookA = null, workbookB = null, lastResults = null;
+
+  function cellText(v){
+    if(v===undefined || v===null) return "";
+    if(typeof v === 'object'){
+      if('result' in v) return cellText(v.result);
+      if('richText' in v) return v.richText.map(t=>t.text).join('');
+      if('text' in v) return String(v.text);
+      return "";
+    }
+    return String(v);
+  }
+  function normalize(v){ return cellText(v).trim(); }
+
+  function setupDrop(dropId, inputId, nameId, onLoaded){
+    const drop = document.getElementById(dropId);
+    const input = document.getElementById(inputId);
+    const nameEl = document.getElementById(nameId);
+    input.addEventListener('change', async () => {
+      const file = input.files[0];
+      if(!file) return;
+      nameEl.textContent = '불러오는 중...';
+      try{
+        const buffer = await file.arrayBuffer();
+        const wb = new ExcelJS.Workbook();
+        await wb.xlsx.load(buffer);
+        nameEl.textContent = file.name;
+        drop.classList.add('filled');
+        onLoaded(wb);
+      } catch(err){
+        nameEl.textContent = '읽기 실패: ' + err.message;
+        onLoaded(null);
+      }
+      checkReady();
+    });
+    drop.addEventListener('dragover', (e)=>{e.preventDefault(); drop.classList.add('drag');});
+    drop.addEventListener('dragleave', ()=> drop.classList.remove('drag'));
+    drop.addEventListener('drop', (e)=>{
+      e.preventDefault();
+      drop.classList.remove('drag');
+      if(e.dataTransfer.files[0]){ input.files = e.dataTransfer.files; input.dispatchEvent(new Event('change')); }
+    });
+  }
+  setupDrop('t3_dropA','t3_fileA','t3_nameA', (wb)=>{ workbookA = wb; });
+  setupDrop('t3_dropB','t3_fileB','t3_nameB', (wb)=>{ workbookB = wb; });
+
+  function checkReady(){ document.getElementById('t3_runBtn').disabled = !(workbookA && workbookB); }
+
+  function sheetRows(wb, colCount){
+    const ws = wb.worksheets[0];
+    const rows = [];
+    ws.eachRow({includeEmpty:true}, (row, rowNumber) => {
+      if(rowNumber === 1) return;
+      const vals = [];
+      for(let c=1; c<=colCount; c++){ vals.push(row.getCell(c).value); }
+      if(vals.every(v => normalize(v) === "")) return;
+      rows.push(vals);
+    });
+    return rows;
+  }
+
+  document.getElementById('t3_runBtn').addEventListener('click', () => {
+    const statusEl = document.getElementById('t3_status');
+    statusEl.className = 'status';
+    try{
+      const rowsA = sheetRows(workbookA, 6);
+      const rowsB = sheetRows(workbookB, 3);
+      if(rowsA.length === 0) throw new Error('A파일에 데이터가 없습니다.');
+      if(rowsB.length === 0) throw new Error('B파일에 데이터가 없습니다.');
+
+      const index = {};
+      rowsA.forEach(row => {
+        const field = normalize(row[0]);
+        const campaign = row[1], adgroup = row[2], keyword = row[3], keywordId = row[4], bidPrice = row[5];
+        const key = field + '|||' + normalize(keyword);
+        if(!index[key]) index[key] = [];
+        index[key].push({campaign, adgroup, keyword, keywordId, bidPrice});
+      });
+
+      const results = [];
+      let errorCount = 0, multiCount = 0;
+
+      rowsB.forEach(row => {
+        const field = normalize(row[0]);
+        const keywordRaw = row[1], targetRank = row[2];
+        const key = field + '|||' + normalize(keywordRaw);
+        const matches = index[key];
+        if(!matches || matches.length === 0){
+          results.push({campaign:'오류', adgroup:'오류', keyword:keywordRaw, keywordId:'', bidPrice:'', targetRank, isError:true, isMulti:false});
+          errorCount++;
+        } else {
+          const isMulti = matches.length > 1;
+          matches.forEach(m => {
+            results.push({campaign:m.campaign, adgroup:m.adgroup, keyword:m.keyword, keywordId:m.keywordId, bidPrice:m.bidPrice, targetRank, isError:false, isMulti});
+            if(isMulti) multiCount++;
+          });
+        }
+      });
+
+      lastResults = results;
+      renderResults(rowsB.length, results, errorCount, multiCount);
+    } catch(err){
+      statusEl.textContent = '오류: ' + err.message;
+      statusEl.className = 'status error';
+    }
+  });
+
+  function renderResults(totalB, results, errorCount, multiCount){
+    document.getElementById('t3_resultCard').style.display = 'block';
+    document.getElementById('t3_statTotal').textContent = totalB;
+    document.getElementById('t3_statRows').textContent = results.length;
+    document.getElementById('t3_statMulti').textContent = multiCount;
+    document.getElementById('t3_statError').textContent = errorCount;
+
+    const body = document.getElementById('t3_resultBody');
+    body.innerHTML = '';
+    const previewLimit = 300;
+    results.slice(0, previewLimit).forEach(r => {
+      const tr = document.createElement('tr');
+      if(r.isError) tr.classList.add('error-row');
+      else if(r.isMulti) tr.classList.add('multi-row');
+      tr.innerHTML = `<td>${escapeHtml(r.campaign)}</td><td>${escapeHtml(r.adgroup)}</td><td>${escapeHtml(r.keyword)}</td><td>${escapeHtml(r.keywordId)}</td><td>${escapeHtml(r.bidPrice)}</td><td>${escapeHtml(r.targetRank)}</td>`;
+      body.appendChild(tr);
+    });
+
+    const moreNote = document.getElementById('t3_moreNote');
+    if(results.length > previewLimit){
+      moreNote.textContent = `미리보기는 ${previewLimit}행까지만 표시됩니다. 전체 ${results.length}행은 다운로드 파일에서 확인하세요.`;
+      moreNote.style.display = 'block';
+    } else { moreNote.style.display = 'none'; }
+
+    document.getElementById('t3_status').textContent = '매칭 완료';
+    document.getElementById('t3_status').className = 'status';
+  }
+
+  function escapeHtml(v){
+    const s = cellText(v);
+    return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  }
+
+  document.getElementById('t3_downloadBtn').addEventListener('click', async () => {
+    if(!lastResults) return;
+    const wbOut = new ExcelJS.Workbook();
+    const YELLOW = {type:'pattern', pattern:'solid', fgColor:{argb:'FFFFF2CC'}};
+
+    const wsAll = wbOut.addWorksheet('매칭결과');
+    wsAll.columns = [
+      {header:'캠페인명', key:'campaign', width:25},{header:'광고그룹명', key:'adgroup', width:25},
+      {header:'키워드', key:'keyword', width:25},{header:'키워드ID', key:'keywordId', width:18},
+      {header:'입찰가', key:'bidPrice', width:12},{header:'목표순위', key:'targetRank', width:12},
+    ];
+    wsAll.getRow(1).font = {name:'Arial', bold:true};
+    lastResults.forEach(r => {
+      const row = wsAll.addRow({campaign: cellText(r.campaign), adgroup: cellText(r.adgroup), keyword: cellText(r.keyword), keywordId: cellText(r.keywordId), bidPrice: cellText(r.bidPrice), targetRank: cellText(r.targetRank)});
+      if(r.isMulti) row.eachCell({includeEmpty:true}, cell => { cell.fill = YELLOW; });
+    });
+
+    const wsOk = wbOut.addWorksheet('매칭성공');
+    wsOk.columns = [
+      {header:'캠페인명', key:'campaign', width:25},{header:'광고그룹명', key:'adgroup', width:25},
+      {header:'키워드', key:'keyword', width:25},{header:'키워드ID', key:'keywordId', width:18},
+      {header:'입찰가', key:'bidPrice', width:12},{header:'목표순위', key:'targetRank', width:12},
+    ];
+    wsOk.getRow(1).font = {name:'Arial', bold:true};
+    lastResults.filter(r => !r.isError && !r.isMulti).forEach(r => {
+      wsOk.addRow({campaign: cellText(r.campaign), adgroup: cellText(r.adgroup), keyword: cellText(r.keyword), keywordId: cellText(r.keywordId), bidPrice: cellText(r.bidPrice), targetRank: cellText(r.targetRank)});
+    });
+
+    const wsProblem = wbOut.addWorksheet('중복오류키워드');
+    wsProblem.columns = [{header:'키워드', key:'keyword', width:25}];
+    wsProblem.getRow(1).font = {name:'Arial', bold:true};
+    const seen = new Set();
+    lastResults.filter(r => r.isError || r.isMulti).forEach(r => {
+      const norm = normalize(r.keyword);
+      if(seen.has(norm)) return;
+      seen.add(norm);
+      wsProblem.addRow({ keyword: cellText(r.keyword) });
+    });
+
+    const buffer = await wbOut.xlsx.writeBuffer();
+    const blob = new Blob([buffer], {type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'});
+    const statusEl = document.getElementById('t3_status');
+    try{
+      await saveFile('매칭결과.xlsx', blob);
+    }catch(err){
+      statusEl.textContent = downloadErrorMessage(err);
+      statusEl.className = 'status error';
+    }
+  });
+})();
+
+/* ================= TOOL 4 : 이미지 편집 ================= */
+(function(){
+  let images = [];
+  let idSeq = 0;
+
+  function fmtBytes(n){
+    if(n < 1024) return n + ' B';
+    if(n < 1024*1024) return (n/1024).toFixed(1) + ' KB';
+    return (n/1024/1024).toFixed(2) + ' MB';
+  }
+
+  const uploadZone = document.getElementById('t4_uploadZone');
+  const fileInput = document.getElementById('t4_fileInput');
+  const thumbGrid = document.getElementById('t4_thumbGrid');
+  const processBtn = document.getElementById('t4_processBtn');
+  const statusEl = document.getElementById('t4_status');
+
+  fileInput.addEventListener('change', () => handleFiles(fileInput.files));
+  uploadZone.addEventListener('dragover', (e)=>{ e.preventDefault(); uploadZone.classList.add('drag'); });
+  uploadZone.addEventListener('dragleave', ()=> uploadZone.classList.remove('drag'));
+  uploadZone.addEventListener('drop', (e)=>{
+    e.preventDefault();
+    uploadZone.classList.remove('drag');
+    if(e.dataTransfer.files) handleFiles(e.dataTransfer.files);
+  });
+
+  function handleFiles(fileList){
+    Array.from(fileList).forEach(file => {
+      if(!file.type.startsWith('image/')) return;
+      const id = 'img' + (idSeq++);
+      const url = URL.createObjectURL(file);
+      const img = new Image();
+      img.onload = () => {
+        images.push({ id, file, name: file.name, origW: img.naturalWidth, origH: img.naturalHeight, origSize: file.size, origType: file.type || 'image/png', img, url });
+        renderThumbs();
+        processBtn.disabled = images.length === 0;
+      };
+      img.src = url;
+    });
+    fileInput.value = '';
+  }
+
+  function removeImage(id){
+    const idx = images.findIndex(i => i.id === id);
+    if(idx >= 0){ URL.revokeObjectURL(images[idx].url); images.splice(idx,1); }
+    renderThumbs();
+    processBtn.disabled = images.length === 0;
+  }
+
+  function renderThumbs(){
+    thumbGrid.innerHTML = '';
+    images.forEach(item => {
+      const card = document.createElement('div');
+      card.className = 'thumb-card';
+      card.innerHTML = `
+        <img class="thumb-img" src="${item.url}" alt="${item.name}">
+        <div class="thumb-meta">
+          <div class="thumb-name">${item.name}</div>
+          <div class="thumb-size">${item.origW}×${item.origH} · ${fmtBytes(item.origSize)}</div>
+        </div>
+        <div class="thumb-foot"><button class="ghost" type="button">삭제</button></div>
+      `;
+      card.querySelector('button').addEventListener('click', () => removeImage(item.id));
+      thumbGrid.appendChild(card);
+    });
+  }
+
+  // settings UI wiring
+  const resizeRadios = document.querySelectorAll('input[name="t4_resizeMode"]');
+  const percentBox = document.getElementById('t4_percentBox');
+  const pixelBox = document.getElementById('t4_pixelBox');
+  resizeRadios.forEach(r => r.addEventListener('change', () => {
+    const mode = document.querySelector('input[name="t4_resizeMode"]:checked').value;
+    percentBox.style.display = mode === 'percent' ? 'block' : 'none';
+    pixelBox.style.display = mode === 'pixel' ? 'block' : 'none';
+  }));
+
+  const percentRange = document.getElementById('t4_percentRange');
+  const percentVal = document.getElementById('t4_percentVal');
+  percentRange.addEventListener('input', () => { percentVal.textContent = percentRange.value + '%'; });
+
+  const qualityRange = document.getElementById('t4_quality');
+  const qualityVal = document.getElementById('t4_qualityVal');
+  qualityRange.addEventListener('input', () => { qualityVal.textContent = qualityRange.value + '%'; });
+
+  function resolveMime(origType, formatChoice){
+    if(formatChoice === 'original') return (origType && origType.startsWith('image/')) ? origType : 'image/jpeg';
+    if(formatChoice === 'jpeg') return 'image/jpeg';
+    if(formatChoice === 'png') return 'image/png';
+    if(formatChoice === 'webp') return 'image/webp';
+    return 'image/jpeg';
+  }
+  function extFor(mime){
+    if(mime === 'image/jpeg') return '.jpg';
+    if(mime === 'image/png') return '.png';
+    if(mime === 'image/webp') return '.webp';
+    return '.jpg';
+  }
+  function buildFileName(originalName, mime){
+    const dot = originalName.lastIndexOf('.');
+    const base = dot > 0 ? originalName.slice(0, dot) : originalName;
+    return base + '_edit' + extFor(mime);
+  }
+  function canvasToBlob(canvas, mime, quality){
+    return new Promise(resolve => {
+      if(mime === 'image/png') canvas.toBlob(b => resolve(b), mime);
+      else canvas.toBlob(b => resolve(b), mime, quality);
+    });
+  }
+  async function encodeWithTargetSize(canvas, mime, targetBytes){
+    let lo = 0.05, hi = 0.95, best = null;
+    for(let i=0;i<7;i++){
+      const q = (lo+hi)/2;
+      const blob = await canvasToBlob(canvas, mime, q);
+      if(blob.size > targetBytes){ hi = q; } else { best = blob; lo = q; }
+    }
+    if(!best) best = await canvasToBlob(canvas, mime, lo);
+    return best;
+  }
+
+  processBtn.addEventListener('click', async () => {
+    if(images.length === 0) return;
+    statusEl.className = 'status ok';
+    statusEl.textContent = '처리 중...';
+    processBtn.disabled = true;
+
+    const mode = document.querySelector('input[name="t4_resizeMode"]:checked').value;
+    const format = document.querySelector('input[name="t4_format"]:checked').value;
+    const quality = parseInt(qualityRange.value, 10) / 100;
+    const targetKBraw = document.getElementById('t4_targetKB').value;
+    const targetKB = targetKBraw ? parseFloat(targetKBraw) : null;
+    const percent = parseFloat(percentRange.value) || 100;
+    const pxW = parseInt(document.getElementById('t4_pxWidth').value, 10);
+    const pxH = parseInt(document.getElementById('t4_pxHeight').value, 10);
+    const lockAspect = document.getElementById('t4_lockAspect').checked;
+
+    for(const item of images){
+      let targetW = item.origW, targetH = item.origH;
+      if(mode === 'percent'){
+        targetW = Math.max(1, Math.round(item.origW * percent / 100));
+        targetH = Math.max(1, Math.round(item.origH * percent / 100));
+      } else if(mode === 'pixel'){
+        if(pxW && pxH && !lockAspect){ targetW = pxW; targetH = pxH; }
+        else if(pxW && pxH && lockAspect){
+          const scale = Math.min(pxW/item.origW, pxH/item.origH);
+          targetW = Math.max(1, Math.round(item.origW*scale));
+          targetH = Math.max(1, Math.round(item.origH*scale));
+        } else if(pxW){ targetW = pxW; targetH = Math.max(1, Math.round(item.origH*(pxW/item.origW))); }
+        else if(pxH){ targetH = pxH; targetW = Math.max(1, Math.round(item.origW*(pxH/item.origH))); }
+      }
+
+      const canvas = document.createElement('canvas');
+      canvas.width = targetW; canvas.height = targetH;
+      const ctx = canvas.getContext('2d');
+      ctx.drawImage(item.img, 0, 0, targetW, targetH);
+
+      const mime = resolveMime(item.origType, format);
+      let blob;
+      if(targetKB && (mime === 'image/jpeg' || mime === 'image/webp')){
+        blob = await encodeWithTargetSize(canvas, mime, targetKB * 1024);
+      } else {
+        blob = await canvasToBlob(canvas, mime, quality);
+      }
+
+      if(item.resultUrl) URL.revokeObjectURL(item.resultUrl);
+      item.resultBlob = blob;
+      item.resultUrl = URL.createObjectURL(blob);
+      item.resultW = targetW; item.resultH = targetH;
+      item.resultSize = blob.size;
+      item.resultName = buildFileName(item.name, mime);
+    }
+
+    renderResults();
+    statusEl.textContent = `완료! ${images.length}개 이미지를 변환했습니다.`;
+    statusEl.className = 'status ok';
+    processBtn.disabled = false;
+  });
+
+  function renderResults(){
+    const card = document.getElementById('t4_resultCard');
+    const grid = document.getElementById('t4_resultGrid');
+    grid.innerHTML = '';
+    card.style.display = 'block';
+    images.forEach(item => {
+      if(!item.resultUrl) return;
+      const diff = item.origSize > 0 ? Math.round((1 - item.resultSize/item.origSize) * 100) : 0;
+      const diffLabel = diff > 0 ? `<span class="down">-${diff}%</span>` : (diff < 0 ? `+${-diff}%` : '변화 없음');
+      const card2 = document.createElement('div');
+      card2.className = 'result-card';
+      card2.innerHTML = `
+        <img class="result-img" src="${item.resultUrl}" alt="${item.resultName}">
+        <div class="result-meta">
+          <div class="result-name">${item.resultName}</div>
+          <div class="result-diff">${item.resultW}×${item.resultH} · ${fmtBytes(item.resultSize)} (${diffLabel})</div>
+        </div>
+        <button class="result-dl" type="button">다운로드</button>
+      `;
+      card2.querySelector('.result-dl').addEventListener('click', async () => {
+        try{
+          await saveFile(item.resultName, item.resultBlob);
+        }catch(err){
+          statusEl.textContent = downloadErrorMessage(err);
+          statusEl.className = 'status error';
+        }
+      });
+      grid.appendChild(card2);
+    });
+  }
+
+  document.getElementById('t4_zipBtn').addEventListener('click', async () => {
+    const ready = images.filter(i => i.resultBlob);
+    if(ready.length === 0) return;
+    const zip = new JSZip();
+    ready.forEach(item => zip.file(item.resultName, item.resultBlob));
+    const content = await zip.generateAsync({type:'blob'});
+    try{
+      await saveFile('이미지_변환결과.zip', content);
+    }catch(err){
+      statusEl.textContent = downloadErrorMessage(err);
+      statusEl.className = 'status error';
+    }
+  });
+})();
+
+</script>
