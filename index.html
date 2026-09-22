@@ -1,5 +1,6 @@
 <title>종합 작업 도구</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Gowun+Batang:wght@400;700&family=IBM+Plex+Sans+KR:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.2/cropper.min.css">
 <style>
   :root{
     --bg:#F4EEE1;
@@ -365,18 +366,35 @@
 
   /* tool 4 image */
   .upload-zone{
-    border:1.5px dashed var(--line-strong);
+    border:2px dashed var(--line-strong);
     background:var(--surface-2);
-    border-radius:12px;
-    padding:34px 20px;
+    border-radius:14px;
+    padding:56px 24px;
+    min-height:220px;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
     text-align:center;
     cursor:pointer;
     position:relative;
   }
   .upload-zone:hover, .upload-zone.drag{ border-color:var(--accent); background:var(--accent-soft); }
   .upload-zone input{ position:absolute; inset:0; opacity:0; cursor:pointer; }
-  .upload-zone .u-title{ font-size:14px; font-weight:700; margin-bottom:4px; }
-  .upload-zone .u-sub{ font-size:12.5px; color:var(--ink-soft); }
+  .upload-zone .u-icon{
+    width:52px; height:52px; margin-bottom:14px;
+    border-radius:50%;
+    background:var(--surface);
+    border:1px solid var(--line);
+    display:flex; align-items:center; justify-content:center;
+    font-size:22px;
+  }
+  .upload-zone.drag .u-icon{ border-color:var(--accent); background:var(--accent-soft); }
+  .upload-zone .u-title{ font-size:16px; font-weight:700; margin-bottom:6px; }
+  .upload-zone .u-sub{ font-size:13px; color:var(--ink-soft); }
+  @media (max-width:640px){
+    .upload-zone{ padding:40px 18px; min-height:170px; }
+  }
 
   .thumb-grid{ display:grid; grid-template-columns:repeat(auto-fill, minmax(150px,1fr)); gap:12px; margin-top:16px; }
   .thumb-card{ border:1px solid var(--line); border-radius:10px; overflow:hidden; background:var(--surface-2); }
@@ -384,7 +402,81 @@
   .thumb-meta{ padding:9px 10px; }
   .thumb-name{ font-size:11.5px; font-weight:600; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
   .thumb-size{ font-size:11px; color:var(--ink-soft); margin-top:2px; font-family:var(--font-mono); }
-  .thumb-foot{ display:flex; justify-content:flex-end; padding:0 8px 8px; }
+  .thumb-crop-badge{
+    display:inline-block; margin-top:5px;
+    font-size:10.5px; font-weight:700; color:var(--accent-dark);
+    background:var(--accent-soft); border-radius:5px; padding:2px 6px;
+  }
+  .thumb-foot{ display:flex; flex-direction:column; gap:6px; padding:0 8px 8px; }
+  .thumb-foot button.ghost{ width:100%; padding:6px 8px; font-size:11.5px; white-space:nowrap; }
+  .thumb-foot button.ghost.crop-btn:hover{ border-color:var(--accent); color:var(--accent-dark); }
+
+  /* crop modal */
+  .crop-modal-overlay{
+    position:fixed; inset:0; z-index:9998;
+    background:rgba(34,29,22,.62);
+    display:none;
+    align-items:center; justify-content:center;
+    padding:20px;
+  }
+  .crop-modal-overlay.open{ display:flex; }
+  .crop-modal{
+    width:100%; max-width:640px;
+    max-height:92vh;
+    background:var(--surface);
+    border-radius:14px;
+    border:1px solid var(--line);
+    box-shadow:var(--shadow);
+    display:flex; flex-direction:column;
+    overflow:hidden;
+  }
+  .crop-modal-head{
+    display:flex; align-items:center; justify-content:space-between;
+    padding:16px 20px; border-bottom:1px solid var(--line);
+  }
+  .crop-modal-head h3{ font-size:15px; font-weight:700; margin:0; }
+  .crop-modal-close{
+    background:transparent; border:none; cursor:pointer;
+    font-size:18px; color:var(--ink-soft); line-height:1; padding:4px;
+  }
+  .crop-modal-close:hover{ color:var(--danger); }
+  .crop-stage{
+    background:#171310;
+    max-height:52vh;
+    display:flex; align-items:center; justify-content:center;
+    overflow:hidden;
+  }
+  .crop-stage img{ display:block; max-width:100%; }
+  .crop-ratio-row{
+    display:flex; flex-wrap:wrap; gap:6px;
+    padding:14px 20px 0;
+  }
+  .crop-ratio-btn{
+    background:var(--surface-2); border:1px solid var(--line); border-radius:7px;
+    padding:6px 12px; font-size:12px; font-weight:600; color:var(--ink-soft);
+    cursor:pointer; font-family:var(--font-body);
+  }
+  .crop-ratio-btn:hover{ border-color:var(--accent); color:var(--accent-dark); }
+  .crop-ratio-btn.active{ background:var(--accent); border-color:var(--accent); color:#fff; }
+  .crop-px-row{
+    display:flex; align-items:center; gap:8px; flex-wrap:wrap;
+    padding:12px 20px 0;
+  }
+  .crop-px-row .crop-px-label{ font-size:12px; font-weight:600; color:var(--ink-soft); margin-right:2px; }
+  .crop-px-row input[type="number"]{ width:84px; padding:7px 9px; font-size:12.5px; }
+  .crop-px-row .crop-px-x{ color:var(--ink-soft); font-size:12px; }
+  .crop-px-row button.ghost{ padding:6px 12px; font-size:12px; }
+  .crop-modal-foot{
+    display:flex; align-items:center; justify-content:space-between; gap:10px;
+    padding:16px 20px; border-top:1px solid var(--line);
+  }
+  .crop-dim-readout{ font-size:11.5px; color:var(--ink-soft); font-family:var(--font-mono); }
+  .crop-modal-actions{ display:flex; gap:8px; }
+  @media (max-width:640px){
+    .crop-ratio-row{ padding:12px 14px 0; }
+    .crop-px-row{ padding:10px 14px 0; }
+    .crop-modal-foot{ padding:14px; flex-wrap:wrap; }
+  }
 
   .settings-grid{ display:grid; grid-template-columns:1fr 1fr; gap:20px; }
   @media (max-width:640px){ .settings-grid{ grid-template-columns:1fr; } }
@@ -688,16 +780,17 @@
       <div class="panel-head">
         <div class="eyebrow">TOOL 04 · IMAGE</div>
         <h1>이미지 편집</h1>
-        <p class="lead">여러 장을 한 번에 올려서 <b>용량, 크기, 파일 형식</b>을 원하는 대로 바꿔보세요. 모든 처리는 브라우저 안에서 끝나고, 이미지가 서버로 전송되지 않아요.</p>
+        <p class="lead">여러 장을 한 번에 올려서 <b>자르기, 용량, 크기, 파일 형식</b>을 원하는 대로 바꿔보세요. 모든 처리는 브라우저 안에서 끝나고, 이미지가 서버로 전송되지 않아요.</p>
       </div>
 
       <div class="card">
         <div class="card-head"><span class="card-num">1</span><h2 class="card-title">이미지 업로드</h2></div>
-        <p class="card-desc">JPG, PNG, WebP 등 여러 장을 한 번에 선택하거나 끌어다 놓으세요.</p>
+        <p class="card-desc">JPG, PNG, WebP 등 여러 장을 한 번에 선택하거나 끌어다 놓으세요. 각 이미지의 <b>[자르기]</b> 버튼으로 원하는 부분만 잘라낼 수 있어요.</p>
         <label class="upload-zone" id="t4_uploadZone">
           <input type="file" id="t4_fileInput" accept="image/*" multiple>
+          <div class="u-icon">⬆</div>
           <div class="u-title">클릭하거나 이미지를 이곳에 끌어다 놓으세요</div>
-          <div class="u-sub">여러 장 동시 선택 가능</div>
+          <div class="u-sub">여러 장 동시 선택 가능 · JPG · PNG · WebP 등</div>
         </label>
         <div class="thumb-grid" id="t4_thumbGrid"></div>
       </div>
@@ -772,9 +865,47 @@
   </main>
 </div>
 
+<div class="crop-modal-overlay" id="t4_cropOverlay">
+  <div class="crop-modal">
+    <div class="crop-modal-head">
+      <h3>이미지 자르기</h3>
+      <button type="button" class="crop-modal-close" id="t4_cropClose">✕</button>
+    </div>
+    <div class="crop-stage">
+      <img id="t4_cropImage" alt="">
+    </div>
+    <div class="crop-ratio-row" id="t4_cropRatioRow">
+      <button type="button" class="crop-ratio-btn active" data-ratio="free">자유롭게</button>
+      <button type="button" class="crop-ratio-btn" data-ratio="1:1">1:1</button>
+      <button type="button" class="crop-ratio-btn" data-ratio="4:3">4:3</button>
+      <button type="button" class="crop-ratio-btn" data-ratio="3:4">3:4</button>
+      <button type="button" class="crop-ratio-btn" data-ratio="16:9">16:9</button>
+      <button type="button" class="crop-ratio-btn" data-ratio="9:16">9:16</button>
+      <button type="button" class="crop-ratio-btn" data-ratio="3:2">3:2</button>
+      <button type="button" class="crop-ratio-btn" data-ratio="2:3">2:3</button>
+    </div>
+    <div class="crop-px-row" id="t4_cropPxRow">
+      <span class="crop-px-label">픽셀로 지정</span>
+      <input type="number" id="t4_cropPxW" min="1" placeholder="가로(px)">
+      <span class="crop-px-x">×</span>
+      <input type="number" id="t4_cropPxH" min="1" placeholder="세로(px)">
+      <button type="button" class="ghost" id="t4_cropPxApplyBtn">적용</button>
+    </div>
+    <div class="crop-modal-foot">
+      <div class="crop-dim-readout" id="t4_cropReadout"></div>
+      <div class="crop-modal-actions">
+        <button type="button" class="ghost" id="t4_cropResetBtn">전체 이미지로</button>
+        <button type="button" class="dark" id="t4_cropCancelBtn">취소</button>
+        <button type="button" class="primary" id="t4_cropApplyBtn">자르기 적용</button>
+      </div>
+    </div>
+  </div>
+</div>
+
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/exceljs/4.4.0/exceljs.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.2/cropper.min.js"></script>
 <script>
 /* ---------------- tab switching ---------------- */
 document.querySelectorAll('.nav-item').forEach(btn => {
@@ -1300,13 +1431,147 @@ async function saveWorkbookFile(wb, filename){
         <div class="thumb-meta">
           <div class="thumb-name">${item.name}</div>
           <div class="thumb-size">${item.origW}×${item.origH} · ${fmtBytes(item.origSize)}</div>
+          ${item.crop ? `<div class="thumb-crop-badge">✂ ${item.crop.w}×${item.crop.h} 크롭됨</div>` : ''}
         </div>
-        <div class="thumb-foot"><button class="ghost" type="button">삭제</button></div>
+        <div class="thumb-foot">
+          <button class="ghost crop-btn" type="button">${item.crop ? '다시 자르기' : '자르기'}</button>
+          <button class="ghost" type="button">삭제</button>
+        </div>
       `;
-      card.querySelector('button').addEventListener('click', () => removeImage(item.id));
+      card.querySelector('.crop-btn').addEventListener('click', () => openCropModal(item.id));
+      card.querySelectorAll('.thumb-foot button')[1].addEventListener('click', () => removeImage(item.id));
       thumbGrid.appendChild(card);
     });
   }
+
+  /* ---------------- crop modal ---------------- */
+  const cropOverlay = document.getElementById('t4_cropOverlay');
+  const cropImageEl = document.getElementById('t4_cropImage');
+  const cropCloseBtn = document.getElementById('t4_cropClose');
+  const cropCancelBtn = document.getElementById('t4_cropCancelBtn');
+  const cropApplyBtn = document.getElementById('t4_cropApplyBtn');
+  const cropResetBtn = document.getElementById('t4_cropResetBtn');
+  const cropReadout = document.getElementById('t4_cropReadout');
+  const cropRatioRow = document.getElementById('t4_cropRatioRow');
+  const cropPxW = document.getElementById('t4_cropPxW');
+  const cropPxH = document.getElementById('t4_cropPxH');
+  const cropPxApplyBtn = document.getElementById('t4_cropPxApplyBtn');
+  let cropperInstance = null;
+  let cropTargetId = null;
+
+  const RATIO_MAP = { free: NaN, '1:1': 1, '4:3': 4/3, '3:4': 3/4, '16:9': 16/9, '9:16': 9/16, '3:2': 3/2, '2:3': 2/3 };
+
+  function pxInputsFocused(){
+    return document.activeElement === cropPxW || document.activeElement === cropPxH;
+  }
+
+  function updateCropReadout(){
+    if(!cropperInstance){ cropReadout.textContent = ''; return; }
+    const d = cropperInstance.getData(true);
+    if(d && d.width && d.height){
+      cropReadout.textContent = `선택 영역: ${d.width} × ${d.height}px`;
+      if(!pxInputsFocused()){
+        cropPxW.value = d.width;
+        cropPxH.value = d.height;
+      }
+    }
+  }
+
+  function applyPxSize(){
+    if(!cropperInstance) return;
+    const imgData = cropperInstance.getImageData();
+    const maxW = Math.round(imgData.naturalWidth);
+    const maxH = Math.round(imgData.naturalHeight);
+    const current = cropperInstance.getData(true);
+    let w = parseInt(cropPxW.value, 10);
+    let h = parseInt(cropPxH.value, 10);
+    if(!w && !h) return; // 둘 다 비어있으면 아무 것도 하지 않음
+    if(!w) w = current.width || maxW; // 한쪽만 입력하면 나머지는 현재 값 유지
+    if(!h) h = current.height || maxH;
+    w = Math.max(1, Math.min(w, maxW));
+    h = Math.max(1, Math.min(h, maxH));
+    cropperInstance.setData({ width: w, height: h });
+    updateCropReadout();
+  }
+
+  cropPxApplyBtn.addEventListener('click', applyPxSize);
+  [cropPxW, cropPxH].forEach(inp => inp.addEventListener('keydown', (e) => {
+    if(e.key === 'Enter'){ e.preventDefault(); applyPxSize(); }
+  }));
+
+  function openCropModal(id){
+    const item = images.find(i => i.id === id);
+    if(!item) return;
+    cropTargetId = id;
+    cropImageEl.src = item.url;
+    cropOverlay.classList.add('open');
+
+    cropRatioRow.querySelectorAll('.crop-ratio-btn').forEach(b => b.classList.toggle('active', b.dataset.ratio === 'free'));
+
+    if(cropperInstance){ cropperInstance.destroy(); cropperInstance = null; }
+    const cropperOpts = {
+      viewMode: 1,
+      background: false,
+      responsive: true,
+      aspectRatio: NaN,
+      ready(){
+        if(item.crop){
+          cropperInstance.setData({ x: item.crop.x, y: item.crop.y, width: item.crop.w, height: item.crop.h });
+        }
+        updateCropReadout();
+      },
+      crop(){ updateCropReadout(); }
+    };
+    if(!item.crop) cropperOpts.autoCropArea = 0.9;
+    cropperInstance = new Cropper(cropImageEl, cropperOpts);
+  }
+
+  function closeCropModal(){
+    cropOverlay.classList.remove('open');
+    if(cropperInstance){ cropperInstance.destroy(); cropperInstance = null; }
+    cropImageEl.removeAttribute('src');
+    cropTargetId = null;
+    cropPxW.value = '';
+    cropPxH.value = '';
+  }
+
+  cropRatioRow.addEventListener('click', (e) => {
+    const btn = e.target.closest('.crop-ratio-btn');
+    if(!btn || !cropperInstance) return;
+    cropRatioRow.querySelectorAll('.crop-ratio-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    cropperInstance.setAspectRatio(RATIO_MAP[btn.dataset.ratio]);
+  });
+
+  cropResetBtn.addEventListener('click', () => {
+    if(!cropperInstance) return;
+    const imgData = cropperInstance.getImageData();
+    cropperInstance.setData({ x: 0, y: 0, width: imgData.naturalWidth, height: imgData.naturalHeight });
+    updateCropReadout();
+  });
+
+  cropCloseBtn.addEventListener('click', closeCropModal);
+  cropCancelBtn.addEventListener('click', closeCropModal);
+  cropOverlay.addEventListener('click', (e) => { if(e.target === cropOverlay) closeCropModal(); });
+
+  cropApplyBtn.addEventListener('click', () => {
+    if(!cropperInstance || !cropTargetId) return;
+    const item = images.find(i => i.id === cropTargetId);
+    if(!item){ closeCropModal(); return; }
+    const d = cropperInstance.getData(true);
+    const w = Math.max(1, Math.min(Math.round(d.width), item.origW));
+    const h = Math.max(1, Math.min(Math.round(d.height), item.origH));
+    const x = Math.max(0, Math.min(Math.round(d.x), item.origW - w));
+    const y = Math.max(0, Math.min(Math.round(d.y), item.origH - h));
+    // 전체 이미지와 사실상 동일하면 크롭을 적용하지 않은 것으로 취급
+    if(x === 0 && y === 0 && w === item.origW && h === item.origH){
+      delete item.crop;
+    } else {
+      item.crop = { x, y, w, h };
+    }
+    closeCropModal();
+    renderThumbs();
+  });
 
   // settings UI wiring
   const resizeRadios = document.querySelectorAll('input[name="t4_resizeMode"]');
@@ -1378,24 +1643,29 @@ async function saveWorkbookFile(wb, filename){
     const lockAspect = document.getElementById('t4_lockAspect').checked;
 
     for(const item of images){
-      let targetW = item.origW, targetH = item.origH;
+      const srcX = item.crop ? item.crop.x : 0;
+      const srcY = item.crop ? item.crop.y : 0;
+      const srcW = item.crop ? item.crop.w : item.origW;
+      const srcH = item.crop ? item.crop.h : item.origH;
+
+      let targetW = srcW, targetH = srcH;
       if(mode === 'percent'){
-        targetW = Math.max(1, Math.round(item.origW * percent / 100));
-        targetH = Math.max(1, Math.round(item.origH * percent / 100));
+        targetW = Math.max(1, Math.round(srcW * percent / 100));
+        targetH = Math.max(1, Math.round(srcH * percent / 100));
       } else if(mode === 'pixel'){
         if(pxW && pxH && !lockAspect){ targetW = pxW; targetH = pxH; }
         else if(pxW && pxH && lockAspect){
-          const scale = Math.min(pxW/item.origW, pxH/item.origH);
-          targetW = Math.max(1, Math.round(item.origW*scale));
-          targetH = Math.max(1, Math.round(item.origH*scale));
-        } else if(pxW){ targetW = pxW; targetH = Math.max(1, Math.round(item.origH*(pxW/item.origW))); }
-        else if(pxH){ targetH = pxH; targetW = Math.max(1, Math.round(item.origW*(pxH/item.origH))); }
+          const scale = Math.min(pxW/srcW, pxH/srcH);
+          targetW = Math.max(1, Math.round(srcW*scale));
+          targetH = Math.max(1, Math.round(srcH*scale));
+        } else if(pxW){ targetW = pxW; targetH = Math.max(1, Math.round(srcH*(pxW/srcW))); }
+        else if(pxH){ targetH = pxH; targetW = Math.max(1, Math.round(srcW*(pxH/srcH))); }
       }
 
       const canvas = document.createElement('canvas');
       canvas.width = targetW; canvas.height = targetH;
       const ctx = canvas.getContext('2d');
-      ctx.drawImage(item.img, 0, 0, targetW, targetH);
+      ctx.drawImage(item.img, srcX, srcY, srcW, srcH, 0, 0, targetW, targetH);
 
       const mime = resolveMime(item.origType, format);
       let blob;
