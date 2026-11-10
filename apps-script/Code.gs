@@ -33,7 +33,7 @@ var DEFAULT_SETTINGS = [
   ['REALERT_HOURS', '3', '같은 문제가 계속될 때 몇 시간마다 다시 알릴지'],
   ['EXPIRE_NOTICE_DAYS', '7', '계약 노출 종료 며칠 전부터 만료 임박 알림을 보낼지'],
   ['ALERT_EMAIL', '', '알림 받을 이메일 (쉼표로 여러 개). 비우면 스크립트 속성 또는 본인 계정'],
-  ['TOOL_URL', 'https://jguild-app.github.io/TOOLS/', '알림 메일에 넣을 도구 주소'],
+  ['TOOL_URL', 'https://tgt-forever.github.io/TOOLS/', '알림 메일에 넣을 도구 주소'],
   ['MAX_RUN_SECONDS', '300', '한 번 실행에 쓸 최대 시간(초). 넘으면 나머지는 다음 실행에서']
 ];
 
