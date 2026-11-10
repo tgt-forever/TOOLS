@@ -1,34 +1,40 @@
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
 <title>종합 작업 도구</title>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Gowun+Batang:wght@400;700&family=IBM+Plex+Sans+KR:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&display=swap">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.2/cropper.min.css">
 <style>
   :root{
-    --bg:#F4EEE1;
-    --bg-soft:#ECE3CD;
+    --bg:#F8F8F7;
+    --bg-soft:#F0F0EE;
     --surface:#FFFFFF;
-    --surface-2:#FBF8F1;
-    --ink:#221D16;
-    --ink-soft:#6B6252;
-    --line:#E1D6BD;
-    --line-strong:#CBBE9E;
-    --accent:#3D6D5C;
-    --accent-dark:#28473C;
-    --accent-soft:#E3ECE7;
-    --gold:#B4863E;
-    --gold-soft:#F6ECD6;
-    --danger:#AE4430;
-    --danger-soft:#F8E6E0;
-    --sidebar-bg:#221D16;
-    --sidebar-ink:#F4EEE1;
-    --sidebar-sub:#A79A82;
-    --sidebar-line:#39301F;
-    --sidebar-accent:#7FC3A6;
-    --shadow: 0 1px 0 rgba(34,29,22,.04), 0 14px 32px -24px rgba(34,29,22,.35);
-    --font-display:'Gowun Batang', 'Noto Serif KR', serif;
-    --font-body:'IBM Plex Sans KR','Noto Sans KR',-apple-system,'Malgun Gothic',sans-serif;
+    --surface-2:#FAFAF9;
+    --ink:#18181B;
+    --ink-soft:#6B6B70;
+    --line:#E7E7E4;
+    --line-strong:#D4D4D0;
+    --accent:#FACC15;        /* 노란색 채움 (버튼, 배지) */
+    --accent-hover:#EAB308;  /* 버튼 hover */
+    --accent-strong:#CA8A04; /* 포커스 테두리 */
+    --accent-dark:#854D0E;   /* 노란 계열 글씨 (흰 배경 위에서 읽히는 진한 톤) */
+    --accent-soft:#FEF9C3;
+    --on-accent:#1C1917;     /* 노란색 위 글씨 */
+    --gold:#C2410C;          /* 경고·중복 표시 (노란 포인트와 구분되게 주황) */
+    --gold-soft:#FFEDD5;
+    --danger:#DC2626;
+    --danger-soft:#FEE2E2;
+    --sidebar-bg:#FFFFFF;
+    --sidebar-ink:#18181B;
+    --sidebar-sub:#71717A;
+    --sidebar-line:#E7E7E4;
+    --sidebar-accent:#FACC15;
+    --shadow: 0 1px 2px rgba(24,24,27,.04), 0 8px 24px -16px rgba(24,24,27,.12);
+    --font-display:'Pretendard Variable', Pretendard, -apple-system, 'Malgun Gothic', sans-serif;
+    --font-body:'Pretendard Variable', Pretendard, -apple-system, 'Malgun Gothic', sans-serif;
     --font-mono:'IBM Plex Mono','JetBrains Mono',monospace;
   }
-  /* 밝은 베이지 톤 고정 — 다크모드 미적용 */
+  /* 화이트 + 옐로우 라이트 테마 고정 — 다크모드 미적용 */
 
   *{box-sizing:border-box;}
   body{
@@ -77,7 +83,7 @@
     color:var(--accent-dark);
     text-transform:uppercase;
   }
-  .sidebar .brand-eyebrow{ color:var(--sidebar-accent); }
+  .sidebar .brand-eyebrow{ color:var(--accent-dark); }
   .brand-title{
     font-family:var(--font-display);
     font-size:23px;
@@ -113,10 +119,10 @@
     font-family:var(--font-body);
     white-space:nowrap;
   }
-  .nav-item:hover{ background:rgba(244,238,225,.06); }
+  .nav-item:hover{ background:var(--bg-soft); }
   .nav-item.active{
-    background:rgba(111,171,147,.16);
-    border-color:rgba(111,171,147,.4);
+    background:var(--accent-soft);
+    border-color:transparent;
   }
   .nav-index{
     font-family:var(--font-mono);
@@ -132,7 +138,7 @@
     flex:0 0 auto;
   }
   .nav-item.active .nav-index{
-    color:var(--sidebar-bg);
+    color:var(--on-accent);
     background:var(--sidebar-accent);
     border-color:var(--sidebar-accent);
   }
@@ -158,7 +164,7 @@
     font-family:var(--font-mono);
     font-size:11.5px;
     letter-spacing:.14em;
-    color:var(--accent);
+    color:var(--accent-dark);
     text-transform:uppercase;
   }
   .panel-head h1{
@@ -194,7 +200,7 @@
     width:24px; height:24px;
     border-radius:50%;
     background:var(--accent);
-    color:#fff;
+    color:var(--on-accent);
     font-family:var(--font-mono);
     font-size:12px;
     display:flex; align-items:center; justify-content:center;
@@ -233,7 +239,7 @@
     color:var(--ink);
   }
   input[type="text"]:focus, input[type="number"]:focus, input[type="password"]:focus, input[type="range"]:focus, button:focus-visible, .nav-item:focus-visible, .drop:focus-within{
-    outline:2px solid var(--accent);
+    outline:2px solid var(--accent-strong);
     outline-offset:2px;
   }
   .order-choice, .radio-group{ display:flex; gap:10px; margin-bottom:14px; flex-wrap:wrap; }
@@ -255,7 +261,7 @@
 
   button.primary{
     background:var(--accent);
-    color:#fff;
+    color:var(--on-accent);
     border:none;
     border-radius:9px;
     padding:11px 20px;
@@ -264,7 +270,7 @@
     cursor:pointer;
     font-family:var(--font-body);
   }
-  button.primary:hover{ background:var(--accent-dark); }
+  button.primary:hover{ background:var(--accent-hover); }
   button.primary:disabled{ background:var(--line-strong); color:var(--surface); cursor:not-allowed; }
   button.dark{
     background:var(--ink);
@@ -328,7 +334,7 @@
     font-family:var(--font-mono); font-size:10px; font-weight:700;
     border-radius:7px;
   }
-  .drop.filled .drop-icon{ background:var(--accent); color:#fff; }
+  .drop.filled .drop-icon{ background:var(--accent); color:var(--on-accent); }
   .drop-text{ flex:1; min-width:0; }
   .drop-name{ font-size:13px; font-weight:600; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
   .drop-meta{ font-size:11.5px; color:var(--ink-soft); margin-top:2px; }
@@ -414,7 +420,7 @@
   /* crop modal */
   .crop-modal-overlay{
     position:fixed; inset:0; z-index:9998;
-    background:rgba(34,29,22,.62);
+    background:rgba(24,24,27,.55);
     display:none;
     align-items:center; justify-content:center;
     padding:20px;
@@ -441,7 +447,7 @@
   }
   .crop-modal-close:hover{ color:var(--danger); }
   .crop-stage{
-    background:#171310;
+    background:#18181B;
     max-height:52vh;
     display:flex; align-items:center; justify-content:center;
     overflow:hidden;
@@ -457,7 +463,7 @@
     cursor:pointer; font-family:var(--font-body);
   }
   .crop-ratio-btn:hover{ border-color:var(--accent); color:var(--accent-dark); }
-  .crop-ratio-btn.active{ background:var(--accent); border-color:var(--accent); color:#fff; }
+  .crop-ratio-btn.active{ background:var(--accent); border-color:var(--accent); color:var(--on-accent); }
   .crop-px-row{
     display:flex; align-items:center; gap:8px; flex-wrap:wrap;
     padding:12px 20px 0;
@@ -517,7 +523,7 @@
   }
   .gate-eyebrow{
     font-family:var(--font-mono); font-size:11px; letter-spacing:.16em;
-    color:var(--accent); text-transform:uppercase;
+    color:var(--accent-dark); text-transform:uppercase;
   }
   .gate-title{ font-family:var(--font-display); font-size:22px; font-weight:700; margin:8px 0 6px; }
   .gate-sub{ font-size:13px; color:var(--ink-soft); margin:0 0 20px; line-height:1.6; }
@@ -526,7 +532,38 @@
     border:1px solid var(--line); border-radius:8px; padding:13px 10px;
     background:var(--surface-2); color:var(--ink); box-sizing:border-box;
   }
-  .gate-input:focus{ outline:2px solid var(--accent); outline-offset:2px; }
+  .gate-input:focus{ outline:2px solid var(--accent-strong); outline-offset:2px; }
+
+  /* tool 5 monitor */
+  .card-head.space{ justify-content:space-between; flex-wrap:wrap; gap:10px; }
+  .card-head .head-left{ display:flex; align-items:center; gap:10px; }
+  .mon-badge{ display:inline-block; font-size:11px; font-weight:700; border-radius:6px; padding:3px 8px; white-space:nowrap; line-height:1.4; }
+  .mon-badge.up{ background:#DCFCE7; color:#166534; }
+  .mon-badge.down{ background:var(--danger-soft); color:var(--danger); }
+  .mon-badge.other{ background:var(--gold-soft); color:var(--gold); }
+  .mon-badge.fail{ background:var(--bg-soft); color:var(--ink-soft); }
+  .mon-badge.none{ background:var(--surface-2); color:var(--ink-soft); border:1px solid var(--line); }
+  .mon-badge.paused{ background:var(--surface-2); color:var(--ink-soft); border:1px dashed var(--line-strong); }
+  .mon-chips{ display:flex; gap:6px; flex-wrap:wrap; margin:0 0 12px; }
+  .mon-chip{ border:1px solid var(--line); background:var(--surface-2); border-radius:999px; padding:5px 12px; font-size:12px; cursor:pointer; font-family:var(--font-body); color:var(--ink-soft); }
+  .mon-chip.active{ background:var(--accent-soft); border-color:var(--accent); color:var(--accent-dark); font-weight:600; }
+  .mon-chip .cnt{ font-family:var(--font-mono); font-size:10.5px; margin-left:4px; }
+  .mon-chip .cnt.bad{ color:var(--danger); font-weight:700; }
+  .mon-row-actions{ display:flex; gap:6px; white-space:nowrap; justify-content:flex-end; }
+  .mon-row-actions button.ghost{ padding:4px 9px; font-size:11px; }
+  .mon-evidence{ max-width:260px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; color:var(--ink-soft); font-size:11.5px; }
+  #t5_kwBody td:nth-child(1), #t5_kwBody td:nth-child(2), #t5_ctBody td:nth-child(1), #t5_ctBody td:nth-child(2), #t5_logBody td{ white-space:nowrap; }
+  .mon-adv-list{ display:flex; flex-direction:column; gap:8px; margin-top:14px; }
+  .mon-adv-item{ display:flex; justify-content:space-between; align-items:center; gap:10px; border:1px solid var(--line); border-radius:9px; padding:9px 12px; font-size:12.5px; background:var(--surface-2); }
+  .mon-adv-item .sub{ color:var(--ink-soft); font-size:11.5px; margin-top:2px; word-break:break-all; }
+  .mon-ta{ width:100%; min-height:84px; font-size:13px; font-family:var(--font-body); border:1px solid var(--line); border-radius:8px; padding:9px 10px; background:var(--surface-2); color:var(--ink); resize:vertical; }
+  .mon-select{ width:100%; font-size:13px; font-family:var(--font-body); border:1px solid var(--line); border-radius:8px; padding:9px 10px; background:var(--surface-2); color:var(--ink); }
+  .mon-ta:focus, .mon-select:focus{ outline:2px solid var(--accent-strong); outline-offset:2px; }
+  .mon-dday{ font-family:var(--font-mono); font-weight:700; }
+  .mon-dday.soon{ color:var(--danger); }
+  .mon-dday.warn{ color:var(--gold); }
+  .stat.ok .num{ color:#166534; }
+  .mon-empty{ padding:18px 10px; text-align:center; color:var(--ink-soft); font-size:12.5px; }
 </style>
 
 <div class="gate-overlay" id="gateOverlay">
@@ -607,6 +644,10 @@
       <button class="nav-item" data-tab="t4">
         <span class="nav-index">04</span>
         <span class="nav-name">이미지 편집</span>
+      </button>
+      <button class="nav-item" data-tab="t5">
+        <span class="nav-index">05</span>
+        <span class="nav-name">노출 모니터링</span>
       </button>
     </div>
     <div class="sidebar-foot">모든 파일 처리는 이 브라우저 안에서만 이뤄지며, 어떤 파일도 서버로 전송되지 않습니다.</div>
@@ -858,6 +899,147 @@
         <div class="result-grid" id="t4_resultGrid"></div>
         <div class="toolbar">
           <button class="dark" id="t4_zipBtn">전체 ZIP으로 다운로드</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ TAB 5 ============ -->
+    <section class="panel" id="panel-t5">
+      <div class="panel-head">
+        <div class="eyebrow">TOOL 05 · MONITOR</div>
+        <h1>브랜드검색 노출 모니터링</h1>
+        <p class="lead">광고주와 키워드를 등록해 두면 <b>10분마다 자동으로</b> 네이버 PC·모바일 검색 결과에서 브랜드검색 광고가 노출되는지 확인하고, 끊기면 이메일로 알려줘요. 계약 기간은 네이버 광고 API로 매일 동기화돼요.</p>
+      </div>
+
+      <div class="card" id="t5_connectCard">
+        <div class="card-head"><span class="card-num">1</span><h2 class="card-title">모니터링 서버 연결</h2></div>
+        <p class="card-desc">Apps Script 웹앱 주소와 접속 토큰을 입력하세요. 이 브라우저에만 저장돼요. 설치 방법은 저장소의 <b>노출모니터링_설치안내.md</b>를 참고하세요.</p>
+        <div class="row">
+          <div class="field"><label class="field-label">웹앱 URL</label><input type="text" id="t5_url" placeholder="https://script.google.com/macros/s/…/exec" autocomplete="off"></div>
+          <div class="field" style="max-width:260px;"><label class="field-label">접속 토큰</label><input type="password" id="t5_token" placeholder="WEB_TOKEN" autocomplete="off"></div>
+        </div>
+        <div class="toolbar" style="margin-top:4px;">
+          <button class="primary" id="t5_connectBtn">연결</button>
+          <button class="ghost" id="t5_disconnectBtn">연결 해제</button>
+          <span class="hint" id="t5_connInfo" style="margin:0;"></span>
+        </div>
+        <div class="status" id="t5_connStatus"></div>
+      </div>
+
+      <div id="t5_body" style="display:none;">
+        <div class="summary" id="t5_summary"></div>
+
+        <div class="card">
+          <div class="card-head space">
+            <div class="head-left"><span class="card-num">2</span><h2 class="card-title">노출 현황</h2></div>
+            <div class="toolbar" style="margin:0;">
+              <button class="ghost" id="t5_refreshBtn">새로고침</button>
+              <button class="ghost" id="t5_runCheckBtn">지금 바로 확인</button>
+            </div>
+          </div>
+          <p class="card-desc">서버 기준 <span id="t5_serverTime">-</span> · 이 화면은 1분마다 자동으로 새로고침돼요. <span id="t5_triggerWarn" style="color:var(--danger);font-weight:600;"></span></p>
+          <div class="mon-chips" id="t5_advFilter"></div>
+          <div class="tablewrap">
+            <table>
+              <thead><tr><th>광고주</th><th>키워드</th><th>매체</th><th>상태</th><th>최근 확인</th><th>근거</th><th></th></tr></thead>
+              <tbody id="t5_kwBody"></tbody>
+            </table>
+          </div>
+          <div class="legend" style="margin-top:10px;">
+            <span><span class="mon-badge up">노출</span> 우리 광고주 브랜드검색 확인</span>
+            <span><span class="mon-badge other">타사노출</span> 브랜드검색 영역은 있으나 식별 문구 불일치</span>
+            <span><span class="mon-badge down">미노출</span> 브랜드검색 영역 없음</span>
+            <span><span class="mon-badge fail">확인실패</span> 네이버 차단·오류 (실제 노출과 무관)</span>
+          </div>
+          <div class="status" id="t5_status"></div>
+        </div>
+
+        <div class="card">
+          <div class="card-head space">
+            <div class="head-left"><span class="card-num">3</span><h2 class="card-title">브랜드검색 계약 기간</h2></div>
+            <button class="ghost" id="t5_syncBtn">계약 동기화</button>
+          </div>
+          <p class="card-desc">네이버 검색광고 API에서 가져온 브랜드검색(시간 계약) 정보예요. 매일 아침 8시에 자동 갱신되고, 노출 종료 <b>7일 전</b>부터 만료 임박 메일이 와요. <span id="t5_contractUpdated" style="color:var(--ink-soft);"></span></p>
+          <div class="tablewrap">
+            <table>
+              <thead><tr><th>광고주</th><th>광고그룹</th><th>계약 상태</th><th>노출 기간</th><th>남은 일수</th></tr></thead>
+              <tbody id="t5_ctBody"></tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-head"><span class="card-num">4</span><h2 class="card-title">광고주 · 키워드 등록</h2></div>
+          <div class="grid-2">
+            <div>
+              <label class="field-label">광고주 추가</label>
+              <div class="row" style="margin-bottom:10px;"><div class="field"><input type="text" id="t5_advName" placeholder="광고주명 (예: 올리브영)" style="font-family:var(--font-body);"></div></div>
+              <div class="row" style="margin-bottom:10px;"><div class="field"><input type="text" id="t5_advCustomer" placeholder="네이버 광고 customerId (숫자) — 계약 조회용, 선택"></div></div>
+              <div class="row" style="margin-bottom:10px;"><div class="field"><input type="text" id="t5_advPatterns" placeholder="식별 문구 (쉼표 구분, 예: 올리브영, oliveyoung.co.kr)" style="font-family:var(--font-body);"></div></div>
+              <div class="row" style="margin-bottom:10px;"><div class="field"><input type="text" id="t5_advEmail" placeholder="이 광고주 전용 알림 이메일 (선택)"></div></div>
+              <div class="hint" style="margin:0 0 10px;">식별 문구는 브랜드검색 광고 안에 나오는 브랜드명이나 사이트 주소예요. 이 문구가 있어야 "우리 광고주 광고"로 판정돼요.</div>
+              <button class="primary" id="t5_addAdvBtn">광고주 추가</button>
+              <div class="mon-adv-list" id="t5_advList"></div>
+            </div>
+            <div>
+              <label class="field-label">키워드 추가</label>
+              <div style="margin-bottom:10px;"><select class="mon-select" id="t5_kwAdv"></select></div>
+              <textarea class="mon-ta" id="t5_kwText" placeholder="키워드를 줄바꿈 또는 쉼표로 여러 개 입력&#10;예) 올리브영&#10;    올리브영 세일"></textarea>
+              <div class="radio-group" style="margin-top:10px;">
+                <label><input type="radio" name="t5_media" value="ALL" checked> PC + 모바일</label>
+                <label><input type="radio" name="t5_media" value="PC"> PC만</label>
+                <label><input type="radio" name="t5_media" value="M"> 모바일만</label>
+              </div>
+              <button class="primary" id="t5_addKwBtn">키워드 추가</button>
+              <div class="hint">키워드 하나당 PC·모바일 각각 10분마다 1번씩 확인해요. 개인 Gmail 계정은 하루 실행 시간 제한이 있어서 <b>키워드×매체 합계 15개 안쪽</b>을 권장해요 (설치 안내서 참고).</div>
+            </div>
+          </div>
+          <div class="status" id="t5_regStatus"></div>
+        </div>
+
+        <div class="card">
+          <div class="card-head space">
+            <div class="head-left"><span class="card-num">5</span><h2 class="card-title">알림 설정</h2></div>
+            <button class="ghost" id="t5_testMailBtn">테스트 메일 보내기</button>
+          </div>
+          <div class="grid-2">
+            <div>
+              <label class="field-label">알림 받을 이메일 (쉼표로 여러 개)</label>
+              <input type="text" id="t5_setEmail" data-key="ALERT_EMAIL" placeholder="name@company.com, other@company.com">
+            </div>
+            <div>
+              <label class="field-label">확인 간격 (분)</label>
+              <select class="mon-select" id="t5_setInterval" data-key="CHECK_INTERVAL_MIN"><option value="5">5분</option><option value="10">10분</option><option value="15">15분</option><option value="30">30분</option></select>
+            </div>
+            <div>
+              <label class="field-label">연속 몇 번 미노출이면 알림</label>
+              <input type="number" id="t5_setDown" data-key="DOWN_ALERT_AFTER" min="1" max="20">
+            </div>
+            <div>
+              <label class="field-label">연속 몇 번 확인실패면 알림</label>
+              <input type="number" id="t5_setFail" data-key="FAIL_ALERT_AFTER" min="1" max="20">
+            </div>
+            <div>
+              <label class="field-label">문제가 계속될 때 재알림 간격 (시간)</label>
+              <input type="number" id="t5_setRealert" data-key="REALERT_HOURS" min="1" max="48">
+            </div>
+            <div>
+              <label class="field-label">계약 만료 며칠 전부터 알림</label>
+              <input type="number" id="t5_setExpire" data-key="EXPIRE_NOTICE_DAYS" min="1" max="60">
+            </div>
+          </div>
+          <div class="toolbar"><button class="primary" id="t5_saveSetBtn">설정 저장</button></div>
+          <div class="status" id="t5_setStatus"></div>
+        </div>
+
+        <div class="card">
+          <div class="card-head"><span class="card-num">6</span><h2 class="card-title">최근 확인 기록</h2></div>
+          <div class="tablewrap" style="max-height:300px;">
+            <table>
+              <thead><tr><th>시각</th><th>광고주</th><th>키워드</th><th>매체</th><th>결과</th><th>근거</th></tr></thead>
+              <tbody id="t5_logBody"></tbody>
+            </table>
+          </div>
         </div>
       </div>
     </section>
@@ -1733,6 +1915,217 @@ async function saveWorkbookFile(wb, filename){
       statusEl.className = 'status error';
     }
   });
+})();
+
+/* ================= Tool 5 : 브랜드검색 노출 모니터링 (Apps Script 웹앱 연동) ================= */
+(function(){
+  const LS_URL = 'wb_mon_url', LS_TOKEN = 'wb_mon_token';
+  const $ = id => document.getElementById(id);
+  const urlEl = $('t5_url'), tokenEl = $('t5_token'), connStatus = $('t5_connStatus'), connInfo = $('t5_connInfo');
+  const body = $('t5_body'), statusEl = $('t5_status'), regStatus = $('t5_regStatus'), setStatus = $('t5_setStatus');
+  let state = null, filterAdv = 'ALL', timer = null;
+
+  const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  function show(el, msg, type){ el.textContent = msg || ''; el.className = 'status' + (msg ? ' ' + type : ''); }
+  function cfg(){ return { url:(localStorage.getItem(LS_URL)||'').trim(), token:localStorage.getItem(LS_TOKEN)||'' }; }
+
+  const BADGE = { '노출':'up', '미노출':'down', '타사노출':'other', '확인실패':'fail' };
+  const CT_LABEL = { ON_EXPOSING:'집행 중', UPCOMING_EXPOSE:'노출 예정', UPCOMING_CANCEL:'취소 예정', EXPOSE_COMPLETED:'종료', CANCELED_BEFORE_EXPOSING:'취소(노출 전)', CANCELED_ON_EXPOSING:'취소(노출 중)' };
+
+  async function api(action, data){
+    const c = cfg();
+    if(!c.url || !c.token) throw new Error('먼저 웹앱 URL과 접속 토큰을 입력하고 연결하세요.');
+    let res;
+    if(!action){
+      res = await fetch(c.url + (c.url.includes('?') ? '&' : '?') + 'token=' + encodeURIComponent(c.token), { method:'GET', redirect:'follow' });
+    }else{
+      // text/plain으로 보내야 브라우저가 사전 요청(preflight) 없이 Apps Script에 바로 전달해요.
+      res = await fetch(c.url, { method:'POST', redirect:'follow', headers:{ 'Content-Type':'text/plain;charset=utf-8' }, body: JSON.stringify(Object.assign({ token:c.token, action }, data || {})) });
+    }
+    const text = await res.text();
+    let j;
+    try{ j = JSON.parse(text); }
+    catch(e){ throw new Error('서버 응답을 해석할 수 없어요. 웹앱이 "모든 사용자" 액세스로 배포됐는지, URL이 /exec로 끝나는지 확인하세요.'); }
+    if(!j.ok) throw new Error(j.error || '알 수 없는 오류');
+    return j;
+  }
+
+  /* ---------- 렌더링 ---------- */
+  function render(){
+    if(!state) return;
+    $('t5_serverTime').textContent = state.serverTime || '-';
+    $('t5_triggerWarn').textContent = state.triggersInstalled ? '' : '⚠ 자동 실행 트리거가 설치되지 않았어요. Apps Script 편집기에서 setup()을 실행하세요.';
+
+    const kws = state.keywords || [];
+    const active = kws.filter(k => k.enabled);
+    const cnt = s => active.filter(k => k.lastStatus === s).length;
+    const unchecked = active.filter(k => !k.lastStatus).length;
+    $('t5_summary').innerHTML =
+      `<div class="stat ok"><div class="num">${cnt('노출')}</div><div class="lbl">노출 중</div></div>` +
+      `<div class="stat danger"><div class="num">${cnt('미노출') + cnt('타사노출')}</div><div class="lbl">미노출 · 타사노출</div></div>` +
+      `<div class="stat"><div class="num">${cnt('확인실패')}</div><div class="lbl">확인 실패</div></div>` +
+      `<div class="stat"><div class="num">${unchecked}</div><div class="lbl">아직 미확인</div></div>` +
+      `<div class="stat"><div class="num">${active.length}</div><div class="lbl">감시 중 (키워드×매체)</div></div>`;
+
+    // 광고주 필터 칩
+    const advs = state.advertisers || [];
+    const chipHtml = [{ name:'ALL', label:'전체' }].concat(advs.map(a => ({ name:a.name, label:a.name }))).map(a => {
+      const list = a.name === 'ALL' ? active : active.filter(k => k.advertiser === a.name);
+      const bad = list.filter(k => k.lastStatus === '미노출' || k.lastStatus === '타사노출').length;
+      return `<button type="button" class="mon-chip${filterAdv === a.name ? ' active' : ''}" data-adv="${esc(a.name)}">${esc(a.label)}<span class="cnt${bad ? ' bad' : ''}">${bad ? '⚠' + bad : list.length}</span></button>`;
+    }).join('');
+    $('t5_advFilter').innerHTML = chipHtml;
+    $('t5_advFilter').querySelectorAll('.mon-chip').forEach(b => b.addEventListener('click', () => { filterAdv = b.dataset.adv; render(); }));
+
+    // 키워드 표
+    const shown = kws.filter(k => filterAdv === 'ALL' || k.advertiser === filterAdv);
+    $('t5_kwBody').innerHTML = shown.length ? shown.map(k => {
+      const badge = !k.enabled ? '<span class="mon-badge paused">일시중지</span>' : (k.lastStatus ? `<span class="mon-badge ${BADGE[k.lastStatus] || 'none'}">${esc(k.lastStatus)}</span>` : '<span class="mon-badge none">미확인</span>');
+      const streak = k.enabled && k.downStreak > 1 ? ` <span style="font-size:10.5px;color:var(--danger);">×${k.downStreak}</span>` : '';
+      return `<tr>
+        <td>${esc(k.advertiser)}</td>
+        <td style="font-weight:600;">${esc(k.keyword)}</td>
+        <td><span class="mon-badge none">${k.media === 'M' ? '모바일' : 'PC'}</span></td>
+        <td>${badge}${streak}</td>
+        <td style="font-family:var(--font-mono);font-size:11.5px;white-space:nowrap;">${esc(k.lastChecked || '-')}</td>
+        <td><div class="mon-evidence" title="${esc(k.lastEvidence)}">${esc(k.lastEvidence || '')}</div></td>
+        <td><div class="mon-row-actions">
+          <button class="ghost" data-act="toggle" data-adv="${esc(k.advertiser)}" data-kw="${esc(k.keyword)}" data-media="${k.media}">${k.enabled ? '일시중지' : '재개'}</button>
+          <button class="ghost" data-act="remove" data-adv="${esc(k.advertiser)}" data-kw="${esc(k.keyword)}" data-media="${k.media}">삭제</button>
+        </div></td></tr>`;
+    }).join('') : '<tr><td colspan="7"><div class="mon-empty">등록된 키워드가 없어요. 아래 4번에서 광고주와 키워드를 추가하세요.</div></td></tr>';
+    $('t5_kwBody').querySelectorAll('button[data-act]').forEach(b => b.addEventListener('click', () => onKwAction(b)));
+
+    // 계약 표
+    const cts = state.contracts || [];
+    $('t5_contractUpdated').textContent = cts.length && cts[0].updatedAt ? `마지막 동기화 ${cts[0].updatedAt}` : '아직 동기화 전';
+    $('t5_ctBody').innerHTML = cts.length ? cts.map(c => {
+      let dd = '';
+      if(c.daysLeft != null && c.status === 'ON_EXPOSING'){
+        const cls = c.daysLeft <= 7 ? 'soon' : (c.daysLeft <= 30 ? 'warn' : '');
+        dd = `<span class="mon-dday ${cls}">D-${c.daysLeft}</span>`;
+      }else if(c.status === 'UPCOMING_EXPOSE'){ dd = '<span style="color:var(--ink-soft);font-size:11.5px;">예정</span>'; }
+      const period = c.exposureStartDt ? `${esc(c.exposureStartDt)} ~ ${esc(c.exposureEndDt)}` : '';
+      return `<tr><td>${esc(c.advertiser)}</td><td>${esc(c.adgroupName)}${c.contractName && !c.adgroupName ? esc(c.contractName) : ''}</td><td>${c.status ? `<span class="mon-badge ${c.status === 'ON_EXPOSING' ? 'up' : (c.status === 'UPCOMING_EXPOSE' ? 'none' : 'fail')}">${esc(CT_LABEL[c.status] || c.status)}</span>` : esc(c.contractName)}</td><td style="font-family:var(--font-mono);font-size:11.5px;white-space:nowrap;">${period}</td><td>${dd}</td></tr>`;
+    }).join('') : '<tr><td colspan="5"><div class="mon-empty">계약 정보가 없어요. 광고주에 customerId를 넣고 "계약 동기화"를 누르세요.</div></td></tr>';
+
+    // 광고주 목록 + 키워드 추가 select
+    $('t5_advList').innerHTML = advs.map(a => `<div class="mon-adv-item"><div><b>${esc(a.name)}</b>${a.enabled ? '' : ' <span class="mon-badge paused">사용 안 함</span>'}<div class="sub">customerId ${esc(a.customerId || '없음')} · 식별 문구: ${esc(a.patterns.join(', ') || '없음')}${a.email ? ' · ' + esc(a.email) : ''}</div></div><button class="ghost" data-remove-adv="${esc(a.name)}">삭제</button></div>`).join('');
+    $('t5_advList').querySelectorAll('button[data-remove-adv]').forEach(b => b.addEventListener('click', async () => {
+      const name = b.dataset.removeAdv;
+      if(!confirm(`"${name}" 광고주와 등록된 키워드를 모두 삭제할까요?`)) return;
+      await run(regStatus, () => api('removeAdvertiser', { name }));
+    }));
+    const sel = $('t5_kwAdv');
+    const prev = sel.value;
+    sel.innerHTML = advs.length ? advs.map(a => `<option value="${esc(a.name)}">${esc(a.name)}</option>`).join('') : '<option value="">먼저 광고주를 추가하세요</option>';
+    if(prev && advs.some(a => a.name === prev)) sel.value = prev;
+
+    // 설정 값 채우기
+    const s = state.settings || {};
+    document.querySelectorAll('#panel-t5 [data-key]').forEach(el => { if(document.activeElement !== el) el.value = s[el.dataset.key] != null ? s[el.dataset.key] : ''; });
+
+    // 로그
+    const log = state.log || [];
+    $('t5_logBody').innerHTML = log.length ? log.map(l => `<tr><td style="font-family:var(--font-mono);font-size:11.5px;white-space:nowrap;">${esc(l.time)}</td><td>${esc(l.advertiser)}</td><td>${esc(l.keyword)}</td><td>${l.media === 'M' ? '모바일' : 'PC'}</td><td><span class="mon-badge ${BADGE[l.result] || 'none'}">${esc(l.result)}</span></td><td><div class="mon-evidence" title="${esc(l.evidence)}">${esc(l.evidence)}${l.note ? ' · ' + esc(l.note) : ''}</div></td></tr>`).join('') : '<tr><td colspan="6"><div class="mon-empty">아직 기록이 없어요.</div></td></tr>';
+  }
+
+  /* ---------- 동작 ---------- */
+  async function run(el, fn, okMsg){
+    show(el, '처리 중…', 'warn');
+    try{
+      const j = await fn();
+      state = j;
+      render();
+      show(el, okMsg || (j.actionResult && j.actionResult.message) || '완료', 'ok');
+    }catch(e){ show(el, e.message || String(e), 'error'); }
+  }
+
+  async function load(silent){
+    try{
+      const j = await api();
+      state = j; render();
+      body.style.display = 'block';
+      if(!silent) show(connStatus, '연결됐어요.', 'ok');
+      connInfo.textContent = '연결됨 · ' + cfg().url.replace(/^https?:\/\//, '').slice(0, 48) + '…';
+      startTimer();
+    }catch(e){
+      body.style.display = 'none';
+      show(connStatus, e.message || String(e), 'error');
+      connInfo.textContent = '';
+    }
+  }
+  function startTimer(){
+    if(timer) clearInterval(timer);
+    timer = setInterval(() => {
+      if(document.visibilityState !== 'visible') return;
+      if(!document.getElementById('panel-t5').classList.contains('active')) return;
+      load(true);
+    }, 60000);
+  }
+
+  async function onKwAction(b){
+    const payload = { advertiser:b.dataset.adv, keyword:b.dataset.kw, media:b.dataset.media };
+    if(b.dataset.act === 'remove'){
+      if(!confirm(`"${payload.keyword}" (${payload.media === 'M' ? '모바일' : 'PC'}) 키워드를 삭제할까요?`)) return;
+      await run(statusEl, () => api('removeKeyword', payload));
+    }else{
+      await run(statusEl, () => api('toggleKeyword', payload));
+    }
+  }
+
+  $('t5_connectBtn').addEventListener('click', () => {
+    const u = urlEl.value.trim(), t = tokenEl.value.trim();
+    if(!u || !t){ show(connStatus, '웹앱 URL과 토큰을 모두 입력하세요.', 'error'); return; }
+    localStorage.setItem(LS_URL, u); localStorage.setItem(LS_TOKEN, t);
+    show(connStatus, '연결 중…', 'warn');
+    load();
+  });
+  $('t5_disconnectBtn').addEventListener('click', () => {
+    localStorage.removeItem(LS_URL); localStorage.removeItem(LS_TOKEN);
+    urlEl.value = ''; tokenEl.value = ''; body.style.display = 'none'; connInfo.textContent = '';
+    if(timer) clearInterval(timer);
+    show(connStatus, '연결을 해제했어요. (서버의 데이터는 그대로 남아 있어요)', 'ok');
+  });
+  $('t5_refreshBtn').addEventListener('click', () => run(statusEl, () => api(), '새로고침 완료'));
+  $('t5_runCheckBtn').addEventListener('click', () => {
+    show(statusEl, '네이버에서 확인하는 중… 키워드 수에 따라 1~2분 걸릴 수 있어요.', 'warn');
+    run(statusEl, () => api('runCheck'));
+  });
+  $('t5_syncBtn').addEventListener('click', () => run(statusEl, () => api('syncContracts')));
+  $('t5_addAdvBtn').addEventListener('click', async () => {
+    const name = $('t5_advName').value.trim();
+    if(!name){ show(regStatus, '광고주명을 입력하세요.', 'error'); return; }
+    await run(regStatus, () => api('addAdvertiser', { name, customerId:$('t5_advCustomer').value.trim(), patterns:$('t5_advPatterns').value.trim() || name, email:$('t5_advEmail').value.trim() }));
+    if(regStatus.classList.contains('ok')){ ['t5_advName','t5_advCustomer','t5_advPatterns','t5_advEmail'].forEach(id => $(id).value = ''); }
+  });
+  $('t5_addKwBtn').addEventListener('click', async () => {
+    const advertiser = $('t5_kwAdv').value, keyword = $('t5_kwText').value.trim();
+    if(!advertiser){ show(regStatus, '먼저 광고주를 추가하세요.', 'error'); return; }
+    if(!keyword){ show(regStatus, '키워드를 입력하세요.', 'error'); return; }
+    const media = (document.querySelector('input[name="t5_media"]:checked') || {}).value || 'ALL';
+    await run(regStatus, () => api('addKeyword', { advertiser, keyword, media }));
+    if(regStatus.classList.contains('ok')) $('t5_kwText').value = '';
+  });
+  $('t5_saveSetBtn').addEventListener('click', async () => {
+    const els = Array.from(document.querySelectorAll('#panel-t5 [data-key]'));
+    const cur = (state && state.settings) || {};
+    const changed = els.filter(el => String(cur[el.dataset.key] == null ? '' : cur[el.dataset.key]) !== String(el.value));
+    if(!changed.length){ show(setStatus, '바뀐 설정이 없어요.', 'warn'); return; }
+    show(setStatus, '저장 중…', 'warn');
+    try{
+      let j = null;
+      for(const el of changed){ j = await api('setSetting', { key:el.dataset.key, value:el.value }); }
+      if(changed.some(el => el.dataset.key === 'CHECK_INTERVAL_MIN')) j = await api('reinstallTriggers');
+      state = j; render();
+      show(setStatus, `설정 ${changed.length}개 저장됐어요.`, 'ok');
+    }catch(e){ show(setStatus, e.message || String(e), 'error'); }
+  });
+  $('t5_testMailBtn').addEventListener('click', () => run(setStatus, () => api('testEmail')));
+
+  // 저장된 연결 정보가 있으면 자동 연결
+  const saved = cfg();
+  if(saved.url && saved.token){ urlEl.value = saved.url; tokenEl.value = saved.token; load(true); }
 })();
 
 </script>
