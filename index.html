@@ -559,6 +559,15 @@
   .mon-ta{ width:100%; min-height:84px; font-size:13px; font-family:var(--font-body); border:1px solid var(--line); border-radius:8px; padding:9px 10px; background:var(--surface-2); color:var(--ink); resize:vertical; }
   .mon-select{ width:100%; font-size:13px; font-family:var(--font-body); border:1px solid var(--line); border-radius:8px; padding:9px 10px; background:var(--surface-2); color:var(--ink); }
   .mon-ta:focus, .mon-select:focus{ outline:2px solid var(--accent-strong); outline-offset:2px; }
+  .mon-pill{ display:inline-flex; align-items:center; justify-content:center; gap:4px; min-width:52px; font-size:11px; font-weight:700; border-radius:7px; padding:5px 10px; border:1px solid transparent; line-height:1.3; white-space:nowrap; }
+  .mon-pill.up{ background:#16A34A; color:#fff; }
+  .mon-pill.down{ background:#DC2626; color:#fff; }
+  .mon-pill.fail{ background:var(--bg-soft); color:var(--ink-soft); border-color:var(--line-strong); }
+  .mon-pill.none{ background:var(--surface); color:var(--ink-soft); border-color:var(--line); }
+  .mon-pill.paused{ background:var(--surface); color:var(--ink-soft); border:1px dashed var(--line-strong); }
+  .mon-pill.off{ background:transparent; color:var(--line-strong); border-color:var(--line); font-weight:500; }
+  .mon-pill i{ font-style:normal; font-size:9.5px; opacity:.9; }
+  .legend .mon-pill{ padding:3px 8px; min-width:0; }
   .mon-dday{ font-family:var(--font-mono); font-weight:700; }
   .mon-dday.soon{ color:var(--danger); }
   .mon-dday.warn{ color:var(--gold); }
@@ -648,6 +657,10 @@
       <button class="nav-item" data-tab="t5">
         <span class="nav-index">05</span>
         <span class="nav-name">노출 모니터링</span>
+      </button>
+      <button class="nav-item" data-tab="t6">
+        <span class="nav-index">06</span>
+        <span class="nav-name">모니터링 설정</span>
       </button>
     </div>
     <div class="sidebar-foot">모든 파일 처리는 이 브라우저 안에서만 이뤄지며, 어떤 파일도 서버로 전송되지 않습니다.</div>
@@ -908,22 +921,14 @@
       <div class="panel-head">
         <div class="eyebrow">TOOL 05 · MONITOR</div>
         <h1>브랜드검색 노출 모니터링</h1>
-        <p class="lead">광고주와 키워드를 등록해 두면 <b>10분마다 자동으로</b> 네이버 PC·모바일 검색 결과에서 브랜드검색 광고가 노출되는지 확인하고, 끊기면 이메일로 알려줘요. 계약 기간은 네이버 광고 API로 매일 동기화돼요.</p>
+        <p class="lead">등록한 키워드의 브랜드검색 광고 노출 상태예요. <b>PC</b>·<b>모바일</b> 버튼이 <b>초록이면 노출, 빨강이면 미노출</b>이에요. 광고주·키워드 등록과 알림 설정은 <b>06 모니터링 설정</b> 탭에서 해요.</p>
       </div>
 
-      <div class="card" id="t5_connectCard">
-        <div class="card-head"><span class="card-num">1</span><h2 class="card-title">모니터링 서버 연결</h2></div>
-        <p class="card-desc">Apps Script 웹앱 주소와 접속 토큰을 입력하세요. 이 브라우저에만 저장돼요. 설치 방법은 저장소의 <b>노출모니터링_설치안내.md</b>를 참고하세요.</p>
-        <div class="row">
-          <div class="field"><label class="field-label">웹앱 URL</label><input type="text" id="t5_url" placeholder="https://script.google.com/macros/s/…/exec" autocomplete="off"></div>
-          <div class="field" style="max-width:260px;"><label class="field-label">접속 토큰</label><input type="password" id="t5_token" placeholder="WEB_TOKEN" autocomplete="off"></div>
-        </div>
-        <div class="toolbar" style="margin-top:4px;">
-          <button class="primary" id="t5_connectBtn">연결</button>
-          <button class="ghost" id="t5_disconnectBtn">연결 해제</button>
-          <span class="hint" id="t5_connInfo" style="margin:0;"></span>
-        </div>
-        <div class="status" id="t5_connStatus"></div>
+      <div class="card" id="t5_notConnected">
+        <div class="card-head"><span class="card-num">!</span><h2 class="card-title">모니터링 서버에 아직 연결되지 않았어요</h2></div>
+        <p class="card-desc"><b>06 모니터링 설정</b> 탭에서 웹앱 URL과 접속 토큰을 입력하고 연결하면 여기에 현황이 나타나요.</p>
+        <button class="primary" id="t5_goSetupBtn">설정 탭으로 이동</button>
+        <div class="status" id="t5_connHint"></div>
       </div>
 
       <div id="t5_body" style="display:none;">
@@ -931,7 +936,7 @@
 
         <div class="card">
           <div class="card-head space">
-            <div class="head-left"><span class="card-num">2</span><h2 class="card-title">노출 현황</h2></div>
+            <div class="head-left"><span class="card-num">1</span><h2 class="card-title">노출 현황</h2></div>
             <div class="toolbar" style="margin:0;">
               <button class="ghost" id="t5_refreshBtn">새로고침</button>
               <button class="ghost" id="t5_runCheckBtn">지금 바로 확인</button>
@@ -941,22 +946,24 @@
           <div class="mon-chips" id="t5_advFilter"></div>
           <div class="tablewrap">
             <table>
-              <thead><tr><th>광고주</th><th>키워드</th><th>매체</th><th>상태</th><th>최근 확인</th><th>근거</th><th></th></tr></thead>
+              <thead><tr><th>광고주</th><th>키워드</th><th>PC</th><th>모바일</th><th>최근 확인</th><th>확인</th></tr></thead>
               <tbody id="t5_kwBody"></tbody>
             </table>
           </div>
           <div class="legend" style="margin-top:10px;">
-            <span><span class="mon-badge up">노출</span> 우리 광고주 브랜드검색 확인</span>
-            <span><span class="mon-badge other">타사노출</span> 브랜드검색 영역은 있으나 식별 문구 불일치</span>
-            <span><span class="mon-badge down">미노출</span> 브랜드검색 영역 없음</span>
-            <span><span class="mon-badge fail">확인실패</span> 네이버 차단·오류 (실제 노출과 무관)</span>
+            <span><span class="mon-pill up">PC</span> 노출 중</span>
+            <span><span class="mon-pill down">PC</span> 미노출 (타사 광고가 나오면 <span class="mon-pill down">PC<i>타사</i></span>)</span>
+            <span><span class="mon-pill fail">PC</span> 확인 실패 (네이버 차단·오류)</span>
+            <span><span class="mon-pill none">PC</span> 아직 미확인</span>
+            <span><span class="mon-pill paused">PC</span> 일시중지</span>
+            <span><span class="mon-pill off">PC</span> 등록 안 함</span>
           </div>
           <div class="status" id="t5_status"></div>
         </div>
 
         <div class="card">
           <div class="card-head space">
-            <div class="head-left"><span class="card-num">3</span><h2 class="card-title">브랜드검색 계약 기간</h2></div>
+            <div class="head-left"><span class="card-num">2</span><h2 class="card-title">브랜드검색 계약 기간</h2></div>
             <button class="ghost" id="t5_syncBtn">계약 동기화</button>
           </div>
           <p class="card-desc">네이버 검색광고 API에서 가져온 브랜드검색(시간 계약) 정보예요. 매일 아침 8시에 자동 갱신되고, 노출 종료 <b>7일 전</b>부터 만료 임박 메일이 와요. <span id="t5_contractUpdated" style="color:var(--ink-soft);"></span></p>
@@ -969,37 +976,92 @@
         </div>
 
         <div class="card">
-          <div class="card-head"><span class="card-num">4</span><h2 class="card-title">광고주 · 키워드 등록</h2></div>
+          <div class="card-head"><span class="card-num">3</span><h2 class="card-title">최근 확인 기록</h2></div>
+          <div class="tablewrap" style="max-height:300px;">
+            <table>
+              <thead><tr><th>시각</th><th>광고주</th><th>키워드</th><th>매체</th><th>결과</th><th>확인</th></tr></thead>
+              <tbody id="t5_logBody"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ TAB 6 ============ -->
+    <section class="panel" id="panel-t6">
+      <div class="panel-head">
+        <div class="eyebrow">TOOL 06 · SETTINGS</div>
+        <h1>모니터링 설정</h1>
+        <p class="lead">05 탭에서 감시할 <b>광고주와 키워드</b>를 등록하고 <b>알림</b>을 설정해요. 처음 한 번은 Apps Script 웹앱에 연결해야 해요 (설치 방법은 저장소의 <b>노출모니터링_설치안내.md</b>).</p>
+      </div>
+
+      <div class="card" id="t5_connectCard">
+        <div class="card-head"><span class="card-num">1</span><h2 class="card-title">모니터링 서버 연결</h2></div>
+        <p class="card-desc">Apps Script 웹앱 주소와 접속 토큰을 입력하세요. 이 브라우저에만 저장돼요.</p>
+        <div class="row">
+          <div class="field"><label class="field-label">웹앱 URL</label><input type="text" id="t5_url" placeholder="https://script.google.com/macros/s/…/exec" autocomplete="off"></div>
+          <div class="field" style="max-width:260px;"><label class="field-label">접속 토큰</label><input type="password" id="t5_token" placeholder="WEB_TOKEN" autocomplete="off"></div>
+        </div>
+        <div class="toolbar" style="margin-top:4px;">
+          <button class="primary" id="t5_connectBtn">연결</button>
+          <button class="ghost" id="t5_disconnectBtn">연결 해제</button>
+          <span class="hint" id="t5_connInfo" style="margin:0;"></span>
+        </div>
+        <div class="status" id="t5_connStatus"></div>
+      </div>
+
+      <div id="t6_body" style="display:none;">
+        <div class="card">
+          <div class="card-head"><span class="card-num">2</span><h2 class="card-title">광고주</h2></div>
+          <p class="card-desc"><b>식별 문구</b>는 브랜드검색 광고 안에 나오는 브랜드명이나 사이트 주소예요. 이 문구가 있어야 "우리 광고주 광고"로 판정돼요. <b>customerId</b>는 네이버 광고시스템 오른쪽 위 계정명 옆 숫자로, 계약 기간 조회에 써요.</p>
           <div class="grid-2">
             <div>
-              <label class="field-label">광고주 추가</label>
-              <div class="row" style="margin-bottom:10px;"><div class="field"><input type="text" id="t5_advName" placeholder="광고주명 (예: 올리브영)" style="font-family:var(--font-body);"></div></div>
-              <div class="row" style="margin-bottom:10px;"><div class="field"><input type="text" id="t5_advCustomer" placeholder="네이버 광고 customerId (숫자) — 계약 조회용, 선택"></div></div>
-              <div class="row" style="margin-bottom:10px;"><div class="field"><input type="text" id="t5_advPatterns" placeholder="식별 문구 (쉼표 구분, 예: 올리브영, oliveyoung.co.kr)" style="font-family:var(--font-body);"></div></div>
-              <div class="row" style="margin-bottom:10px;"><div class="field"><input type="text" id="t5_advEmail" placeholder="이 광고주 전용 알림 이메일 (선택)"></div></div>
-              <div class="hint" style="margin:0 0 10px;">식별 문구는 브랜드검색 광고 안에 나오는 브랜드명이나 사이트 주소예요. 이 문구가 있어야 "우리 광고주 광고"로 판정돼요.</div>
-              <button class="primary" id="t5_addAdvBtn">광고주 추가</button>
-              <div class="mon-adv-list" id="t5_advList"></div>
+              <div class="row" style="margin-bottom:10px;"><div class="field"><label class="field-label">광고주명</label><input type="text" id="t5_advName" placeholder="예: 올리브영" style="font-family:var(--font-body);"></div></div>
+              <div class="row" style="margin-bottom:10px;"><div class="field"><label class="field-label">네이버 광고 customerId (선택)</label><input type="text" id="t5_advCustomer" placeholder="숫자만, 예: 1234567"></div></div>
             </div>
             <div>
-              <label class="field-label">키워드 추가</label>
+              <div class="row" style="margin-bottom:10px;"><div class="field"><label class="field-label">식별 문구 (쉼표로 여러 개)</label><input type="text" id="t5_advPatterns" placeholder="예: 올리브영, oliveyoung.co.kr" style="font-family:var(--font-body);"></div></div>
+              <div class="row" style="margin-bottom:10px;"><div class="field"><label class="field-label">이 광고주 전용 알림 이메일 (선택)</label><input type="text" id="t5_advEmail" placeholder="name@company.com"></div></div>
+            </div>
+          </div>
+          <button class="primary" id="t5_addAdvBtn">광고주 추가</button>
+          <div class="mon-adv-list" id="t5_advList"></div>
+          <div class="status" id="t5_regStatus"></div>
+        </div>
+
+        <div class="card">
+          <div class="card-head"><span class="card-num">3</span><h2 class="card-title">키워드</h2></div>
+          <div class="grid-2">
+            <div>
+              <label class="field-label">광고주</label>
               <div style="margin-bottom:10px;"><select class="mon-select" id="t5_kwAdv"></select></div>
-              <textarea class="mon-ta" id="t5_kwText" placeholder="키워드를 줄바꿈 또는 쉼표로 여러 개 입력&#10;예) 올리브영&#10;    올리브영 세일"></textarea>
-              <div class="radio-group" style="margin-top:10px;">
+              <label class="field-label">키워드 (줄바꿈 또는 쉼표로 여러 개)</label>
+              <textarea class="mon-ta" id="t5_kwText" placeholder="예) 올리브영&#10;    올리브영 세일"></textarea>
+            </div>
+            <div>
+              <label class="field-label">매체</label>
+              <div class="radio-group" style="flex-direction:column;">
                 <label><input type="radio" name="t5_media" value="ALL" checked> PC + 모바일</label>
                 <label><input type="radio" name="t5_media" value="PC"> PC만</label>
                 <label><input type="radio" name="t5_media" value="M"> 모바일만</label>
               </div>
               <button class="primary" id="t5_addKwBtn">키워드 추가</button>
-              <div class="hint">키워드 하나당 PC·모바일 각각 10분마다 1번씩 확인해요. 개인 Gmail 계정은 하루 실행 시간 제한이 있어서 <b>키워드×매체 합계 15개 안쪽</b>을 권장해요 (설치 안내서 참고).</div>
+              <div class="hint">키워드 하나당 PC·모바일 각각 10분마다 1번씩 확인해요. 개인 Gmail 계정은 하루 실행 시간 제한이 있어서 <b>키워드×매체 합계 15개 안쪽</b>을 권장해요.</div>
             </div>
           </div>
-          <div class="status" id="t5_regStatus"></div>
+          <div class="status" id="t5_kwStatus"></div>
+          <label class="field-label" style="margin-top:18px;">등록된 키워드</label>
+          <div class="tablewrap">
+            <table>
+              <thead><tr><th>광고주</th><th>키워드</th><th>매체</th><th>감시</th><th></th></tr></thead>
+              <tbody id="t6_kwBody"></tbody>
+            </table>
+          </div>
         </div>
 
         <div class="card">
           <div class="card-head space">
-            <div class="head-left"><span class="card-num">5</span><h2 class="card-title">알림 설정</h2></div>
+            <div class="head-left"><span class="card-num">4</span><h2 class="card-title">알림 설정</h2></div>
             <button class="ghost" id="t5_testMailBtn">테스트 메일 보내기</button>
           </div>
           <div class="grid-2">
@@ -1031,19 +1093,8 @@
           <div class="toolbar"><button class="primary" id="t5_saveSetBtn">설정 저장</button></div>
           <div class="status" id="t5_setStatus"></div>
         </div>
-
-        <div class="card">
-          <div class="card-head"><span class="card-num">6</span><h2 class="card-title">최근 확인 기록</h2></div>
-          <div class="tablewrap" style="max-height:300px;">
-            <table>
-              <thead><tr><th>시각</th><th>광고주</th><th>키워드</th><th>매체</th><th>결과</th><th>근거</th></tr></thead>
-              <tbody id="t5_logBody"></tbody>
-            </table>
-          </div>
-        </div>
       </div>
     </section>
-
   </main>
 </div>
 
@@ -1917,12 +1968,13 @@ async function saveWorkbookFile(wb, filename){
   });
 })();
 
-/* ================= Tool 5 : 브랜드검색 노출 모니터링 (Apps Script 웹앱 연동) ================= */
+/* ================= Tool 5/6 : 브랜드검색 노출 모니터링 (05 현황) + 모니터링 설정 (06) — Apps Script 웹앱 연동 ================= */
 (function(){
   const LS_URL = 'wb_mon_url', LS_TOKEN = 'wb_mon_token';
   const $ = id => document.getElementById(id);
   const urlEl = $('t5_url'), tokenEl = $('t5_token'), connStatus = $('t5_connStatus'), connInfo = $('t5_connInfo');
-  const body = $('t5_body'), statusEl = $('t5_status'), regStatus = $('t5_regStatus'), setStatus = $('t5_setStatus');
+  const body5 = $('t5_body'), body6 = $('t6_body'), notConnected = $('t5_notConnected');
+  const statusEl = $('t5_status'), regStatus = $('t5_regStatus'), kwStatus = $('t5_kwStatus'), setStatus = $('t5_setStatus');
   let state = null, filterAdv = 'ALL', timer = null;
 
   const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -1931,10 +1983,11 @@ async function saveWorkbookFile(wb, filename){
 
   const BADGE = { '노출':'up', '미노출':'down', '타사노출':'other', '확인실패':'fail' };
   const CT_LABEL = { ON_EXPOSING:'집행 중', UPCOMING_EXPOSE:'노출 예정', UPCOMING_CANCEL:'취소 예정', EXPOSE_COMPLETED:'종료', CANCELED_BEFORE_EXPOSING:'취소(노출 전)', CANCELED_ON_EXPOSING:'취소(노출 중)' };
+  const MEDIA_LABEL = { PC:'PC', M:'모바일' };
 
   async function api(action, data){
     const c = cfg();
-    if(!c.url || !c.token) throw new Error('먼저 웹앱 URL과 접속 토큰을 입력하고 연결하세요.');
+    if(!c.url || !c.token) throw new Error('먼저 06 모니터링 설정 탭에서 웹앱 URL과 접속 토큰을 입력하고 연결하세요.');
     let res;
     if(!action){
       res = await fetch(c.url + (c.url.includes('?') ? '&' : '?') + 'token=' + encodeURIComponent(c.token), { method:'GET', redirect:'follow' });
@@ -1948,6 +2001,16 @@ async function saveWorkbookFile(wb, filename){
     catch(e){ throw new Error('서버 응답을 해석할 수 없어요. 웹앱이 "모든 사용자" 액세스로 배포됐는지, URL이 /exec로 끝나는지 확인하세요.'); }
     if(!j.ok) throw new Error(j.error || '알 수 없는 오류');
     return j;
+  }
+
+  /* ---------- 매체 버튼 (PC / 모바일) ---------- */
+  function pill(k, label){
+    if(!k) return `<span class="mon-pill off" title="등록 안 함">${label}</span>`;
+    if(!k.enabled) return `<span class="mon-pill paused" title="일시중지">${label}</span>`;
+    const st = k.lastStatus || '';
+    const cls = st === '노출' ? 'up' : (st === '미노출' || st === '타사노출') ? 'down' : st === '확인실패' ? 'fail' : 'none';
+    const tip = (st || '아직 미확인') + (k.downStreak > 1 ? ` (연속 ${k.downStreak}회)` : '') + (k.lastChecked ? ` · ${k.lastChecked}` : '');
+    return `<span class="mon-pill ${cls}" title="${esc(tip)}">${label}${st === '타사노출' ? '<i>타사</i>' : ''}</span>`;
   }
 
   /* ---------- 렌더링 ---------- */
@@ -1969,32 +2032,37 @@ async function saveWorkbookFile(wb, filename){
 
     // 광고주 필터 칩
     const advs = state.advertisers || [];
-    const chipHtml = [{ name:'ALL', label:'전체' }].concat(advs.map(a => ({ name:a.name, label:a.name }))).map(a => {
+    $('t5_advFilter').innerHTML = [{ name:'ALL', label:'전체' }].concat(advs.map(a => ({ name:a.name, label:a.name }))).map(a => {
       const list = a.name === 'ALL' ? active : active.filter(k => k.advertiser === a.name);
       const bad = list.filter(k => k.lastStatus === '미노출' || k.lastStatus === '타사노출').length;
       return `<button type="button" class="mon-chip${filterAdv === a.name ? ' active' : ''}" data-adv="${esc(a.name)}">${esc(a.label)}<span class="cnt${bad ? ' bad' : ''}">${bad ? '⚠' + bad : list.length}</span></button>`;
     }).join('');
-    $('t5_advFilter').innerHTML = chipHtml;
     $('t5_advFilter').querySelectorAll('.mon-chip').forEach(b => b.addEventListener('click', () => { filterAdv = b.dataset.adv; render(); }));
 
-    // 키워드 표
-    const shown = kws.filter(k => filterAdv === 'ALL' || k.advertiser === filterAdv);
-    $('t5_kwBody').innerHTML = shown.length ? shown.map(k => {
-      const badge = !k.enabled ? '<span class="mon-badge paused">일시중지</span>' : (k.lastStatus ? `<span class="mon-badge ${BADGE[k.lastStatus] || 'none'}">${esc(k.lastStatus)}</span>` : '<span class="mon-badge none">미확인</span>');
-      const streak = k.enabled && k.downStreak > 1 ? ` <span style="font-size:10.5px;color:var(--danger);">×${k.downStreak}</span>` : '';
+    // 현황표: 광고주+키워드당 한 줄, PC/모바일은 색 버튼으로
+    const groups = [];
+    const byKey = {};
+    kws.filter(k => filterAdv === 'ALL' || k.advertiser === filterAdv).forEach(k => {
+      const key = k.advertiser + '\u0000' + k.keyword;
+      if(!byKey[key]){ byKey[key] = { advertiser:k.advertiser, keyword:k.keyword, PC:null, M:null }; groups.push(byKey[key]); }
+      byKey[key][k.media] = k;
+    });
+    $('t5_kwBody').innerHTML = groups.length ? groups.map(g => {
+      const entries = [g.PC, g.M].filter(Boolean);
+      const problem = entries.find(k => k.enabled && k.lastStatus && k.lastStatus !== '노출');
+      const src = problem || entries.find(k => k.lastEvidence);
+      const both = entries.length > 1;
+      const text = src ? ((both && problem ? MEDIA_LABEL[src.media] + ': ' : '') + (src.lastEvidence || '')) : '';
+      const tip = entries.map(k => `${MEDIA_LABEL[k.media]}: ${k.lastStatus || '미확인'}${k.lastEvidence ? ' — ' + k.lastEvidence : ''}`).join('\n');
+      const last = entries.map(k => k.lastChecked || '').sort().pop() || '-';
       return `<tr>
-        <td>${esc(k.advertiser)}</td>
-        <td style="font-weight:600;">${esc(k.keyword)}</td>
-        <td><span class="mon-badge none">${k.media === 'M' ? '모바일' : 'PC'}</span></td>
-        <td>${badge}${streak}</td>
-        <td style="font-family:var(--font-mono);font-size:11.5px;white-space:nowrap;">${esc(k.lastChecked || '-')}</td>
-        <td><div class="mon-evidence" title="${esc(k.lastEvidence)}">${esc(k.lastEvidence || '')}</div></td>
-        <td><div class="mon-row-actions">
-          <button class="ghost" data-act="toggle" data-adv="${esc(k.advertiser)}" data-kw="${esc(k.keyword)}" data-media="${k.media}">${k.enabled ? '일시중지' : '재개'}</button>
-          <button class="ghost" data-act="remove" data-adv="${esc(k.advertiser)}" data-kw="${esc(k.keyword)}" data-media="${k.media}">삭제</button>
-        </div></td></tr>`;
-    }).join('') : '<tr><td colspan="7"><div class="mon-empty">등록된 키워드가 없어요. 아래 4번에서 광고주와 키워드를 추가하세요.</div></td></tr>';
-    $('t5_kwBody').querySelectorAll('button[data-act]').forEach(b => b.addEventListener('click', () => onKwAction(b)));
+        <td>${esc(g.advertiser)}</td>
+        <td style="font-weight:600;">${esc(g.keyword)}</td>
+        <td>${pill(g.PC, 'PC')}</td>
+        <td>${pill(g.M, '모바일')}</td>
+        <td style="font-family:var(--font-mono);font-size:11.5px;white-space:nowrap;">${esc(last)}</td>
+        <td><div class="mon-evidence" title="${esc(tip)}">${esc(text)}</div></td></tr>`;
+    }).join('') : '<tr><td colspan="6"><div class="mon-empty">등록된 키워드가 없어요. 06 모니터링 설정 탭에서 광고주와 키워드를 추가하세요.</div></td></tr>';
 
     // 계약 표
     const cts = state.contracts || [];
@@ -2007,9 +2075,13 @@ async function saveWorkbookFile(wb, filename){
       }else if(c.status === 'UPCOMING_EXPOSE'){ dd = '<span style="color:var(--ink-soft);font-size:11.5px;">예정</span>'; }
       const period = c.exposureStartDt ? `${esc(c.exposureStartDt)} ~ ${esc(c.exposureEndDt)}` : '';
       return `<tr><td>${esc(c.advertiser)}</td><td>${esc(c.adgroupName)}${c.contractName && !c.adgroupName ? esc(c.contractName) : ''}</td><td>${c.status ? `<span class="mon-badge ${c.status === 'ON_EXPOSING' ? 'up' : (c.status === 'UPCOMING_EXPOSE' ? 'none' : 'fail')}">${esc(CT_LABEL[c.status] || c.status)}</span>` : esc(c.contractName)}</td><td style="font-family:var(--font-mono);font-size:11.5px;white-space:nowrap;">${period}</td><td>${dd}</td></tr>`;
-    }).join('') : '<tr><td colspan="5"><div class="mon-empty">계약 정보가 없어요. 광고주에 customerId를 넣고 "계약 동기화"를 누르세요.</div></td></tr>';
+    }).join('') : '<tr><td colspan="5"><div class="mon-empty">계약 정보가 없어요. 06 탭에서 광고주에 customerId를 넣고 "계약 동기화"를 누르세요.</div></td></tr>';
 
-    // 광고주 목록 + 키워드 추가 select
+    // 로그
+    const log = state.log || [];
+    $('t5_logBody').innerHTML = log.length ? log.map(l => `<tr><td style="font-family:var(--font-mono);font-size:11.5px;white-space:nowrap;">${esc(l.time)}</td><td>${esc(l.advertiser)}</td><td>${esc(l.keyword)}</td><td>${MEDIA_LABEL[l.media] || l.media}</td><td><span class="mon-badge ${BADGE[l.result] || 'none'}">${esc(l.result)}</span></td><td><div class="mon-evidence" title="${esc(l.evidence)}">${esc(l.evidence)}${l.note ? ' · ' + esc(l.note) : ''}</div></td></tr>`).join('') : '<tr><td colspan="6"><div class="mon-empty">아직 기록이 없어요.</div></td></tr>';
+
+    /* ----- 06 설정 탭 ----- */
     $('t5_advList').innerHTML = advs.map(a => `<div class="mon-adv-item"><div><b>${esc(a.name)}</b>${a.enabled ? '' : ' <span class="mon-badge paused">사용 안 함</span>'}<div class="sub">customerId ${esc(a.customerId || '없음')} · 식별 문구: ${esc(a.patterns.join(', ') || '없음')}${a.email ? ' · ' + esc(a.email) : ''}</div></div><button class="ghost" data-remove-adv="${esc(a.name)}">삭제</button></div>`).join('');
     $('t5_advList').querySelectorAll('button[data-remove-adv]').forEach(b => b.addEventListener('click', async () => {
       const name = b.dataset.removeAdv;
@@ -2021,13 +2093,19 @@ async function saveWorkbookFile(wb, filename){
     sel.innerHTML = advs.length ? advs.map(a => `<option value="${esc(a.name)}">${esc(a.name)}</option>`).join('') : '<option value="">먼저 광고주를 추가하세요</option>';
     if(prev && advs.some(a => a.name === prev)) sel.value = prev;
 
-    // 설정 값 채우기
-    const s = state.settings || {};
-    document.querySelectorAll('#panel-t5 [data-key]').forEach(el => { if(document.activeElement !== el) el.value = s[el.dataset.key] != null ? s[el.dataset.key] : ''; });
+    $('t6_kwBody').innerHTML = kws.length ? kws.map(k => `<tr>
+        <td>${esc(k.advertiser)}</td>
+        <td style="font-weight:600;">${esc(k.keyword)}</td>
+        <td><span class="mon-badge none">${MEDIA_LABEL[k.media]}</span></td>
+        <td>${k.enabled ? '<span class="mon-badge up">감시 중</span>' : '<span class="mon-badge paused">일시중지</span>'}</td>
+        <td><div class="mon-row-actions">
+          <button class="ghost" data-act="toggle" data-adv="${esc(k.advertiser)}" data-kw="${esc(k.keyword)}" data-media="${k.media}">${k.enabled ? '일시중지' : '재개'}</button>
+          <button class="ghost" data-act="remove" data-adv="${esc(k.advertiser)}" data-kw="${esc(k.keyword)}" data-media="${k.media}">삭제</button>
+        </div></td></tr>`).join('') : '<tr><td colspan="5"><div class="mon-empty">등록된 키워드가 없어요.</div></td></tr>';
+    $('t6_kwBody').querySelectorAll('button[data-act]').forEach(b => b.addEventListener('click', () => onKwAction(b)));
 
-    // 로그
-    const log = state.log || [];
-    $('t5_logBody').innerHTML = log.length ? log.map(l => `<tr><td style="font-family:var(--font-mono);font-size:11.5px;white-space:nowrap;">${esc(l.time)}</td><td>${esc(l.advertiser)}</td><td>${esc(l.keyword)}</td><td>${l.media === 'M' ? '모바일' : 'PC'}</td><td><span class="mon-badge ${BADGE[l.result] || 'none'}">${esc(l.result)}</span></td><td><div class="mon-evidence" title="${esc(l.evidence)}">${esc(l.evidence)}${l.note ? ' · ' + esc(l.note) : ''}</div></td></tr>`).join('') : '<tr><td colspan="6"><div class="mon-empty">아직 기록이 없어요.</div></td></tr>';
+    const s = state.settings || {};
+    document.querySelectorAll('#panel-t6 [data-key]').forEach(el => { if(document.activeElement !== el) el.value = s[el.dataset.key] != null ? s[el.dataset.key] : ''; });
   }
 
   /* ---------- 동작 ---------- */
@@ -2041,17 +2119,24 @@ async function saveWorkbookFile(wb, filename){
     }catch(e){ show(el, e.message || String(e), 'error'); }
   }
 
+  function setConnected(on){
+    body5.style.display = on ? 'block' : 'none';
+    body6.style.display = on ? 'block' : 'none';
+    notConnected.style.display = on ? 'none' : 'block';
+  }
+
   async function load(silent){
     try{
       const j = await api();
       state = j; render();
-      body.style.display = 'block';
-      if(!silent) show(connStatus, '연결됐어요.', 'ok');
+      setConnected(true);
+      if(!silent) show(connStatus, '연결됐어요. 05 모니터링 탭에서 현황을 볼 수 있어요.', 'ok');
       connInfo.textContent = '연결됨 · ' + cfg().url.replace(/^https?:\/\//, '').slice(0, 48) + '…';
       startTimer();
     }catch(e){
-      body.style.display = 'none';
+      setConnected(false);
       show(connStatus, e.message || String(e), 'error');
+      show($('t5_connHint'), cfg().url ? '연결 오류: ' + (e.message || String(e)) : '', 'error');
       connInfo.textContent = '';
     }
   }
@@ -2059,21 +2144,22 @@ async function saveWorkbookFile(wb, filename){
     if(timer) clearInterval(timer);
     timer = setInterval(() => {
       if(document.visibilityState !== 'visible') return;
-      if(!document.getElementById('panel-t5').classList.contains('active')) return;
-      load(true);
+      const onMonitor = $('panel-t5').classList.contains('active') || $('panel-t6').classList.contains('active');
+      if(onMonitor) load(true);
     }, 60000);
   }
 
   async function onKwAction(b){
     const payload = { advertiser:b.dataset.adv, keyword:b.dataset.kw, media:b.dataset.media };
     if(b.dataset.act === 'remove'){
-      if(!confirm(`"${payload.keyword}" (${payload.media === 'M' ? '모바일' : 'PC'}) 키워드를 삭제할까요?`)) return;
-      await run(statusEl, () => api('removeKeyword', payload));
+      if(!confirm(`"${payload.keyword}" (${MEDIA_LABEL[payload.media]}) 키워드를 삭제할까요?`)) return;
+      await run(kwStatus, () => api('removeKeyword', payload));
     }else{
-      await run(statusEl, () => api('toggleKeyword', payload));
+      await run(kwStatus, () => api('toggleKeyword', payload));
     }
   }
 
+  $('t5_goSetupBtn').addEventListener('click', () => document.querySelector('.nav-item[data-tab="t6"]').click());
   $('t5_connectBtn').addEventListener('click', () => {
     const u = urlEl.value.trim(), t = tokenEl.value.trim();
     if(!u || !t){ show(connStatus, '웹앱 URL과 토큰을 모두 입력하세요.', 'error'); return; }
@@ -2083,7 +2169,7 @@ async function saveWorkbookFile(wb, filename){
   });
   $('t5_disconnectBtn').addEventListener('click', () => {
     localStorage.removeItem(LS_URL); localStorage.removeItem(LS_TOKEN);
-    urlEl.value = ''; tokenEl.value = ''; body.style.display = 'none'; connInfo.textContent = '';
+    urlEl.value = ''; tokenEl.value = ''; setConnected(false); connInfo.textContent = '';
     if(timer) clearInterval(timer);
     show(connStatus, '연결을 해제했어요. (서버의 데이터는 그대로 남아 있어요)', 'ok');
   });
@@ -2101,14 +2187,14 @@ async function saveWorkbookFile(wb, filename){
   });
   $('t5_addKwBtn').addEventListener('click', async () => {
     const advertiser = $('t5_kwAdv').value, keyword = $('t5_kwText').value.trim();
-    if(!advertiser){ show(regStatus, '먼저 광고주를 추가하세요.', 'error'); return; }
-    if(!keyword){ show(regStatus, '키워드를 입력하세요.', 'error'); return; }
+    if(!advertiser){ show(kwStatus, '먼저 광고주를 추가하세요.', 'error'); return; }
+    if(!keyword){ show(kwStatus, '키워드를 입력하세요.', 'error'); return; }
     const media = (document.querySelector('input[name="t5_media"]:checked') || {}).value || 'ALL';
-    await run(regStatus, () => api('addKeyword', { advertiser, keyword, media }));
-    if(regStatus.classList.contains('ok')) $('t5_kwText').value = '';
+    await run(kwStatus, () => api('addKeyword', { advertiser, keyword, media }));
+    if(kwStatus.classList.contains('ok')) $('t5_kwText').value = '';
   });
   $('t5_saveSetBtn').addEventListener('click', async () => {
-    const els = Array.from(document.querySelectorAll('#panel-t5 [data-key]'));
+    const els = Array.from(document.querySelectorAll('#panel-t6 [data-key]'));
     const cur = (state && state.settings) || {};
     const changed = els.filter(el => String(cur[el.dataset.key] == null ? '' : cur[el.dataset.key]) !== String(el.value));
     if(!changed.length){ show(setStatus, '바뀐 설정이 없어요.', 'warn'); return; }
