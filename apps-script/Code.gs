@@ -572,7 +572,7 @@ function checkBizmoney() {
   return { count: out.length, alerts: alerts.length };
 }
 
-function won_(n) { return (n === '' || n == null) ? '-' : Number(n).toLocaleString('ko-KR') + '원'; }
+function won_(n) { return (n === '' || n == null) ? '-' : Math.round(Number(n)).toLocaleString('ko-KR') + '원'; }
 
 function sendBizmoneyAlerts_(settings, alerts, threshold) {
   var bad = alerts.filter(function (a) { return a.type === 'BAD'; });
