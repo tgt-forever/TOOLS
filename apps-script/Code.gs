@@ -17,7 +17,7 @@
  *   ALERT_EMAIL       (선택) 알림 받을 이메일, 쉼표로 여러 개. 없으면 설정 시트 → 없으면 본인 계정
  */
 
-var SHEET = { ADV: '광고주', KW: '키워드', LOG: '로그', CONTRACT: '계약', SET: '설정' };
+var SHEET = { ADV: '광고주', KW: '키워드', LOG: '로그', CONTRACT: '계약', SET: '설정', BIZ: '비즈머니' };
 
 var HEADERS = {};
 HEADERS[SHEET.ADV] = ['광고주명', '네이버 customerId', '식별 문구(쉼표 구분)', '알림 이메일(선택)', '사용(Y/N)'];
@@ -25,13 +25,17 @@ HEADERS[SHEET.KW] = ['광고주명', '키워드', '매체(PC/M)', '사용(Y/N)',
 HEADERS[SHEET.LOG] = ['시각', '광고주명', '키워드', '매체', '결과', '근거', '메모'];
 HEADERS[SHEET.CONTRACT] = ['광고주명', '광고그룹명', '계약명', '계약 상태', '노출 시작', '노출 종료', '남은 일수', '계약 ID', '갱신시각'];
 HEADERS[SHEET.SET] = ['항목', '값', '설명'];
+HEADERS[SHEET.BIZ] = ['광고주명', 'customerId', '잔액', '예산 잠금', '상태', '갱신시각', '마지막 알림시각', '마지막 알림 상태', '메모'];
 
 var DEFAULT_SETTINGS = [
   ['CHECK_INTERVAL_MIN', '10', '노출 확인 간격(분). 5/10/15/30 중 하나. 바꾼 뒤 setup() 또는 05 탭 "설정 저장"으로 트리거 재설치'],
   ['DOWN_ALERT_AFTER', '2', '연속 몇 번 미노출이면 알림을 보낼지 (10분 간격이므로 2 = 20분 연속)'],
   ['FAIL_ALERT_AFTER', '3', '연속 몇 번 확인실패(차단·오류)면 알림을 보낼지'],
   ['REALERT_HOURS', '3', '같은 문제가 계속될 때 몇 시간마다 다시 알릴지'],
-  ['EXPIRE_NOTICE_DAYS', '7', '계약 노출 종료 며칠 전부터 만료 임박 알림을 보낼지'],
+  ['EXPIRE_NOTICE_DAYS', '5', '계약 노출 종료 며칠 전부터 만료 임박 알림을 매일 보낼지. 같은 광고그룹에 새 계약이 잡혀 남은 기간이 이 일수를 넘으면 자동으로 멈춤'],
+  ['EXPIRE_ALERT_HOUR', '9', '계약 확인·만료 알림을 보낼 시각(0~23시). 바꾼 뒤 setup() 또는 06 탭 "설정 저장"으로 트리거 재설치'],
+  ['BIZMONEY_THRESHOLD', '100000', '비즈머니 잔액이 이 금액(원) 이하로 내려가면 알림'],
+  ['BIZMONEY_REALERT_HOURS', '24', '비즈머니가 계속 부족할 때 몇 시간마다 다시 알릴지'],
   ['ALERT_EMAIL', '', '알림 받을 이메일 (쉼표로 여러 개). 비우면 스크립트 속성 또는 본인 계정'],
   ['TOOL_URL', 'https://tgt-forever.github.io/TOOLS/', '알림 메일에 넣을 도구 주소'],
   ['MAX_RUN_SECONDS', '300', '한 번 실행에 쓸 최대 시간(초). 넘으면 나머지는 다음 실행에서']
@@ -81,10 +85,14 @@ function installTriggers_() {
     var fn = t.getHandlerFunction();
     if (fn === 'runCheck' || fn === 'syncContracts') ScriptApp.deleteTrigger(t);
   });
-  var interval = Number(getSettings_().CHECK_INTERVAL_MIN || 10);
+  var settings = getSettings_();
+  var interval = Number(settings.CHECK_INTERVAL_MIN || 10);
   if ([1, 5, 10, 15, 30].indexOf(interval) < 0) interval = 10; // Apps Script가 허용하는 값만
+  var hour = Math.round(Number(settings.EXPIRE_ALERT_HOUR));
+  if (!(hour >= 0 && hour <= 23)) hour = 9;
   ScriptApp.newTrigger('runCheck').timeBased().everyMinutes(interval).create();
-  ScriptApp.newTrigger('syncContracts').timeBased().everyDays(1).atHour(8).create();
+  // 계약 동기화 + 만료 알림: 매일 지정 시각(해당 시각~+1시간 사이에 실행됨, 스크립트 시간대 기준)
+  ScriptApp.newTrigger('syncContracts').timeBased().everyDays(1).atHour(hour).create();
 }
 
 /* =========================================================
@@ -154,7 +162,11 @@ function getKeywords_() {
 function runCheck() {
   var lock = LockService.getScriptLock();
   if (!lock.tryLock(5000)) { Logger.log('이전 실행이 아직 진행 중이라 건너뜀'); return; }
-  try { runCheck_(); } finally { lock.releaseLock(); }
+  try {
+    runCheck_();
+    // 비즈머니 잔액도 같은 간격으로 확인 (노출 확인이 실패해도 잔액 확인은 실행)
+    try { checkBizmoney(); } catch (e) { Logger.log('비즈머니 확인 오류: ' + e); }
+  } finally { lock.releaseLock(); }
 }
 
 function runCheck_() {
@@ -429,15 +441,29 @@ function syncContracts() {
     });
     keep.sort(function (a, b) { return String(a.adgroupName).localeCompare(String(b.adgroupName)) || String(a.exposureStartDt).localeCompare(String(b.exposureStartDt)); });
 
-    var upcomingByGroup = {};
-    keep.forEach(function (c) { if (c.contractStatus === 'UPCOMING_EXPOSE') upcomingByGroup[c.nccAdgroupId] = true; });
+    // 광고그룹별로 "가장 늦게 끝나는 유효 계약"을 찾는다.
+    // 새 계약(노출 예정 또는 이미 집행 중)이 잡혀 남은 기간이 기준일을 넘으면 알림이 자동으로 멈춘다.
+    var latestEndByGroup = {};
+    keep.forEach(function (c) {
+      var st = c.contractStatus;
+      if ((st === 'ON_EXPOSING' || st === 'UPCOMING_EXPOSE' || st === 'UPCOMING_CANCEL') && c.exposureEndDt) {
+        var t = new Date(c.exposureEndDt).getTime();
+        if (!latestEndByGroup[c.nccAdgroupId] || t > latestEndByGroup[c.nccAdgroupId]) latestEndByGroup[c.nccAdgroupId] = t;
+      }
+    });
+    var noticeDays = Number(settings.EXPIRE_NOTICE_DAYS || 5);
+    var alertedGroup = {};
 
     keep.forEach(function (c) {
       var end = c.exposureEndDt ? new Date(c.exposureEndDt) : null;
       var daysLeft = end ? Math.ceil((end.getTime() - now) / 86400000) : '';
       out.push([adv.name, c.adgroupName || '', c.contractName || '', c.contractStatus || '', c.exposureStartDt ? new Date(c.exposureStartDt) : '', end || '', daysLeft, c.nccTimeContractId || '', new Date()]);
-      if (c.contractStatus === 'ON_EXPOSING' && daysLeft !== '' && daysLeft <= Number(settings.EXPIRE_NOTICE_DAYS || 7) && !upcomingByGroup[c.nccAdgroupId]) {
-        expiring.push({ adv: adv, c: c, daysLeft: daysLeft });
+      if (c.contractStatus !== 'ON_EXPOSING' || alertedGroup[c.nccAdgroupId]) return;
+      var latest = latestEndByGroup[c.nccAdgroupId];
+      var groupDaysLeft = latest ? Math.ceil((latest - now) / 86400000) : daysLeft;
+      if (groupDaysLeft !== '' && groupDaysLeft <= noticeDays) {
+        alertedGroup[c.nccAdgroupId] = true;
+        expiring.push({ adv: adv, c: c, daysLeft: groupDaysLeft, endDt: latest ? new Date(latest) : end });
       }
     });
     if (!keep.length) out.push([adv.name, '', '(조회된 브랜드검색 계약 없음)', '', '', '', '', '', new Date()]);
@@ -458,19 +484,21 @@ function sendExpiryAlerts_(settings, expiring) {
   var today = fmtDate_(new Date());
   var byAdv = {};
   expiring.forEach(function (x) {
-    var key = 'EXPIRE_SENT_' + x.c.nccTimeContractId;
-    if (props.getProperty(key) === today) return; // 하루 한 번만
+    var key = 'EXPIRE_SENT_' + x.c.nccAdgroupId;
+    if (props.getProperty(key) === today) return; // 광고그룹당 하루 한 번만
     props.setProperty(key, today);
     (byAdv[x.adv.name] = byAdv[x.adv.name] || []).push(x);
   });
+  var noticeDays = Number(settings.EXPIRE_NOTICE_DAYS || 5);
   Object.keys(byAdv).forEach(function (name) {
     var items = byAdv[name];
-    var subject = '[노출 모니터링] ⏰ 계약 만료 임박 · ' + name + ' (' + items.map(function (x) { return 'D-' + x.daysLeft; }).join(', ') + ')';
+    var subject = '[노출 모니터링] ⏰ 계약 만료 ' + items.map(function (x) { return x.daysLeft <= 0 ? '오늘 종료' : 'D-' + x.daysLeft; }).join(', ') + ' · ' + name;
     var html = '<div style="font-family:-apple-system,Malgun Gothic,sans-serif;font-size:14px;color:#222;max-width:640px">' +
       '<h2 style="font-size:17px;margin:0 0 12px">' + name + ' 브랜드검색 계약이 곧 끝납니다</h2>' +
       '<ul style="line-height:1.8">' + items.map(function (x) {
-        return '<li><b>' + x.c.adgroupName + '</b> · ' + fmtDate_(x.c.exposureStartDt) + ' ~ <b>' + fmtDate_(x.c.exposureEndDt) + '</b> (D-' + x.daysLeft + ')<br><span style="color:#777;font-size:12px">같은 광고그룹에 예정(UPCOMING_EXPOSE) 계약이 없습니다.</span></li>';
+        return '<li><b>' + x.c.adgroupName + '</b> · 노출 종료 <b>' + fmtDate_(x.endDt) + '</b> (' + (x.daysLeft <= 0 ? '오늘' : 'D-' + x.daysLeft) + ')</li>';
       }).join('') + '</ul>' +
+      '<p style="color:#555;font-size:12px;line-height:1.6">이 메일은 종료 ' + noticeDays + '일 전부터 매일 한 번 발송됩니다. 같은 광고그룹에 새 계약이 등록되어 남은 기간이 ' + noticeDays + '일을 넘으면 자동으로 멈춥니다.</p>' +
       '<p><a href="' + settings.TOOL_URL + '" style="color:#854D0E">종합 작업 도구 열기 →</a></p></div>';
     var to = recipients_(settings, items[0].adv);
     if (to) MailApp.sendEmail({ to: to, subject: subject, htmlBody: html });
@@ -478,7 +506,111 @@ function sendExpiryAlerts_(settings, expiring) {
 }
 
 /* =========================================================
- * 5. 웹앱 (index.html 05 탭과 통신)
+ * 4-2. 비즈머니 잔액 확인 (runCheck와 같은 간격 + 수동)
+ * ========================================================= */
+
+var BIZ = { OK: '정상', LOW: '잔액 부족 임박', EMPTY: '잔액 부족', FAIL: '조회 실패', NOID: 'customerId 없음' };
+
+function bizState_(bizmoney, budgetLock, threshold) {
+  if (budgetLock || bizmoney <= 0) return BIZ.EMPTY;
+  if (bizmoney <= threshold) return BIZ.LOW;
+  return BIZ.OK;
+}
+
+/** 모든 광고주의 비즈머니 잔액을 조회해 "비즈머니" 시트를 새로 쓰고, 부족하면 메일 */
+function checkBizmoney() {
+  var settings = getSettings_();
+  var threshold = Number(settings.BIZMONEY_THRESHOLD || 100000);
+  var realertMs = Number(settings.BIZMONEY_REALERT_HOURS || 24) * 3600 * 1000;
+  var sh = sheet_(SHEET.BIZ);
+
+  // 이전 상태 (알림 중복 방지용)
+  var prev = {};
+  rows_(SHEET.BIZ).forEach(function (r) {
+    if (r[0]) prev[String(r[0]).trim()] = { state: String(r[4] || ''), lastAlert: r[6] ? new Date(r[6]) : null, lastAlertState: String(r[7] || '') };
+  });
+
+  var advs = getAdvertisers_().filter(function (a) { return a.enabled; });
+  var now = new Date();
+  var out = [];
+  var alerts = [];
+
+  advs.forEach(function (adv) {
+    var p = prev[adv.name] || { state: '', lastAlert: null, lastAlertState: '' };
+    var row = { adv: adv, bizmoney: '', budgetLock: '', state: '', note: '', lastAlert: p.lastAlert, lastAlertState: p.lastAlertState };
+
+    if (!adv.customerId) {
+      row.state = BIZ.NOID; row.note = '06 탭에서 customerId를 입력하세요';
+    } else {
+      try {
+        var b = naverApi_('GET', '/billing/bizmoney', adv.customerId) || {};
+        row.bizmoney = Number(b.bizmoney || 0);
+        row.budgetLock = b.budgetLock ? 'Y' : 'N';
+        row.state = bizState_(row.bizmoney, !!b.budgetLock, threshold);
+        if (b.budgetLock) row.note = '예산 잠금(광고 중단) 상태';
+      } catch (e) {
+        row.state = BIZ.FAIL; row.note = String(e.message || e).slice(0, 200);
+      }
+    }
+
+    // 알림 판단
+    var bad = row.state === BIZ.LOW || row.state === BIZ.EMPTY;
+    var wasBad = p.state === BIZ.LOW || p.state === BIZ.EMPTY;
+    var sinceAlert = p.lastAlert ? now.getTime() - p.lastAlert.getTime() : Infinity;
+    var type = null;
+    if (bad && (!wasBad || p.lastAlertState !== row.state)) type = 'BAD';         // 부족 상태로 바뀜 (또는 임박 → 부족으로 악화)
+    else if (bad && sinceAlert >= realertMs) type = 'BAD';                          // 계속 부족 → 주기적 재알림
+    else if (!bad && wasBad && p.lastAlert && row.state === BIZ.OK) type = 'RECOVER'; // 충전되어 정상으로 복귀
+    if (type) { alerts.push({ type: type, row: row }); row.lastAlert = now; row.lastAlertState = row.state; }
+
+    out.push([adv.name, adv.customerId, row.bizmoney, row.budgetLock, row.state, now, row.lastAlert || '', row.lastAlertState || '', row.note]);
+  });
+
+  if (sh.getLastRow() > 1) sh.getRange(2, 1, sh.getLastRow() - 1, sh.getLastColumn()).clearContent();
+  if (out.length) sh.getRange(2, 1, out.length, out[0].length).setValues(out);
+  if (alerts.length) sendBizmoneyAlerts_(settings, alerts, threshold);
+  return { count: out.length, alerts: alerts.length };
+}
+
+function won_(n) { return (n === '' || n == null) ? '-' : Number(n).toLocaleString('ko-KR') + '원'; }
+
+function sendBizmoneyAlerts_(settings, alerts, threshold) {
+  var bad = alerts.filter(function (a) { return a.type === 'BAD'; });
+  var rec = alerts.filter(function (a) { return a.type === 'RECOVER'; });
+  var tool = '<p><a href="' + settings.TOOL_URL + '" style="color:#854D0E">종합 작업 도구 열기 →</a></p></div>';
+  var head = '<div style="font-family:-apple-system,Malgun Gothic,sans-serif;font-size:14px;color:#222;max-width:640px">';
+  var rowHtml = function (a) {
+    var r = a.row;
+    var color = r.state === BIZ.EMPTY ? '#DC2626' : (r.state === BIZ.LOW ? '#C2410C' : '#166534');
+    return '<tr><td style="padding:6px 10px;border-bottom:1px solid #eee;"><b>' + r.adv.name + '</b> <span style="color:#777;font-size:12px">(' + r.adv.customerId + ')</span></td>' +
+      '<td style="padding:6px 10px;border-bottom:1px solid #eee;font-weight:bold;">' + won_(r.bizmoney) + '</td>' +
+      '<td style="padding:6px 10px;border-bottom:1px solid #eee;color:' + color + ';font-weight:bold;">' + r.state + '</td>' +
+      '<td style="padding:6px 10px;border-bottom:1px solid #eee;color:#555;font-size:12px;">' + (r.note || '') + '</td></tr>';
+  };
+
+  // 광고주별 전용 이메일이 있으면 그 광고주 건은 따로, 나머지는 공통 수신자에게 묶어서
+  var groups = {};
+  alerts.forEach(function (a) { var to = recipients_(settings, a.row.adv); (groups[to] = groups[to] || []).push(a); });
+  Object.keys(groups).forEach(function (to) {
+    if (!to) return;
+    var list = groups[to];
+    var b = list.filter(function (a) { return a.type === 'BAD'; });
+    var r = list.filter(function (a) { return a.type === 'RECOVER'; });
+    var hasEmpty = b.some(function (a) { return a.row.state === BIZ.EMPTY; });
+    var subject = '[비즈머니] ' + (b.length ? (hasEmpty ? '🚨 잔액 부족' : '⚠ 잔액 ' + won_(threshold) + ' 이하') : '✅ 충전 확인') + ' · ' +
+      list.map(function (a) { return a.row.adv.name; }).join(', ');
+    var html = head +
+      '<h2 style="font-size:17px;margin:0 0 12px">비즈머니 잔액 알림</h2>' +
+      '<p style="color:#555;margin:0 0 14px">' + nowStr_() + ' 기준</p>' +
+      (b.length ? '<h3 style="font-size:14px;margin:12px 0 6px">⚠ 충전이 필요해요</h3><table style="border-collapse:collapse;width:100%;font-size:13px">' + b.map(rowHtml).join('') + '</table>' : '') +
+      (r.length ? '<h3 style="font-size:14px;margin:16px 0 6px">✅ 충전이 확인됐어요</h3><table style="border-collapse:collapse;width:100%;font-size:13px">' + r.map(rowHtml).join('') + '</table>' : '') +
+      '<p style="color:#555;font-size:12px;line-height:1.6;margin-top:14px">기준 금액 ' + won_(threshold) + ' 이하 또는 예산 잠금이면 알림이 오고, 계속 부족하면 ' + (settings.BIZMONEY_REALERT_HOURS || 24) + '시간마다 다시 알립니다. 기준은 06 모니터링 설정 탭에서 바꿀 수 있어요.</p>' + tool;
+    MailApp.sendEmail({ to: to, subject: subject, htmlBody: html });
+  });
+}
+
+/* =========================================================
+ * 5. 웹앱 (index.html 05·06·07 탭과 통신)
  * ========================================================= */
 
 function json_(obj) {
@@ -526,10 +658,15 @@ function statusPayload_() {
     return { time: fmtDateTime_(r[0]), advertiser: r[1], keyword: r[2], media: r[3], result: r[4], evidence: r[5], note: r[6] };
   });
   var triggers = ScriptApp.getProjectTriggers().map(function (t) { return t.getHandlerFunction(); });
+  var biz = rows_(SHEET.BIZ).filter(function (r) { return String(r[0]).trim(); }).map(function (r) {
+    return { advertiser: r[0], customerId: String(r[1] || ''), bizmoney: r[2] === '' ? null : Number(r[2]), budgetLock: r[3] === 'Y', state: r[4], updatedAt: fmtDateTime_(r[5]), lastAlert: fmtDateTime_(r[6]), note: r[8] || '' };
+  });
   return {
     ok: true,
     serverTime: nowStr_(),
+    timeZone: Session.getScriptTimeZone(),
     triggersInstalled: triggers.indexOf('runCheck') >= 0,
+    bizmoney: biz,
     settings: getSettings_(),
     advertisers: advs.map(function (a) { return { name: a.name, customerId: a.customerId, patterns: a.patterns, email: a.email, enabled: a.enabled }; }),
     keywords: kws.map(function (k) { return { advertiser: k.advertiser, keyword: k.keyword, media: k.media, enabled: k.enabled, lastStatus: k.lastStatus, lastChecked: k.lastChecked, downStreak: k.downStreak, failStreak: k.failStreak, lastEvidence: k.lastEvidence }; }),
@@ -599,6 +736,10 @@ function handleAction_(b) {
     var r = syncContracts();
     return { message: '계약 동기화 완료 (' + r.count + '건' + (r.errors.length ? ', 오류 ' + r.errors.length + '건: ' + r.errors.join(' / ') : '') + ')' };
   }
+  if (action === 'checkBizmoney') {
+    var bz = checkBizmoney();
+    return { message: '비즈머니 확인 완료 (' + bz.count + '개 광고주' + (bz.alerts ? ', 알림 ' + bz.alerts + '건 발송' : '') + ')' };
+  }
   if (action === 'testEmail') {
     var s = getSettings_();
     MailApp.sendEmail({ to: recipients_(s, null), subject: '[노출 모니터링] 테스트 메일', htmlBody: '알림 메일이 정상적으로 도착했습니다. (' + nowStr_() + ')' });
@@ -615,7 +756,8 @@ function handleAction_(b) {
   }
   if (action === 'reinstallTriggers') {
     installTriggers_();
-    return { message: '확인 간격 ' + getSettings_().CHECK_INTERVAL_MIN + '분으로 트리거 재설치 완료' };
+    var s2 = getSettings_();
+    return { message: '트리거 재설치 완료 (노출·비즈머니 확인 ' + s2.CHECK_INTERVAL_MIN + '분마다, 계약 확인 매일 ' + s2.EXPIRE_ALERT_HOUR + '시)' };
   }
   if (action === 'ping') return { message: 'ok' };
   throw new Error('알 수 없는 action: ' + action);
@@ -631,6 +773,13 @@ function debugCheck() {
   var r2 = checkOne_('올리브영', 'M', ['올리브영']);
   Logger.log(JSON.stringify(r1));
   Logger.log(JSON.stringify(r2));
+}
+
+/** 비즈머니 API 확인: 첫 번째 광고주의 잔액을 로그로 출력 */
+function debugBizmoney() {
+  var adv = getAdvertisers_().filter(function (a) { return a.customerId; })[0];
+  if (!adv) { Logger.log('customerId가 있는 광고주가 없습니다.'); return; }
+  Logger.log(adv.name + ': ' + JSON.stringify(naverApi_('GET', '/billing/bizmoney', adv.customerId)));
 }
 
 /** API 연결 확인: 첫 번째 광고주의 계약 목록을 로그로 출력 */

@@ -552,7 +552,7 @@
   .mon-row-actions{ display:flex; gap:6px; white-space:nowrap; justify-content:flex-end; }
   .mon-row-actions button.ghost{ padding:4px 9px; font-size:11px; }
   .mon-evidence{ max-width:260px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; color:var(--ink-soft); font-size:11.5px; }
-  #t5_kwBody td:nth-child(1), #t5_kwBody td:nth-child(2), #t5_ctBody td:nth-child(1), #t5_ctBody td:nth-child(2), #t5_logBody td{ white-space:nowrap; }
+  #t5_kwBody td:nth-child(1), #t5_kwBody td:nth-child(2), #t5_ctBody td:nth-child(1), #t5_ctBody td:nth-child(2), #t5_logBody td, #t7_body_rows td:nth-child(1), #t7_body_rows td:nth-child(4){ white-space:nowrap; }
   .mon-adv-list{ display:flex; flex-direction:column; gap:8px; margin-top:14px; }
   .mon-adv-item{ display:flex; justify-content:space-between; align-items:center; gap:10px; border:1px solid var(--line); border-radius:9px; padding:9px 12px; font-size:12.5px; background:var(--surface-2); }
   .mon-adv-item .sub{ color:var(--ink-soft); font-size:11.5px; margin-top:2px; word-break:break-all; }
@@ -568,6 +568,9 @@
   .mon-pill.off{ background:transparent; color:var(--line-strong); border-color:var(--line); font-weight:500; }
   .mon-pill i{ font-style:normal; font-size:9.5px; opacity:.9; }
   .legend .mon-pill{ padding:3px 8px; min-width:0; }
+  .mon-money{ font-family:var(--font-mono); font-weight:700; font-variant-numeric:tabular-nums; white-space:nowrap; }
+  .mon-money.low{ color:var(--gold); }
+  .mon-money.empty{ color:var(--danger); }
   .mon-dday{ font-family:var(--font-mono); font-weight:700; }
   .mon-dday.soon{ color:var(--danger); }
   .mon-dday.warn{ color:var(--gold); }
@@ -661,6 +664,10 @@
       <button class="nav-item" data-tab="t6">
         <span class="nav-index">06</span>
         <span class="nav-name">모니터링 설정</span>
+      </button>
+      <button class="nav-item" data-tab="t7">
+        <span class="nav-index">07</span>
+        <span class="nav-name">비즈머니</span>
       </button>
     </div>
     <div class="sidebar-foot">모든 파일 처리는 이 브라우저 안에서만 이뤄지며, 어떤 파일도 서버로 전송되지 않습니다.</div>
@@ -966,7 +973,7 @@
             <div class="head-left"><span class="card-num">2</span><h2 class="card-title">브랜드검색 계약 기간</h2></div>
             <button class="ghost" id="t5_syncBtn">계약 동기화</button>
           </div>
-          <p class="card-desc">네이버 검색광고 API에서 가져온 브랜드검색(시간 계약) 정보예요. 매일 아침 8시에 자동 갱신되고, 노출 종료 <b>7일 전</b>부터 만료 임박 메일이 와요. <span id="t5_contractUpdated" style="color:var(--ink-soft);"></span></p>
+          <p class="card-desc">네이버 검색광고 API에서 가져온 브랜드검색(시간 계약) 정보예요. 매일 06 탭에서 정한 시각에 자동 갱신되고, 노출 종료 <b>기준일(기본 5일) 전부터 매일</b> 만료 메일이 와요. 새 계약이 잡히면 자동으로 멈춰요. <span id="t5_contractUpdated" style="color:var(--ink-soft);"></span></p>
           <div class="tablewrap">
             <table>
               <thead><tr><th>광고주</th><th>광고그룹</th><th>계약 상태</th><th>노출 기간</th><th>남은 일수</th></tr></thead>
@@ -1086,8 +1093,23 @@
               <input type="number" id="t5_setRealert" data-key="REALERT_HOURS" min="1" max="48">
             </div>
             <div>
-              <label class="field-label">계약 만료 며칠 전부터 알림</label>
+              <label class="field-label">계약 만료 며칠 전부터 매일 알림</label>
               <input type="number" id="t5_setExpire" data-key="EXPIRE_NOTICE_DAYS" min="1" max="60">
+              <div class="hint">같은 광고그룹에 새 계약이 잡혀 남은 기간이 이 일수를 넘으면 자동으로 멈춰요.</div>
+            </div>
+            <div>
+              <label class="field-label">계약 확인·만료 알림 시각</label>
+              <select class="mon-select" id="t5_setExpireHour" data-key="EXPIRE_ALERT_HOUR"></select>
+              <div class="hint" id="t6_tzInfo">해당 시각부터 1시간 안에 실행돼요.</div>
+            </div>
+            <div>
+              <label class="field-label">비즈머니 알림 기준 금액 (원)</label>
+              <input type="number" id="t5_setBizThreshold" data-key="BIZMONEY_THRESHOLD" min="0" step="10000">
+              <div class="hint">이 금액 이하이거나 예산 잠금이면 알림. 07 비즈머니 탭에서 확인해요.</div>
+            </div>
+            <div>
+              <label class="field-label">비즈머니 계속 부족할 때 재알림 간격 (시간)</label>
+              <input type="number" id="t5_setBizRealert" data-key="BIZMONEY_REALERT_HOURS" min="1" max="168">
             </div>
           </div>
           <div class="toolbar"><button class="primary" id="t5_saveSetBtn">설정 저장</button></div>
@@ -1095,6 +1117,50 @@
         </div>
       </div>
     </section>
+
+    <!-- ============ TAB 7 ============ -->
+    <section class="panel" id="panel-t7">
+      <div class="panel-head">
+        <div class="eyebrow">TOOL 07 · BIZMONEY</div>
+        <h1>비즈머니 잔액</h1>
+        <p class="lead">06 탭에 등록한 광고주의 네이버 비즈머니 잔액을 <b>노출 확인과 같은 간격(기본 10분)</b>으로 가져와요. 잔액이 기준 금액(기본 10만원) 이하이거나 예산 잠금이 걸리면 이메일로 알려줘요.</p>
+      </div>
+
+      <div class="card" id="t7_notConnected">
+        <div class="card-head"><span class="card-num">!</span><h2 class="card-title">모니터링 서버에 아직 연결되지 않았어요</h2></div>
+        <p class="card-desc"><b>06 모니터링 설정</b> 탭에서 웹앱 URL과 접속 토큰을 입력하고 연결하면, 05 노출 모니터링과 같은 연결로 여기에도 잔액이 나타나요.</p>
+        <button class="primary" id="t7_goSetupBtn">설정 탭으로 이동</button>
+      </div>
+
+      <div id="t7_body" style="display:none;">
+        <div class="summary" id="t7_summary"></div>
+
+        <div class="card">
+          <div class="card-head space">
+            <div class="head-left"><span class="card-num">1</span><h2 class="card-title">광고주별 잔액</h2></div>
+            <div class="toolbar" style="margin:0;">
+              <button class="ghost" id="t7_refreshBtn">새로고침</button>
+              <button class="ghost" id="t7_checkBtn">지금 바로 확인</button>
+            </div>
+          </div>
+          <p class="card-desc">마지막 갱신 <span id="t7_updated">-</span> · 알림 기준 <b id="t7_threshold">-</b> 이하 · 광고주 추가와 customerId 입력은 06 탭에서 해요.</p>
+          <div class="tablewrap">
+            <table>
+              <thead><tr><th>광고주</th><th>customerId</th><th>잔액</th><th>상태</th><th>갱신시각</th><th>마지막 알림</th><th>확인</th></tr></thead>
+              <tbody id="t7_body_rows"></tbody>
+            </table>
+          </div>
+          <div class="legend" style="margin-top:10px;">
+            <span><span class="mon-badge up">정상</span> 기준 금액 초과</span>
+            <span><span class="mon-badge other">잔액 부족 임박</span> 기준 금액 이하</span>
+            <span><span class="mon-badge down">잔액 부족</span> 0원 또는 예산 잠금(광고 중단)</span>
+            <span><span class="mon-badge fail">조회 실패</span> API 오류 (customerId·권한 확인)</span>
+          </div>
+          <div class="status" id="t7_status"></div>
+        </div>
+      </div>
+    </section>
+
   </main>
 </div>
 
@@ -1973,8 +2039,10 @@ async function saveWorkbookFile(wb, filename){
   const LS_URL = 'wb_mon_url', LS_TOKEN = 'wb_mon_token';
   const $ = id => document.getElementById(id);
   const urlEl = $('t5_url'), tokenEl = $('t5_token'), connStatus = $('t5_connStatus'), connInfo = $('t5_connInfo');
-  const body5 = $('t5_body'), body6 = $('t6_body'), notConnected = $('t5_notConnected');
-  const statusEl = $('t5_status'), regStatus = $('t5_regStatus'), kwStatus = $('t5_kwStatus'), setStatus = $('t5_setStatus');
+  const body5 = $('t5_body'), body6 = $('t6_body'), body7 = $('t7_body'), notConnected = $('t5_notConnected'), notConnected7 = $('t7_notConnected');
+  const statusEl = $('t5_status'), regStatus = $('t5_regStatus'), kwStatus = $('t5_kwStatus'), setStatus = $('t5_setStatus'), bizStatus = $('t7_status');
+  // 계약 확인 시각 선택지 0~23시
+  $('t5_setExpireHour').innerHTML = Array.from({ length:24 }, (_, h) => `<option value="${h}">${String(h).padStart(2,'0')}시</option>`).join('');
   let state = null, filterAdv = 'ALL', timer = null;
 
   const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -2106,6 +2174,35 @@ async function saveWorkbookFile(wb, filename){
 
     const s = state.settings || {};
     document.querySelectorAll('#panel-t6 [data-key]').forEach(el => { if(document.activeElement !== el) el.value = s[el.dataset.key] != null ? s[el.dataset.key] : ''; });
+    const tz = state.timeZone || '';
+    $('t6_tzInfo').innerHTML = tz
+      ? (tz === 'Asia/Seoul' ? '서버 시간대 Asia/Seoul (한국 시간) · 해당 시각부터 1시간 안에 실행돼요.' : `<span style="color:var(--danger);font-weight:600;">⚠ 서버 시간대가 ${esc(tz)}예요.</span> Apps Script 프로젝트 설정에서 시간대를 Asia/Seoul로 바꿔야 한국 시간 기준으로 와요.`)
+      : '해당 시각부터 1시간 안에 실행돼요.';
+
+    /* ----- 07 비즈머니 탭 ----- */
+    const biz = state.bizmoney || [];
+    const thr = Number(s.BIZMONEY_THRESHOLD || 100000);
+    const won = n => (n == null || n === '') ? '-' : Number(n).toLocaleString('ko-KR') + '원';
+    $('t7_threshold').textContent = won(thr);
+    $('t7_updated').textContent = biz.length && biz[0].updatedAt ? biz[0].updatedAt : '아직 확인 전';
+    const bc = st => biz.filter(b => b.state === st).length;
+    $('t7_summary').innerHTML =
+      `<div class="stat ok"><div class="num">${bc('정상')}</div><div class="lbl">정상</div></div>` +
+      `<div class="stat gold"><div class="num">${bc('잔액 부족 임박')}</div><div class="lbl">${won(thr)} 이하</div></div>` +
+      `<div class="stat danger"><div class="num">${bc('잔액 부족')}</div><div class="lbl">잔액 부족 · 예산 잠금</div></div>` +
+      `<div class="stat"><div class="num">${bc('조회 실패') + bc('customerId 없음')}</div><div class="lbl">조회 불가</div></div>`;
+    const BIZ_BADGE = { '정상':'up', '잔액 부족 임박':'other', '잔액 부족':'down', '조회 실패':'fail', 'customerId 없음':'none' };
+    $('t7_body_rows').innerHTML = biz.length ? biz.map(b => {
+      const moneyCls = b.state === '잔액 부족' ? 'empty' : (b.state === '잔액 부족 임박' ? 'low' : '');
+      return `<tr>
+        <td style="font-weight:600;">${esc(b.advertiser)}</td>
+        <td style="font-family:var(--font-mono);font-size:11.5px;">${esc(b.customerId || '-')}</td>
+        <td><span class="mon-money ${moneyCls}">${won(b.bizmoney)}</span></td>
+        <td><span class="mon-badge ${BIZ_BADGE[b.state] || 'none'}">${esc(b.state)}</span>${b.budgetLock ? ' <span class="mon-badge down" title="잔액 부족으로 광고가 멈춘 상태">예산 잠금</span>' : ''}</td>
+        <td style="font-family:var(--font-mono);font-size:11.5px;white-space:nowrap;">${esc(b.updatedAt || '-')}</td>
+        <td style="font-family:var(--font-mono);font-size:11.5px;white-space:nowrap;">${esc(b.lastAlert || '-')}</td>
+        <td><div class="mon-evidence" title="${esc(b.note)}">${esc(b.note)}</div></td></tr>`;
+    }).join('') : '<tr><td colspan="7"><div class="mon-empty">아직 잔액 정보가 없어요. "지금 바로 확인"을 누르거나, 06 탭에서 광고주에 customerId를 입력하세요.</div></td></tr>';
   }
 
   /* ---------- 동작 ---------- */
@@ -2122,7 +2219,9 @@ async function saveWorkbookFile(wb, filename){
   function setConnected(on){
     body5.style.display = on ? 'block' : 'none';
     body6.style.display = on ? 'block' : 'none';
+    body7.style.display = on ? 'block' : 'none';
     notConnected.style.display = on ? 'none' : 'block';
+    notConnected7.style.display = on ? 'none' : 'block';
   }
 
   async function load(silent){
@@ -2144,7 +2243,7 @@ async function saveWorkbookFile(wb, filename){
     if(timer) clearInterval(timer);
     timer = setInterval(() => {
       if(document.visibilityState !== 'visible') return;
-      const onMonitor = $('panel-t5').classList.contains('active') || $('panel-t6').classList.contains('active');
+      const onMonitor = ['panel-t5','panel-t6','panel-t7'].some(id => $(id).classList.contains('active'));
       if(onMonitor) load(true);
     }, 60000);
   }
@@ -2160,6 +2259,12 @@ async function saveWorkbookFile(wb, filename){
   }
 
   $('t5_goSetupBtn').addEventListener('click', () => document.querySelector('.nav-item[data-tab="t6"]').click());
+  $('t7_goSetupBtn').addEventListener('click', () => document.querySelector('.nav-item[data-tab="t6"]').click());
+  $('t7_refreshBtn').addEventListener('click', () => run(bizStatus, () => api(), '새로고침 완료'));
+  $('t7_checkBtn').addEventListener('click', () => {
+    show(bizStatus, '네이버 광고 API에서 잔액을 가져오는 중…', 'warn');
+    run(bizStatus, () => api('checkBizmoney'));
+  });
   $('t5_connectBtn').addEventListener('click', () => {
     const u = urlEl.value.trim(), t = tokenEl.value.trim();
     if(!u || !t){ show(connStatus, '웹앱 URL과 토큰을 모두 입력하세요.', 'error'); return; }
@@ -2202,7 +2307,7 @@ async function saveWorkbookFile(wb, filename){
     try{
       let j = null;
       for(const el of changed){ j = await api('setSetting', { key:el.dataset.key, value:el.value }); }
-      if(changed.some(el => el.dataset.key === 'CHECK_INTERVAL_MIN')) j = await api('reinstallTriggers');
+      if(changed.some(el => el.dataset.key === 'CHECK_INTERVAL_MIN' || el.dataset.key === 'EXPIRE_ALERT_HOUR')) j = await api('reinstallTriggers');
       state = j; render();
       show(setStatus, `설정 ${changed.length}개 저장됐어요.`, 'ok');
     }catch(e){ show(setStatus, e.message || String(e), 'error'); }
