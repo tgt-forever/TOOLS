@@ -568,6 +568,11 @@
   .mon-pill.off{ background:transparent; color:var(--line-strong); border-color:var(--line); font-weight:500; }
   .mon-pill i{ font-style:normal; font-size:9.5px; opacity:.9; }
   .legend .mon-pill{ padding:3px 8px; min-width:0; }
+  .tablewrap.full{ max-height:none; overflow:visible; }
+  .tablewrap.full thead th{ top:0; }
+  .mon-search{ display:flex; align-items:center; gap:12px; margin:0 0 12px; }
+  .mon-search input[type="search"]{ flex:1; min-width:0; font-size:13.5px; border:1px solid var(--line); border-radius:8px; padding:10px 12px; background:var(--surface-2); color:var(--ink); }
+  .mon-search input[type="search"]:focus{ outline:2px solid var(--accent-strong); outline-offset:2px; }
   .mon-money{ font-family:var(--font-mono); font-weight:700; font-variant-numeric:tabular-nums; white-space:nowrap; }
   .mon-money.low{ color:var(--gold); }
   .mon-money.empty{ color:var(--danger); }
@@ -1144,7 +1149,11 @@
             </div>
           </div>
           <p class="card-desc">마지막 갱신 <span id="t7_updated">-</span> · 알림 기준 <b id="t7_threshold">-</b> 이하 · 광고주 추가와 customerId 입력은 06 탭에서 해요.</p>
-          <div class="tablewrap">
+          <div class="mon-search">
+            <input type="search" id="t7_search" placeholder="광고주명 또는 customerId로 검색" autocomplete="off" style="font-family:var(--font-body);">
+            <span class="hint" id="t7_searchInfo" style="margin:0;white-space:nowrap;"></span>
+          </div>
+          <div class="tablewrap full">
             <table>
               <thead><tr><th>광고주</th><th>customerId</th><th>잔액</th><th>상태</th><th>갱신시각</th><th>마지막 알림</th><th>확인</th></tr></thead>
               <tbody id="t7_body_rows"></tbody>
@@ -2192,7 +2201,10 @@ async function saveWorkbookFile(wb, filename){
       `<div class="stat danger"><div class="num">${bc('잔액 부족')}</div><div class="lbl">잔액 부족 · 예산 잠금</div></div>` +
       `<div class="stat"><div class="num">${bc('조회 실패') + bc('customerId 없음')}</div><div class="lbl">조회 불가</div></div>`;
     const BIZ_BADGE = { '정상':'up', '잔액 부족 임박':'other', '잔액 부족':'down', '조회 실패':'fail', 'customerId 없음':'none' };
-    $('t7_body_rows').innerHTML = biz.length ? biz.map(b => {
+    const q = ($('t7_search').value || '').trim().toLowerCase().replace(/\s+/g, '');
+    const bizShown = q ? biz.filter(b => (String(b.advertiser) + ' ' + String(b.customerId || '')).toLowerCase().replace(/\s+/g, '').includes(q)) : biz;
+    $('t7_searchInfo').textContent = q ? `${bizShown.length} / ${biz.length}개` : (biz.length ? `${biz.length}개 광고주` : '');
+    $('t7_body_rows').innerHTML = bizShown.length ? bizShown.map(b => {
       const moneyCls = b.state === '잔액 부족' ? 'empty' : (b.state === '잔액 부족 임박' ? 'low' : '');
       return `<tr>
         <td style="font-weight:600;">${esc(b.advertiser)}</td>
@@ -2202,7 +2214,9 @@ async function saveWorkbookFile(wb, filename){
         <td style="font-family:var(--font-mono);font-size:11.5px;white-space:nowrap;">${esc(b.updatedAt || '-')}</td>
         <td style="font-family:var(--font-mono);font-size:11.5px;white-space:nowrap;">${esc(b.lastAlert || '-')}</td>
         <td><div class="mon-evidence" title="${esc(b.note)}">${esc(b.note)}</div></td></tr>`;
-    }).join('') : '<tr><td colspan="7"><div class="mon-empty">아직 잔액 정보가 없어요. "지금 바로 확인"을 누르거나, 06 탭에서 광고주에 customerId를 입력하세요.</div></td></tr>';
+    }).join('') : (biz.length
+      ? `<tr><td colspan="7"><div class="mon-empty">"${esc($('t7_search').value.trim())}"에 해당하는 광고주가 없어요.</div></td></tr>`
+      : '<tr><td colspan="7"><div class="mon-empty">아직 잔액 정보가 없어요. "지금 바로 확인"을 누르거나, 06 탭에서 광고주에 customerId를 입력하세요.</div></td></tr>');
   }
 
   /* ---------- 동작 ---------- */
@@ -2261,6 +2275,7 @@ async function saveWorkbookFile(wb, filename){
   $('t5_goSetupBtn').addEventListener('click', () => document.querySelector('.nav-item[data-tab="t6"]').click());
   $('t7_goSetupBtn').addEventListener('click', () => document.querySelector('.nav-item[data-tab="t6"]').click());
   $('t7_refreshBtn').addEventListener('click', () => run(bizStatus, () => api(), '새로고침 완료'));
+  $('t7_search').addEventListener('input', () => { if(state) render(); });
   $('t7_checkBtn').addEventListener('click', () => {
     show(bizStatus, '네이버 광고 API에서 잔액을 가져오는 중…', 'warn');
     run(bizStatus, () => api('checkBizmoney'));
