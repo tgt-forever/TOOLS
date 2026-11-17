@@ -573,6 +573,23 @@
   .tablewrap.full{ max-height:none; overflow-x:auto; overflow-y:hidden; }
   #t7_body_rows td:nth-child(1){ white-space:normal; word-break:keep-all; min-width:110px; line-height:1.4; }
   #t7_body_rows .mon-evidence{ max-width:200px; }
+  .mon-accounts{ display:grid; grid-template-columns:repeat(auto-fit, minmax(200px, 1fr)); gap:12px; }
+  .mon-account{
+    display:flex; align-items:center; gap:14px; text-align:left;
+    border:1.5px solid var(--line); border-radius:12px; padding:16px 18px;
+    background:var(--surface-2); cursor:pointer; font-family:var(--font-body); color:var(--ink);
+  }
+  .mon-account:hover{ border-color:var(--accent-strong); background:var(--accent-soft); }
+  .mon-account.active{ border-color:var(--accent); background:var(--accent-soft); }
+  .mon-account .avatar{
+    width:42px; height:42px; border-radius:50%; flex:0 0 auto;
+    display:flex; align-items:center; justify-content:center;
+    background:var(--surface); border:1px solid var(--line); font-weight:700; font-size:15px;
+  }
+  .mon-account.active .avatar{ background:var(--accent); border-color:var(--accent); color:var(--on-accent); }
+  .mon-account .name{ font-size:15px; font-weight:700; }
+  .mon-account .sub{ font-size:11.5px; color:var(--ink-soft); margin-top:3px; }
+  .mon-account.active .sub{ color:var(--accent-dark); font-weight:600; }
   .mon-search{ display:flex; align-items:center; gap:12px; margin:0 0 12px; }
   .mon-search input[type="search"]{ flex:1; min-width:0; font-size:13.5px; border:1px solid var(--line); border-radius:8px; padding:10px 12px; background:var(--surface-2); color:var(--ink); }
   .mon-search input[type="search"]:focus{ outline:2px solid var(--accent-strong); outline-offset:2px; }
@@ -941,7 +958,7 @@
 
       <div class="card" id="t5_notConnected">
         <div class="card-head"><span class="card-num">!</span><h2 class="card-title">모니터링 서버에 아직 연결되지 않았어요</h2></div>
-        <p class="card-desc"><b>06 모니터링 설정</b> 탭에서 웹앱 URL과 접속 토큰을 입력하고 연결하면 여기에 현황이 나타나요.</p>
+        <p class="card-desc"><b>06 모니터링 설정</b> 탭에서 계정(정이사님 / 박이사님)을 누르면 여기에 현황이 나타나요.</p>
         <button class="primary" id="t5_goSetupBtn">설정 탭으로 이동</button>
         <div class="status" id="t5_connHint"></div>
       </div>
@@ -1012,15 +1029,19 @@
 
       <div class="card" id="t5_connectCard">
         <div class="card-head"><span class="card-num">1</span><h2 class="card-title">모니터링 서버 연결</h2></div>
-        <p class="card-desc">Apps Script 웹앱 주소와 접속 토큰을 입력하세요. 이 브라우저에만 저장돼요.</p>
-        <div class="row">
-          <div class="field"><label class="field-label">웹앱 URL</label><input type="text" id="t5_url" placeholder="https://script.google.com/macros/s/…/exec" autocomplete="off"></div>
-          <div class="field" style="max-width:260px;"><label class="field-label">접속 토큰</label><input type="password" id="t5_token" placeholder="WEB_TOKEN" autocomplete="off"></div>
-        </div>
-        <div class="toolbar" style="margin-top:4px;">
-          <button class="primary" id="t5_connectBtn">연결</button>
+        <p class="card-desc">계정을 누르면 바로 연결돼요. 선택한 계정은 이 브라우저에 기억되고, 05·07 탭도 같은 계정으로 보여요.</p>
+        <div class="mon-accounts" id="t5_accounts"></div>
+        <div class="toolbar" style="margin-top:14px;">
           <button class="ghost" id="t5_disconnectBtn">연결 해제</button>
+          <button class="ghost" id="t5_manualToggle">직접 입력</button>
           <span class="hint" id="t5_connInfo" style="margin:0;"></span>
+        </div>
+        <div id="t5_manualBox" style="display:none;margin-top:14px;padding-top:14px;border-top:1px dashed var(--line);">
+          <div class="row">
+            <div class="field"><label class="field-label">웹앱 URL</label><input type="text" id="t5_url" placeholder="https://script.google.com/macros/s/…/exec" autocomplete="off"></div>
+            <div class="field" style="max-width:260px;"><label class="field-label">접속 토큰</label><input type="password" id="t5_token" placeholder="WEB_TOKEN" autocomplete="off"></div>
+          </div>
+          <div class="toolbar" style="margin-top:4px;"><button class="primary" id="t5_connectBtn">입력한 값으로 연결</button></div>
         </div>
         <div class="status" id="t5_connStatus"></div>
       </div>
@@ -1136,7 +1157,7 @@
 
       <div class="card" id="t7_notConnected">
         <div class="card-head"><span class="card-num">!</span><h2 class="card-title">모니터링 서버에 아직 연결되지 않았어요</h2></div>
-        <p class="card-desc"><b>06 모니터링 설정</b> 탭에서 웹앱 URL과 접속 토큰을 입력하고 연결하면, 05 노출 모니터링과 같은 연결로 여기에도 잔액이 나타나요.</p>
+        <p class="card-desc"><b>06 모니터링 설정</b> 탭에서 계정(정이사님 / 박이사님)을 누르면, 05 노출 모니터링과 같은 연결로 여기에도 잔액이 나타나요.</p>
         <button class="primary" id="t7_goSetupBtn">설정 탭으로 이동</button>
       </div>
 
@@ -2050,6 +2071,11 @@ async function saveWorkbookFile(wb, filename){
 (function(){
   const LS_URL = 'wb_mon_url', LS_TOKEN = 'wb_mon_token';
   const $ = id => document.getElementById(id);
+  // 계정 버튼: 각자 자기 구글 시트(Apps Script 웹앱)에 연결
+  const ACCOUNTS = [
+    { id:'jung', name:'정이사님', initial:'정', url:'https://script.google.com/macros/s/AKfycbyE5DhHgJ_Z-XgB6ZUHv1_7e4HbIyxFygKyn2hRU8-rLEdeGO_dT3vblVSUdEc44Qw5/exec', token:'Adfactory123' },
+    { id:'park', name:'박이사님', initial:'박', url:'https://script.google.com/macros/s/AKfycbyHGR7Tz1RtQKbovVLENTOjpfM-QxajcTM8ISBRYX6LcjhW6Wl-ceKYpxRUzgRrj2VgCA/exec', token:'perad123' }
+  ];
   const urlEl = $('t5_url'), tokenEl = $('t5_token'), connStatus = $('t5_connStatus'), connInfo = $('t5_connInfo');
   const body5 = $('t5_body'), body6 = $('t6_body'), body7 = $('t7_body'), notConnected = $('t5_notConnected'), notConnected7 = $('t7_notConnected');
   const statusEl = $('t5_status'), regStatus = $('t5_regStatus'), kwStatus = $('t5_kwStatus'), setStatus = $('t5_setStatus'), bizStatus = $('t7_status');
@@ -2060,6 +2086,21 @@ async function saveWorkbookFile(wb, filename){
   const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
   function show(el, msg, type){ el.textContent = msg || ''; el.className = 'status' + (msg ? ' ' + type : ''); }
   function cfg(){ return { url:(localStorage.getItem(LS_URL)||'').trim(), token:localStorage.getItem(LS_TOKEN)||'' }; }
+  function currentAccount(){ const c = cfg(); return ACCOUNTS.find(a => a.url === c.url && a.token === c.token) || null; }
+  function renderAccounts(connected){
+    const cur = connected ? currentAccount() : null;
+    $('t5_accounts').innerHTML = ACCOUNTS.map(a => `<button type="button" class="mon-account${cur && cur.id === a.id ? ' active' : ''}" data-acc="${a.id}">
+        <span class="avatar">${esc(a.initial)}</span>
+        <span><div class="name">${esc(a.name)}</div><div class="sub">${cur && cur.id === a.id ? '연결됨 · 이 계정의 시트를 보고 있어요' : '누르면 바로 연결'}</div></span>
+      </button>`).join('');
+    $('t5_accounts').querySelectorAll('.mon-account').forEach(b => b.addEventListener('click', () => {
+      const a = ACCOUNTS.find(x => x.id === b.dataset.acc);
+      localStorage.setItem(LS_URL, a.url); localStorage.setItem(LS_TOKEN, a.token);
+      urlEl.value = a.url; tokenEl.value = a.token;
+      show(connStatus, a.name + ' 계정에 연결 중…', 'warn');
+      load();
+    }));
+  }
 
   const BADGE = { '노출':'up', '미노출':'down', '타사노출':'other', '확인실패':'fail' };
   const CT_LABEL = { ON_EXPOSING:'집행 중', UPCOMING_EXPOSE:'노출 예정', UPCOMING_CANCEL:'취소 예정', EXPOSE_COMPLETED:'종료', CANCELED_BEFORE_EXPOSING:'취소(노출 전)', CANCELED_ON_EXPOSING:'취소(노출 중)' };
@@ -2067,7 +2108,7 @@ async function saveWorkbookFile(wb, filename){
 
   async function api(action, data){
     const c = cfg();
-    if(!c.url || !c.token) throw new Error('먼저 06 모니터링 설정 탭에서 웹앱 URL과 접속 토큰을 입력하고 연결하세요.');
+    if(!c.url || !c.token) throw new Error('먼저 06 모니터링 설정 탭에서 계정을 선택해 연결하세요.');
     let res;
     if(!action){
       res = await fetch(c.url + (c.url.includes('?') ? '&' : '?') + 'token=' + encodeURIComponent(c.token), { method:'GET', redirect:'follow' });
@@ -2246,14 +2287,17 @@ async function saveWorkbookFile(wb, filename){
       const j = await api();
       state = j; render();
       setConnected(true);
-      if(!silent) show(connStatus, '연결됐어요. 05 모니터링 탭에서 현황을 볼 수 있어요.', 'ok');
-      connInfo.textContent = '연결됨 · ' + cfg().url.replace(/^https?:\/\//, '').slice(0, 48) + '…';
+      const acc = currentAccount();
+      if(!silent) show(connStatus, (acc ? acc.name + ' 계정에 ' : '') + '연결됐어요. 05 모니터링 탭에서 현황을 볼 수 있어요.', 'ok');
+      connInfo.textContent = '연결됨 · ' + (acc ? acc.name : cfg().url.replace(/^https?:\/\//, '').slice(0, 40) + '…');
+      renderAccounts(true);
       startTimer();
     }catch(e){
       setConnected(false);
       show(connStatus, e.message || String(e), 'error');
       show($('t5_connHint'), cfg().url ? '연결 오류: ' + (e.message || String(e)) : '', 'error');
       connInfo.textContent = '';
+      renderAccounts(false);
     }
   }
   function startTimer(){
@@ -2294,7 +2338,14 @@ async function saveWorkbookFile(wb, filename){
     localStorage.removeItem(LS_URL); localStorage.removeItem(LS_TOKEN);
     urlEl.value = ''; tokenEl.value = ''; setConnected(false); connInfo.textContent = '';
     if(timer) clearInterval(timer);
+    renderAccounts(false);
     show(connStatus, '연결을 해제했어요. (서버의 데이터는 그대로 남아 있어요)', 'ok');
+  });
+  $('t5_manualToggle').addEventListener('click', () => {
+    const box = $('t5_manualBox');
+    const open = box.style.display === 'none';
+    box.style.display = open ? 'block' : 'none';
+    $('t5_manualToggle').textContent = open ? '직접 입력 닫기' : '직접 입력';
   });
   $('t5_refreshBtn').addEventListener('click', () => run(statusEl, () => api(), '새로고침 완료'));
   $('t5_runCheckBtn').addEventListener('click', () => {
@@ -2333,6 +2384,7 @@ async function saveWorkbookFile(wb, filename){
   $('t5_testMailBtn').addEventListener('click', () => run(setStatus, () => api('testEmail')));
 
   // 저장된 연결 정보가 있으면 자동 연결
+  renderAccounts(false);
   const saved = cfg();
   if(saved.url && saved.token){ urlEl.value = saved.url; tokenEl.value = saved.token; load(true); }
 })();
