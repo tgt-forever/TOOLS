@@ -2,7 +2,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>종합 작업 도구</title>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=Jua&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=Jua&family=Black+Han+Sans&family=Do+Hyeon&family=Nanum+Myeongjo:wght@400;700&family=Nanum+Pen+Script&family=Gaegu:wght@400;700&display=swap">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.2/cropper.min.css">
 <style>
   :root{
@@ -591,6 +591,88 @@
   .mon-account .sub{ font-size:11.5px; color:var(--ink-soft); margin-top:3px; }
   .mon-account.active .sub{ color:var(--accent-dark); font-weight:600; }
   .mon-search{ display:flex; align-items:center; gap:12px; margin:0 0 12px; }
+  /* 04 하위 탭 + 이미지 수정(편집기) */
+  .t4-subtabs{ display:flex; gap:4px; background:var(--bg-soft); border-radius:12px; padding:4px; margin:0 0 18px; max-width:360px; }
+  .t4-subtabs button{ all:unset; box-sizing:border-box; flex:1; text-align:center; padding:9px 0; border-radius:9px; font-size:13.5px; font-weight:700; color:var(--ink-soft); cursor:pointer; font-family:var(--font-body); }
+  .t4-subtabs button.on{ background:var(--surface); color:var(--ink); box-shadow:0 1px 2px rgba(24,24,27,.08); }
+  .ed-card{ padding:18px 20px; }
+  .ed-top{ display:flex; align-items:center; gap:10px; }
+  .ed-add{ position:relative; flex:0 0 auto; display:inline-flex; align-items:center; padding:9px 14px; border-radius:9px; background:var(--accent); color:var(--on-accent); font-weight:700; font-size:13px; cursor:pointer; }
+  .ed-add input{ position:absolute; inset:0; opacity:0; cursor:pointer; }
+  .ed-strip{ display:flex; gap:8px; overflow-x:auto; min-width:0; padding:2px; }
+  .ed-thumb{ position:relative; flex:0 0 auto; width:64px; cursor:pointer; border:2px solid transparent; border-radius:9px; padding:2px; text-align:center; }
+  .ed-thumb.on{ border-color:var(--accent-strong); background:var(--accent-soft); }
+  .ed-thumb img{ width:56px; height:42px; object-fit:contain; display:block; margin:0 auto; background:repeating-conic-gradient(#eee 0 25%, #fff 0 50%) 0 0/10px 10px; border-radius:5px; }
+  .ed-thumb span{ display:block; font-size:10.5px; color:var(--ink-soft); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; margin-top:2px; }
+  .ed-thumb button{ all:unset; position:absolute; top:-4px; right:-4px; width:17px; height:17px; border-radius:50%; background:var(--ink); color:#fff; font-size:10px; text-align:center; line-height:17px; cursor:pointer; display:none; }
+  .ed-thumb:hover button{ display:block; }
+  .ed-main{ display:grid; grid-template-columns:minmax(0,1fr) 290px; gap:16px; margin-top:14px; }
+  @media (max-width:980px){ .ed-main{ grid-template-columns:minmax(0,1fr); } }
+  .ed-toolbar{ display:flex; align-items:center; gap:6px; margin-bottom:8px; flex-wrap:wrap; }
+  .ed-toolbar button.ghost{ padding:6px 11px; }
+  .ed-toolbar button:disabled{ opacity:.4; cursor:default; }
+  .ed-size{ margin-left:auto; font-family:var(--font-mono); font-size:11.5px; color:var(--ink-soft); }
+  .ed-stage{ background:var(--bg-soft); border-radius:12px; min-height:260px; display:flex; align-items:center; justify-content:center; padding:12px; overflow:hidden; }
+  .ed-stage canvas{ display:block; max-width:100%; background:repeating-conic-gradient(#e9e9e6 0 25%, #fff 0 50%) 0 0/16px 16px; box-shadow:0 1px 3px rgba(24,24,27,.12); touch-action:none; }
+  .ed-hint{ font-size:12px; color:var(--ink-soft); margin-top:8px; min-height:18px; }
+  .ed-panel{ border:1px solid var(--line); border-radius:12px; padding:12px; background:var(--surface-2); align-self:start; }
+  .ed-tools{ display:grid; grid-template-columns:repeat(4,1fr); gap:4px; margin-bottom:12px; }
+  .ed-tools button{ all:unset; box-sizing:border-box; text-align:center; padding:7px 2px; border-radius:8px; font-size:11.5px; font-weight:600; color:var(--ink-soft); cursor:pointer; background:var(--surface); border:1px solid var(--line); font-family:var(--font-body); white-space:nowrap; }
+  .ed-tools button:hover{ border-color:var(--accent-strong); }
+  .ed-tools button.on{ background:var(--accent); border-color:var(--accent); color:var(--on-accent); }
+  .ed-pane{ display:none; }
+  .ed-pane.on{ display:block; }
+  .ed-sl{ margin-bottom:10px; }
+  .ed-sl > div{ display:flex; justify-content:space-between; font-size:12px; font-weight:600; margin-bottom:3px; }
+  .ed-sl > div b{ font-family:var(--font-mono); font-weight:600; color:var(--ink-soft); }
+  .ed-sl input[type="range"]{ width:100%; accent-color:var(--accent-strong); }
+  .ed-row{ display:flex; align-items:center; gap:8px; margin-bottom:10px; flex-wrap:wrap; }
+  .ed-row input[type="text"], .ed-row input[type="number"]{ min-width:0; padding:7px 8px; font-size:12.5px; }
+  .ed-c{ display:inline-flex; align-items:center; gap:6px; font-size:12px; font-weight:600; }
+  .ed-chk{ display:inline-flex; align-items:center; gap:6px; font-size:12px; font-weight:600; cursor:pointer; }
+  .ed-chk input{ accent-color:var(--accent-strong); }
+  input[type="color"]{ width:30px; height:26px; padding:0; border:1px solid var(--line); border-radius:6px; background:none; cursor:pointer; }
+  .ed-sel{ font-size:12.5px; font-family:var(--font-body); border:1px solid var(--line); border-radius:8px; padding:7px 8px; background:var(--surface); color:var(--ink); width:100%; }
+  .ed-ta{ width:100%; box-sizing:border-box; font-size:13px; font-family:var(--font-body); border:1px solid var(--line); border-radius:8px; padding:8px; background:var(--surface); color:var(--ink); resize:vertical; margin-bottom:8px; }
+  .ed-full{ width:100%; }
+  .ed-panel button.primary, .ed-panel button.ghost{ padding:8px 12px; font-size:12.5px; }
+  .ed-grid2{ display:grid; grid-template-columns:1fr 1fr; gap:6px; margin-bottom:12px; }
+  .ed-grid3{ display:grid; grid-template-columns:repeat(3,1fr); gap:6px; margin-bottom:12px; }
+  .ed-grid3 button, .ed-seg button, .ed-pos button, .ed-presets button.p{ all:unset; box-sizing:border-box; text-align:center; padding:8px 4px; border-radius:8px; font-size:12px; font-weight:600; cursor:pointer; background:var(--surface); border:1px solid var(--line); color:var(--ink); font-family:var(--font-body); }
+  .ed-grid3 button.on, .ed-seg button.on, .ed-pos button.on, .ed-presets button.p.on{ background:var(--accent-soft); border-color:var(--accent-strong); color:var(--accent-dark); }
+  .ed-seg{ display:flex; gap:4px; margin-bottom:12px; }
+  .ed-seg button{ flex:1; }
+  .ed-pos{ display:grid; grid-template-columns:repeat(3,38px); gap:4px; }
+  .ed-pos button{ padding:6px 0; }
+  .ed-label{ font-size:12px; font-weight:700; margin:6px 0 6px; }
+  .ed-filebtn{ position:relative; display:inline-block; padding:7px 12px; border-radius:8px; border:1px solid var(--line); background:var(--surface); font-size:12px; font-weight:600; cursor:pointer; }
+  .ed-filebtn input{ position:absolute; inset:0; opacity:0; cursor:pointer; }
+  #ed_wmImgBox{ margin-bottom:10px; }
+  .ed-presets{ display:grid; grid-template-columns:1fr 1fr; gap:6px; margin-bottom:12px; }
+  .ed-presets .pw{ position:relative; }
+  .ed-presets button.p{ width:100%; line-height:1.3; }
+  .ed-presets button.p small{ display:block; font-family:var(--font-mono); font-weight:400; font-size:10.5px; color:var(--ink-soft); }
+  .ed-presets button.x{ all:unset; position:absolute; top:-5px; right:-5px; width:16px; height:16px; border-radius:50%; background:var(--ink); color:#fff; font-size:9.5px; text-align:center; line-height:16px; cursor:pointer; }
+  .ed-mlist{ display:flex; flex-direction:column; gap:4px; margin-bottom:12px; max-height:160px; overflow-y:auto; }
+  .ed-mlist label{ display:flex; align-items:center; gap:8px; font-size:12px; padding:5px 8px; border:1px solid var(--line); border-radius:8px; background:var(--surface); cursor:pointer; }
+  .ed-mlist img{ width:34px; height:26px; object-fit:contain; }
+  .ed-pick{ display:flex; align-items:center; gap:10px; padding:10px; border:1px solid var(--line); border-radius:10px; background:var(--surface); }
+  .ed-pick .sw{ width:40px; height:40px; border-radius:8px; border:1px solid var(--line); background:repeating-conic-gradient(#eee 0 25%, #fff 0 50%) 0 0/10px 10px; }
+  .ed-pick b{ font-family:var(--font-mono); font-size:15px; }
+  .ed-recent{ display:flex; gap:6px; flex-wrap:wrap; }
+  .ed-recent button{ all:unset; width:26px; height:26px; border-radius:6px; border:1px solid var(--line); cursor:pointer; }
+  .ed-layers{ display:flex; flex-direction:column; gap:4px; }
+  .ed-layer{ display:flex; align-items:center; gap:3px; padding:6px 6px 6px 10px; border:1px solid var(--line); border-radius:8px; background:var(--surface); cursor:pointer; font-size:12px; }
+  .ed-layer.on{ border-color:var(--accent-strong); background:var(--accent-soft); }
+  .ed-layer.off .nm{ opacity:.45; text-decoration:line-through; }
+  .ed-layer .nm{ flex:1; min-width:0; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; font-weight:600; }
+  .ed-layer button{ all:unset; padding:3px 6px; border-radius:6px; font-size:11px; color:var(--ink-soft); cursor:pointer; }
+  .ed-layer button:hover{ background:var(--bg-soft); color:var(--ink); }
+  .ed-empty-msg{ font-size:12px; color:var(--ink-soft); padding:14px 4px; text-align:center; }
+  .ed-bottom{ display:flex; align-items:center; gap:8px; flex-wrap:wrap; margin-top:16px; padding-top:14px; border-top:1px solid var(--line); }
+  .ed-bottom button{ padding:9px 14px; font-size:13px; }
+  .ed-sp{ flex:1; }
+
   /* 미니 위젯 창 — 핑크 + 잔디 + 복숭아 고양이 (4:3) */
   .wg-body{ margin:0; background:#FFF0F6; font-family:var(--font-body); color:#4A1D2E; font-size:12px; line-height:1.4; overflow:hidden; }
   .wg{ height:100vh; display:flex; flex-direction:column; box-sizing:border-box; }
@@ -902,9 +984,15 @@
       <div class="panel-head">
         <div class="eyebrow">TOOL 04 · IMAGE</div>
         <h1>이미지 편집</h1>
-        <p class="lead">여러 장을 한 번에 올려서 <b>자르기, 용량, 크기, 파일 형식</b>을 원하는 대로 바꿔보세요. 모든 처리는 브라우저 안에서 끝나고, 이미지가 서버로 전송되지 않아요.</p>
+        <p class="lead"><b>형식 변경</b>에서는 자르기·용량·크기·파일 형식을, <b>이미지 수정</b>에서는 색 보정·글자·워터마크·모자이크·배경 제거 같은 편집을 해요. 모든 처리는 브라우저 안에서 끝나고, 이미지가 서버로 전송되지 않아요.</p>
       </div>
 
+      <div class="t4-subtabs" id="t4_subtabs">
+        <button type="button" data-view="convert" class="on">형식 변경</button>
+        <button type="button" data-view="edit">이미지 수정</button>
+      </div>
+
+      <div id="t4_convertView">
       <div class="card">
         <div class="card-head"><span class="card-num">1</span><h2 class="card-title">이미지 업로드</h2></div>
         <p class="card-desc">JPG, PNG, WebP 등 여러 장을 한 번에 선택하거나 끌어다 놓으세요. 각 이미지의 <b>[자르기]</b> 버튼으로 원하는 부분만 잘라낼 수 있어요.</p>
@@ -982,6 +1070,197 @@
           <button class="dark" id="t4_zipBtn">전체 ZIP으로 다운로드</button>
         </div>
       </div>
+      </div><!-- /t4_convertView -->
+
+      <div id="t4_editView" style="display:none;">
+        <div class="card ed-card">
+          <div class="ed-top">
+            <label class="ed-add">＋ 이미지 추가<input type="file" id="ed_file" accept="image/*" multiple></label>
+            <div class="ed-strip" id="ed_strip"></div>
+          </div>
+
+          <label class="upload-zone" id="ed_empty" style="margin-top:14px;">
+            <input type="file" id="ed_file2" accept="image/*" multiple>
+            <div class="u-icon">✎</div>
+            <div class="u-title">수정할 이미지를 클릭해서 고르거나 끌어다 놓으세요</div>
+            <div class="u-sub">여러 장을 올려두고 하나씩 고쳐도 되고, 같은 편집을 모든 이미지에 한 번에 적용할 수도 있어요</div>
+          </label>
+
+          <div class="ed-main" id="ed_main" style="display:none;">
+            <div class="ed-left">
+              <div class="ed-toolbar">
+                <button type="button" class="ghost" id="ed_undo">↶ 되돌리기</button>
+                <button type="button" class="ghost" id="ed_redo">↷ 다시 실행</button>
+                <button type="button" class="ghost" id="ed_reset">원본으로</button>
+                <span class="ed-size" id="ed_size"></span>
+              </div>
+              <div class="ed-stage" id="ed_stage"><canvas id="ed_canvas"></canvas></div>
+              <div class="ed-hint" id="ed_hint"></div>
+            </div>
+
+            <div class="ed-panel">
+              <div class="ed-tools" id="ed_tools">
+                <button type="button" data-tool="adjust" class="on">조정</button>
+                <button type="button" data-tool="filter">필터</button>
+                <button type="button" data-tool="rotate">회전·반전</button>
+                <button type="button" data-tool="text">텍스트</button>
+                <button type="button" data-tool="wm">워터마크</button>
+                <button type="button" data-tool="draw">도형·그리기</button>
+                <button type="button" data-tool="mosaic">모자이크</button>
+                <button type="button" data-tool="frame">테두리·여백</button>
+                <button type="button" data-tool="preset">규격</button>
+                <button type="button" data-tool="merge">합치기</button>
+                <button type="button" data-tool="pick">스포이드</button>
+                <button type="button" data-tool="bg">배경 제거</button>
+                <button type="button" data-tool="layers">레이어</button>
+              </div>
+
+              <div class="ed-pane" data-pane="adjust">
+                <div class="ed-sl"><div><span>밝기</span><b data-v="brightness">0</b></div><input type="range" data-adj="brightness" min="-100" max="100" value="0"></div>
+                <div class="ed-sl"><div><span>대비</span><b data-v="contrast">0</b></div><input type="range" data-adj="contrast" min="-100" max="100" value="0"></div>
+                <div class="ed-sl"><div><span>채도</span><b data-v="saturation">0</b></div><input type="range" data-adj="saturation" min="-100" max="100" value="0"></div>
+                <div class="ed-sl"><div><span>노출</span><b data-v="exposure">0</b></div><input type="range" data-adj="exposure" min="-100" max="100" value="0"></div>
+                <div class="ed-sl"><div><span>색온도 (차갑게 ↔ 따뜻하게)</span><b data-v="temperature">0</b></div><input type="range" data-adj="temperature" min="-100" max="100" value="0"></div>
+                <div class="ed-sl"><div><span>선명하게</span><b data-v="sharpen">0</b></div><input type="range" data-adj="sharpen" min="0" max="100" value="0"></div>
+                <div class="ed-sl"><div><span>흐리게</span><b data-v="blur">0</b></div><input type="range" data-adj="blur" min="0" max="20" step="0.5" value="0"></div>
+                <button type="button" class="ghost ed-full" id="ed_adjReset">조정 초기화</button>
+              </div>
+
+              <div class="ed-pane" data-pane="filter">
+                <div class="ed-grid3" id="ed_filters"></div>
+                <div class="ed-sl"><div><span>필터 강도</span><b id="ed_fsV">100</b></div><input type="range" id="ed_fs" min="0" max="100" value="100"></div>
+              </div>
+
+              <div class="ed-pane" data-pane="rotate">
+                <div class="ed-grid2">
+                  <button type="button" class="ghost" data-rot="l">⟲ 왼쪽 90°</button>
+                  <button type="button" class="ghost" data-rot="r">⟳ 오른쪽 90°</button>
+                  <button type="button" class="ghost" data-rot="h">⇋ 좌우 뒤집기</button>
+                  <button type="button" class="ghost" data-rot="v">⇵ 상하 뒤집기</button>
+                </div>
+                <div class="ed-sl"><div><span>자유 각도</span><b id="ed_angV">0°</b></div><input type="range" id="ed_ang" min="-45" max="45" step="0.5" value="0"></div>
+                <div class="ed-row"><button type="button" class="primary" id="ed_angApply">각도 적용</button><button type="button" class="ghost" id="ed_angCancel">취소</button></div>
+                <p class="hint">돌리면 생기는 모서리 빈 곳은 투명해요. '테두리·여백'에서 배경색을 켜면 그 색으로 채워져요.</p>
+              </div>
+
+              <div class="ed-pane" data-pane="text">
+                <textarea class="ed-ta" id="ed_txt" rows="2">텍스트를 입력하세요</textarea>
+                <div class="ed-row"><select class="ed-sel" id="ed_font">
+                  <option value="Pretendard Variable">프리텐다드 (기본)</option>
+                  <option value="Black Han Sans">검은고딕 (굵은 제목)</option>
+                  <option value="Do Hyeon">도현체</option>
+                  <option value="Jua">주아체 (동글)</option>
+                  <option value="Nanum Myeongjo">나눔명조</option>
+                  <option value="Nanum Pen Script">나눔펜 (손글씨)</option>
+                  <option value="Gaegu">개구체 (손글씨)</option>
+                </select></div>
+                <div class="ed-sl"><div><span>글자 크기</span><b id="ed_tsizeV">60</b></div><input type="range" id="ed_tsize" min="10" max="300" value="60"></div>
+                <div class="ed-row">
+                  <label class="ed-c">글자색 <input type="color" id="ed_tcolor" value="#ffffff"></label>
+                  <label class="ed-chk"><input type="checkbox" id="ed_tbold" checked> 굵게</label>
+                  <select class="ed-sel" id="ed_talign" style="flex:1;"><option value="left">왼쪽 정렬</option><option value="center" selected>가운데 정렬</option><option value="right">오른쪽 정렬</option></select>
+                </div>
+                <div class="ed-row"><label class="ed-c">외곽선 <input type="color" id="ed_tstroke" value="#000000"></label><input type="range" id="ed_tstrokeW" min="0" max="10" value="0" style="flex:1;" title="외곽선 두께"></div>
+                <div class="ed-row"><label class="ed-chk"><input type="checkbox" id="ed_tshadow" checked> 그림자</label></div>
+                <div class="ed-row"><label class="ed-chk"><input type="checkbox" id="ed_tbox"> 배경 박스</label><input type="color" id="ed_tboxColor" value="#000000"><input type="range" id="ed_tboxOp" min="10" max="100" value="60" style="flex:1;" title="박스 진하기"></div>
+                <button type="button" class="primary ed-full" id="ed_addText">＋ 텍스트 추가</button>
+                <p class="hint">글자를 선택한 상태에서 위 값을 바꾸면 그 글자가 바로 바뀌어요. 캔버스에서 끌어서 옮기고, 오른쪽 아래 점을 끌면 크기가 바뀌어요.</p>
+              </div>
+
+              <div class="ed-pane" data-pane="wm">
+                <div class="ed-seg" id="ed_wmKind"><button type="button" data-k="image" class="on">로고 이미지</button><button type="button" data-k="text">문구</button></div>
+                <div id="ed_wmImgBox"><label class="ed-filebtn">로고 파일 고르기<input type="file" id="ed_wmFile" accept="image/*"></label><span class="hint" id="ed_wmFileName" style="margin-left:6px;">선택된 파일 없음</span></div>
+                <div id="ed_wmTextBox" class="ed-row" style="display:none;"><input type="text" id="ed_wmText" value="© 회사명" style="flex:1;font-family:var(--font-body);"><input type="color" id="ed_wmColor" value="#ffffff"></div>
+                <div class="ed-sl"><div><span>진하기</span><b id="ed_wmOpV">50</b></div><input type="range" id="ed_wmOp" min="5" max="100" value="50"></div>
+                <div class="ed-sl"><div><span>크기</span><b id="ed_wmSizeV">20</b></div><input type="range" id="ed_wmSize" min="3" max="80" value="20"></div>
+                <div class="ed-sl"><div><span>기울기</span><b id="ed_wmAngV">0°</b></div><input type="range" id="ed_wmAng" min="-45" max="45" value="0"></div>
+                <div class="ed-label">위치</div>
+                <div class="ed-pos" id="ed_wmPos">
+                  <button type="button" data-p="tl">↖</button><button type="button" data-p="tc">↑</button><button type="button" data-p="tr">↗</button>
+                  <button type="button" data-p="ml">←</button><button type="button" data-p="mc">●</button><button type="button" data-p="mr">→</button>
+                  <button type="button" data-p="bl">↙</button><button type="button" data-p="bc">↓</button><button type="button" data-p="br" class="on">↘</button>
+                </div>
+                <label class="ed-chk" style="margin:8px 0;"><input type="checkbox" id="ed_wmTile"> 바둑판처럼 반복</label>
+                <button type="button" class="primary ed-full" id="ed_addWm">＋ 워터마크 넣기</button>
+                <p class="hint">아래 "이 편집을 모든 이미지에 적용"을 누르면 다른 이미지에도 같은 자리에 들어가요.</p>
+              </div>
+
+              <div class="ed-pane" data-pane="draw">
+                <div class="ed-grid3" id="ed_drawModes">
+                  <button type="button" data-m="select">선택·이동</button><button type="button" data-m="rect" class="on">사각형</button><button type="button" data-m="ellipse">원</button>
+                  <button type="button" data-m="arrow">화살표</button><button type="button" data-m="highlight">형광펜</button><button type="button" data-m="brush">브러시</button>
+                  <button type="button" data-m="eraser">지우개</button>
+                </div>
+                <div class="ed-row"><label class="ed-c">선 색 <input type="color" id="ed_dColor" value="#E11D48"></label><label class="ed-chk"><input type="checkbox" id="ed_dFill"> 채우기</label><label class="ed-c">채우기·형광펜 색 <input type="color" id="ed_dFillColor" value="#FDE047"></label></div>
+                <div class="ed-sl"><div><span>두께</span><b id="ed_dWV">8</b></div><input type="range" id="ed_dW" min="1" max="60" value="8"></div>
+              </div>
+
+              <div class="ed-pane" data-pane="mosaic">
+                <div class="ed-seg" id="ed_mosModes"><button type="button" data-m="mosaic" class="on">모자이크</button><button type="button" data-m="blurArea">흐리게</button></div>
+                <div class="ed-sl"><div><span>강도</span><b id="ed_mosSV">40</b></div><input type="range" id="ed_mosS" min="5" max="100" value="40"></div>
+                <p class="hint">가릴 부분(전화번호, 얼굴, 개인정보 등)을 캔버스에서 드래그하세요. 여러 군데 반복할 수 있어요.</p>
+              </div>
+
+              <div class="ed-pane" data-pane="frame">
+                <div class="ed-sl"><div><span>테두리 두께</span><b data-fv="border">0</b></div><input type="range" data-fr="border" min="0" max="80" value="0"></div>
+                <div class="ed-row"><label class="ed-c">테두리 색 <input type="color" data-fr="borderColor" value="#ffffff"></label></div>
+                <div class="ed-sl"><div><span>둥근 모서리</span><b data-fv="radius">0</b></div><input type="range" data-fr="radius" min="0" max="100" value="0"></div>
+                <div class="ed-sl"><div><span>여백</span><b data-fv="pad">0</b></div><input type="range" data-fr="pad" min="0" max="300" value="0"></div>
+                <div class="ed-row"><label class="ed-chk"><input type="checkbox" data-fr="bgOn"> 배경색 채우기</label><input type="color" data-fr="bg" value="#ffffff"></div>
+                <div class="ed-row"><label class="ed-chk"><input type="checkbox" data-fr="square"> 정사각형으로 맞추기 (남는 곳은 여백)</label></div>
+              </div>
+
+              <div class="ed-pane" data-pane="preset">
+                <div class="ed-presets" id="ed_presets"></div>
+                <div class="ed-seg" id="ed_presetMode"><button type="button" data-m="cover" class="on">꽉 채우기 (잘라냄)</button><button type="button" data-m="contain">여백 넣기</button></div>
+                <div class="ed-row"><label class="ed-c">여백 색 <input type="color" id="ed_presetBg" value="#ffffff"></label></div>
+                <div class="ed-row"><button type="button" class="primary" id="ed_presetOne">이 이미지에 적용</button><button type="button" class="ghost" id="ed_presetAll">모든 이미지에 적용</button></div>
+                <div class="ed-label">내 규격 추가</div>
+                <div class="ed-row"><input type="text" id="ed_pName" placeholder="이름" style="flex:1.4;font-family:var(--font-body);"><input type="number" id="ed_pW" placeholder="가로" style="flex:1;"><input type="number" id="ed_pH" placeholder="세로" style="flex:1;"><button type="button" class="ghost" id="ed_pAdd">추가</button></div>
+              </div>
+
+              <div class="ed-pane" data-pane="merge">
+                <div class="ed-label">합칠 이미지 (2장 이상)</div>
+                <div class="ed-mlist" id="ed_mergeList"></div>
+                <div class="ed-seg" id="ed_mergeLayout"><button type="button" data-m="h" class="on">가로로</button><button type="button" data-m="v">세로로</button><button type="button" data-m="g">격자 (2열)</button></div>
+                <div class="ed-sl"><div><span>간격</span><b id="ed_mGapV">20</b></div><input type="range" id="ed_mGap" min="0" max="100" value="20"></div>
+                <div class="ed-row"><label class="ed-c">배경색 <input type="color" id="ed_mBg" value="#ffffff"></label></div>
+                <button type="button" class="primary ed-full" id="ed_merge">합치기</button>
+                <p class="hint">고른 이미지들을 편집한 모습 그대로 붙여서 새 이미지로 만들어요.</p>
+              </div>
+
+              <div class="ed-pane" data-pane="pick">
+                <p class="hint" style="margin-top:0;">캔버스에서 색을 알고 싶은 곳을 클릭하세요.</p>
+                <div class="ed-pick"><span class="sw" id="ed_pickSw"></span><div style="flex:1;"><b id="ed_pickHex">-</b><div class="hint" id="ed_pickRgb" style="margin:2px 0 0;"></div></div><button type="button" class="ghost" id="ed_pickCopy">복사</button></div>
+                <div class="ed-label">최근 고른 색</div>
+                <div class="ed-recent" id="ed_pickRecent"></div>
+              </div>
+
+              <div class="ed-pane" data-pane="bg">
+                <p class="card-desc" style="margin-bottom:12px;">AI가 사람·상품 같은 주인공만 남기고 배경을 지워요. 처음 한 번은 AI 모델을 내려받느라 1분 정도 걸리고, 그다음부터는 한 장에 몇 초면 돼요. 이미지는 이 컴퓨터 안에서만 처리돼요.</p>
+                <button type="button" class="primary ed-full" id="ed_bgBtn">배경 지우기</button>
+                <div class="status" id="ed_bgStatus"></div>
+                <p class="hint">지운 뒤 '테두리·여백'에서 배경색을 켜면 흰 배경 등으로 바꿀 수 있어요. 투명하게 남기려면 PNG로 저장하세요.</p>
+              </div>
+
+              <div class="ed-pane" data-pane="layers">
+                <div class="ed-layers" id="ed_layers"></div>
+                <p class="hint">위에 있을수록 앞에 보여요. 브러시·지우개·모자이크·배경 제거는 사진에 바로 합쳐져서 레이어로 나오지 않아요 (되돌리기로 취소할 수 있어요).</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="ed-bottom" id="ed_bottom" style="display:none;">
+            <button type="button" class="ghost" id="ed_applyAll">이 편집을 모든 이미지에 적용</button>
+            <span class="ed-sp"></span>
+            <select class="ed-sel" id="ed_fmt" style="width:auto;"><option value="png">PNG</option><option value="jpeg">JPG</option><option value="webp">WebP</option></select>
+            <button type="button" class="dark" id="ed_save">이 이미지 저장</button>
+            <button type="button" class="ghost" id="ed_saveAll">전체 ZIP 저장</button>
+            <button type="button" class="primary" id="ed_send">형식 변경으로 보내기</button>
+          </div>
+          <div class="status" id="ed_status"></div>
+        </div>
+      </div><!-- /t4_editView -->
     </section>
 
     <!-- ============ TAB 5 ============ -->
@@ -1783,6 +2062,8 @@ async function saveWorkbookFile(wb, filename){
     });
     fileInput.value = '';
   }
+  // '이미지 수정'에서 편집한 결과를 이 탭으로 넘겨받을 때 사용
+  window.__t4AddFiles = handleFiles;
 
   function removeImage(id){
     const idx = images.findIndex(i => i.id === id);
@@ -2103,6 +2384,834 @@ async function saveWorkbookFile(wb, filename){
       statusEl.className = 'status error';
     }
   });
+})();
+
+/* ================= TOOL 4-2 : 이미지 수정 (편집기) =================
+   구조
+   - doc 하나 = 이미지 한 장. base(캔버스, 브러시·모자이크·회전 등 "사진에 합쳐지는" 편집 결과)
+     + objects(텍스트·워터마크·도형 = 레이어) + adj(색 보정) + filter + frame(테두리·여백).
+   - 레이어 좌표는 이미지 크기 대비 비율(0~1)로 저장 → 크기가 다른 이미지에 일괄 적용해도 같은 자리.
+   - 되돌리기: 바뀔 때마다 commit()으로 상태를 쌓음. base는 바꿀 때 항상 새 캔버스로 교체(제자리 수정 X). */
+(function(){
+  const $ = id => document.getElementById(id);
+  if(!$('t4_editView')) return;
+  const canvas = $('ed_canvas'), ctx = canvas.getContext('2d');
+  const statusEl = $('ed_status');
+  const show = (el, msg, type) => { el.textContent = msg || ''; el.className = 'status' + (msg ? ' ' + type : ''); };
+  const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  const mk = (w, h) => { const c = document.createElement('canvas'); c.width = Math.max(1, Math.round(w)); c.height = Math.max(1, Math.round(h)); return c; };
+  const clone = c => { const n = mk(c.width, c.height); n.getContext('2d').drawImage(c, 0, 0); return n; };
+  const thumbOf = c => { const s = 96 / Math.max(c.width, c.height); const t = mk(c.width * s, c.height * s); t.getContext('2d').drawImage(c, 0, 0, t.width, t.height); return t.toDataURL('image/png'); };
+
+  const ADJ0 = { brightness:0, contrast:0, saturation:0, exposure:0, temperature:0, sharpen:0, blur:0 };
+  const FRAME0 = { border:0, borderColor:'#ffffff', radius:0, pad:0, bg:'#ffffff', bgOn:false, square:false };
+  const FILTERS = [
+    ['none','원본',{}], ['gray','흑백',{ grayscale:100 }], ['sepia','세피아',{ sepia:85 }],
+    ['vintage','빈티지',{ sepia:40, contrast:-10, saturation:-25, vignette:45 }], ['vivid','쨍하게',{ contrast:18, saturation:45 }],
+    ['soft','부드럽게',{ contrast:-18, brightness:6, saturation:-10 }], ['warm','따뜻하게',{ temperature:45 }],
+    ['cool','차갑게',{ temperature:-45 }], ['mono','강한 흑백',{ grayscale:100, contrast:35 }]
+  ];
+  const FILTER_MAP = Object.fromEntries(FILTERS.map(f => [f[0], f[2]]));
+
+  let docs = [], cur = null, seq = 0, oseq = 0;
+  let tool = 'adjust', mode = 'select', drawMode = 'rect', mosMode = 'mosaic', selId = null;
+  let view = null, drag = null, tempRect = null;
+  let wmKind = 'image', wmImg = null, wmPos = 'br';
+  let presetSel = 0, presetMode = 'cover', mergeLayout = 'h';
+  const mergeSel = new Set();
+  const recentColors = [];
+
+  /* ---------- 하위 탭 (형식 변경 / 이미지 수정) ---------- */
+  function setSubView(v){
+    document.querySelectorAll('#t4_subtabs button').forEach(x => x.classList.toggle('on', x.dataset.view === v));
+    $('t4_convertView').style.display = v === 'convert' ? '' : 'none';
+    $('t4_editView').style.display = v === 'edit' ? '' : 'none';
+    if(v === 'edit') render();
+  }
+  document.querySelectorAll('#t4_subtabs button').forEach(b => b.addEventListener('click', () => setSubView(b.dataset.view)));
+
+  /* ---------- 되돌리기 ---------- */
+  const cloneObj = o => ({ ...o });
+  const snap = d => ({ base:d.base, objects:d.objects.map(cloneObj), adj:{ ...d.adj }, filter:{ ...d.filter }, frame:{ ...d.frame } });
+  function commit(d = cur){
+    if(!d) return;
+    const prev = d.hist[d.hi];
+    d.hist = d.hist.slice(0, d.hi + 1);
+    d.hist.push(snap(d));
+    if(d.hist.length > 40) d.hist.shift();
+    d.hi = d.hist.length - 1;
+    if(!prev || prev.base !== d.base){ d.thumb = thumbOf(d.base); if(d === cur) renderStrip(); }
+  }
+  function restore(d, s){
+    d.base = s.base; d.objects = s.objects.map(cloneObj); d.adj = { ...s.adj }; d.filter = { ...s.filter }; d.frame = { ...s.frame };
+    d.pendingAngle = 0; d._adj = null;
+    if(selId && !d.objects.some(o => o.id === selId)) selId = null;
+  }
+  function undo(){ const d = cur; if(!d || d.hi <= 0) return; d.hi--; restore(d, d.hist[d.hi]); d.thumb = thumbOf(d.base); renderStrip(); syncPanes(); render(); }
+  function redo(){ const d = cur; if(!d || d.hi >= d.hist.length - 1) return; d.hi++; restore(d, d.hist[d.hi]); d.thumb = thumbOf(d.base); renderStrip(); syncPanes(); render(); }
+  $('ed_undo').addEventListener('click', undo);
+  $('ed_redo').addEventListener('click', redo);
+  $('ed_reset').addEventListener('click', () => {
+    const d = cur; if(!d) return;
+    d.base = d.orig; d.objects = []; d.adj = { ...ADJ0 }; d.filter = { name:'none', strength:100 }; d.frame = { ...FRAME0 };
+    d.pendingAngle = 0; d._adj = null; selId = null;
+    commit(); syncPanes(); render();
+  });
+
+  /* ---------- 이미지 불러오기 ---------- */
+  function addDoc(name, c){
+    const d = { id:'d' + (++seq), name, orig:c, base:c, objects:[], adj:{ ...ADJ0 }, filter:{ name:'none', strength:100 },
+      frame:{ ...FRAME0 }, hist:[], hi:-1, pendingAngle:0, thumb:'' };
+    docs.push(d); commit(d); return d;
+  }
+  async function loadFiles(list){
+    const files = Array.from(list || []).filter(f => (f.type || '').startsWith('image/'));
+    let last = null;
+    for(const f of files){
+      try{
+        const bmp = await createImageBitmap(f);
+        const c = mk(bmp.width, bmp.height); c.getContext('2d').drawImage(bmp, 0, 0);
+        last = addDoc(f.name, c);
+      }catch(e){ show(statusEl, f.name + ' 파일을 열 수 없어요.', 'error'); }
+    }
+    $('ed_file').value = ''; $('ed_file2').value = '';
+    if(last) selectDoc(last); else renderStrip();
+  }
+  $('ed_file').addEventListener('change', e => loadFiles(e.target.files));
+  $('ed_file2').addEventListener('change', e => loadFiles(e.target.files));
+  const editView = $('t4_editView');
+  editView.addEventListener('dragover', e => { e.preventDefault(); });
+  editView.addEventListener('drop', e => { e.preventDefault(); if(e.dataTransfer && e.dataTransfer.files.length) loadFiles(e.dataTransfer.files); });
+
+  function selectDoc(d){
+    if(cur && cur.pendingAngle){ cur.pendingAngle = 0; }
+    cur = d; selId = null; drag = null; tempRect = null;
+    syncPanes(); renderStrip(); render();
+    if(tool === 'merge') renderMergeList();
+  }
+  function renderStrip(){
+    $('ed_strip').innerHTML = docs.map(d => `<div class="ed-thumb${d === cur ? ' on' : ''}" data-id="${d.id}" title="${esc(d.name)}"><img src="${d.thumb}" alt=""><span>${esc(d.name)}</span><button type="button" data-x="${d.id}" title="목록에서 빼기">✕</button></div>`).join('');
+    $('ed_strip').querySelectorAll('.ed-thumb').forEach(el => el.addEventListener('click', e => {
+      if(e.target.dataset.x){
+        const i = docs.findIndex(d => d.id === e.target.dataset.x);
+        const wasCur = docs[i] === cur;
+        mergeSel.delete(docs[i].id);
+        docs.splice(i, 1);
+        if(wasCur){ cur = null; if(docs.length) selectDoc(docs[Math.min(i, docs.length - 1)]); else { renderStrip(); render(); } }
+        else renderStrip();
+        return;
+      }
+      const d = docs.find(x => x.id === el.dataset.id); if(d && d !== cur) selectDoc(d);
+    }));
+  }
+
+  /* ---------- 그리기 ---------- */
+  function rotateCanvas(src, deg){
+    const r = deg * Math.PI / 180, c = Math.abs(Math.cos(r)), s = Math.abs(Math.sin(r));
+    const W = src.width * c + src.height * s, H = src.width * s + src.height * c;
+    const n = mk(W, H), x = n.getContext('2d');
+    x.translate(n.width / 2, n.height / 2); x.rotate(r); x.drawImage(src, -src.width / 2, -src.height / 2);
+    return n;
+  }
+  function effBase(d){
+    if(!d.pendingAngle) return d.base;
+    if(!d._rot || d._rot.a !== d.pendingAngle || d._rot.b !== d.base) d._rot = { a:d.pendingAngle, b:d.base, c:rotateCanvas(d.base, d.pendingAngle) };
+    return d._rot.c;
+  }
+  // 출력 크기와 사진이 놓일 자리 (scale=1이면 실제 크기)
+  function layout(d, scale){
+    const b = effBase(d), bw = b.width, bh = b.height;
+    const u = Math.max(bw, bh) / 1000;
+    const pad = d.frame.pad * u;
+    let W = bw + pad * 2, H = bh + pad * 2;
+    if(d.frame.square){ const S = Math.max(W, H); W = S; H = S; }
+    return { base:b, W:W * scale, H:H * scale, ix:(W - bw) / 2 * scale, iy:(H - bh) / 2 * scale, iw:bw * scale, ih:bh * scale,
+      u:u * scale, bord:d.frame.border * u * scale, radius:d.frame.radius / 100 * Math.min(W, H) / 2 * scale };
+  }
+  function effAdj(d){
+    const a = { ...d.adj, grayscale:0, sepia:0, vignette:0 };
+    const p = FILTER_MAP[d.filter.name] || {}, k = d.filter.strength / 100;
+    for(const key in p) a[key] = (a[key] || 0) + p[key] * k;
+    return a;
+  }
+  function sharpen(c, amt){
+    const x = c.getContext('2d'), w = c.width, h = c.height;
+    if(w < 3 || h < 3) return;
+    const src = x.getImageData(0, 0, w, h), s = src.data, out = x.createImageData(w, h), o = out.data, k = amt * 1.2;
+    o.set(s);
+    const row = w * 4;
+    for(let y = 1; y < h - 1; y++){
+      for(let xx = 1; xx < w - 1; xx++){
+        const i = (y * w + xx) * 4;
+        for(let ch = 0; ch < 3; ch++){
+          const v = s[i + ch] * (1 + 4 * k) - k * (s[i + ch - 4] + s[i + ch + 4] + s[i + ch - row] + s[i + ch + row]);
+          o[i + ch] = v < 0 ? 0 : v > 255 ? 255 : v;
+        }
+      }
+    }
+    x.putImageData(out, 0, 0);
+  }
+  function adjustedCanvas(d, L, useCache){
+    const a = effAdj(d);
+    const key = Math.round(L.iw) + 'x' + Math.round(L.ih) + '|' + JSON.stringify(a);
+    if(useCache && d._adj && d._adj.key === key && d._adj.base === L.base) return d._adj.c;
+    const c = mk(L.iw, L.ih), x = c.getContext('2d');
+    const bright = Math.max(0, (1 + a.brightness / 100) * (1 + a.exposure / 100 * 1.3));
+    x.filter = [
+      `brightness(${bright.toFixed(3)})`, `contrast(${Math.max(0, 1 + a.contrast / 100).toFixed(3)})`,
+      `saturate(${Math.max(0, 1 + a.saturation / 100).toFixed(3)})`,
+      a.grayscale ? `grayscale(${Math.min(100, a.grayscale)}%)` : '', a.sepia ? `sepia(${Math.min(100, a.sepia)}%)` : '',
+      a.blur > 0 ? `blur(${(a.blur * L.u).toFixed(2)}px)` : ''
+    ].join(' ');
+    x.drawImage(L.base, 0, 0, c.width, c.height);
+    x.filter = 'none';
+    if(a.temperature){
+      const t = mk(c.width, c.height), tx = t.getContext('2d');
+      tx.fillStyle = a.temperature > 0 ? 'rgb(255,150,40)' : 'rgb(40,140,255)';
+      tx.fillRect(0, 0, t.width, t.height);
+      tx.globalCompositeOperation = 'destination-in'; tx.drawImage(c, 0, 0);
+      x.globalCompositeOperation = 'soft-light'; x.globalAlpha = Math.min(1, Math.abs(a.temperature) / 100);
+      x.drawImage(t, 0, 0); x.globalAlpha = 1; x.globalCompositeOperation = 'source-over';
+    }
+    if(a.sharpen > 0) sharpen(c, a.sharpen / 100);
+    if(a.vignette > 0){
+      const R = Math.max(c.width, c.height);
+      const g = x.createRadialGradient(c.width / 2, c.height / 2, R * 0.35, c.width / 2, c.height / 2, R * 0.75);
+      g.addColorStop(0, 'rgba(0,0,0,0)'); g.addColorStop(1, `rgba(0,0,0,${Math.min(0.85, a.vignette / 100 * 0.8)})`);
+      x.globalCompositeOperation = 'source-atop'; x.fillStyle = g; x.fillRect(0, 0, c.width, c.height); x.globalCompositeOperation = 'source-over';
+    }
+    if(useCache) d._adj = { key, base:L.base, c };
+    return c;
+  }
+  function fontStr(o, fs){ return `${o.bold ? 700 : 400} ${fs}px "${o.font}", "Pretendard Variable", sans-serif`; }
+  function drawObj(x, o, L, isPreview){
+    const P = (fx, fy) => [L.ix + fx * L.iw, L.iy + fy * L.ih];
+    let bb = null;
+    x.save();
+    if(o.type === 'text'){
+      const fs = Math.max(1, o.size * L.iw), lines = String(o.text || '').split('\n'), lh = fs * 1.25;
+      x.font = fontStr(o, fs);
+      const ws = lines.map(t => x.measureText(t).width), tw = Math.max(1, ...ws), th = lh * lines.length;
+      const padB = o.box ? fs * 0.35 : 0;
+      const [px, py] = P(o.x, o.y);
+      bb = { x:px, y:py, w:tw + padB * 2, h:th + padB * 2 };
+      if(o.box){ x.globalAlpha = o.boxOp / 100; x.fillStyle = o.boxColor; x.beginPath(); x.roundRect(bb.x, bb.y, bb.w, bb.h, fs * 0.25); x.fill(); x.globalAlpha = 1; }
+      x.textBaseline = 'top';
+      if(o.shadow){ x.shadowColor = 'rgba(0,0,0,.45)'; x.shadowBlur = fs * 0.15; x.shadowOffsetY = fs * 0.06; }
+      lines.forEach((t, i) => {
+        const tx = px + padB + (o.align === 'center' ? (tw - ws[i]) / 2 : o.align === 'right' ? tw - ws[i] : 0);
+        const ty = py + padB + i * lh + (lh - fs) / 2;
+        if(o.strokeW > 0){ x.lineJoin = 'round'; x.lineWidth = o.strokeW / 10 * fs * 0.3; x.strokeStyle = o.strokeColor; x.strokeText(t, tx, ty); }
+        x.fillStyle = o.color; x.fillText(t, tx, ty);
+      });
+    }else if(o.type === 'wm'){
+      x.globalAlpha = o.opacity / 100;
+      let w, h, paint;
+      if(o.kind === 'image' && o.img){
+        w = o.size * L.iw; h = w * o.img.height / o.img.width;
+        paint = (cx, cy) => x.drawImage(o.img, cx - w / 2, cy - h / 2, w, h);
+      }else{
+        const fs = Math.max(1, o.size * L.iw * 0.35);
+        x.font = `700 ${fs}px "Pretendard Variable", sans-serif`; x.textAlign = 'center'; x.textBaseline = 'middle'; x.fillStyle = o.color;
+        w = x.measureText(o.text || '').width; h = fs * 1.2;
+        paint = (cx, cy) => x.fillText(o.text || '', cx, cy);
+      }
+      if(o.tile){
+        x.beginPath(); x.rect(L.ix, L.iy, L.iw, L.ih); x.clip();
+        x.translate(L.ix + L.iw / 2, L.iy + L.ih / 2); x.rotate((o.angle || -30) * Math.PI / 180);
+        const sx = w * 1.7 + L.iw * 0.04, sy = h * 2.6 + L.ih * 0.04, R = Math.hypot(L.iw, L.ih);
+        let r = 0;
+        for(let yy = -R; yy <= R; yy += sy, r++) for(let xx = -R; xx <= R; xx += sx) paint(xx + (r % 2 ? sx / 2 : 0), yy);
+      }else{
+        if(o.x == null){
+          const m = 0.03, fw = w / L.iw, fh = h / L.ih, row = o.pos[0], col = o.pos[1];
+          o.x = col === 'l' ? m : col === 'c' ? 0.5 - fw / 2 : 1 - m - fw;
+          o.y = row === 't' ? m : row === 'm' ? 0.5 - fh / 2 : 1 - m - fh;
+        }
+        const cx = L.ix + o.x * L.iw + w / 2, cy = L.iy + o.y * L.ih + h / 2;
+        x.translate(cx, cy); x.rotate((o.angle || 0) * Math.PI / 180); paint(0, 0);
+        bb = { x:cx - w / 2, y:cy - h / 2, w, h };
+      }
+    }else if(o.type === 'arrow'){
+      const [x1, y1] = P(o.x, o.y), [x2, y2] = P(o.x2, o.y2), lw = Math.max(1, o.lw * L.iw);
+      const ang = Math.atan2(y2 - y1, x2 - x1), head = lw * 4.2;
+      x.strokeStyle = o.color; x.fillStyle = o.color; x.lineWidth = lw; x.lineCap = 'round';
+      x.beginPath(); x.moveTo(x1, y1); x.lineTo(x2 - Math.cos(ang) * head * 0.8, y2 - Math.sin(ang) * head * 0.8); x.stroke();
+      x.beginPath(); x.moveTo(x2, y2);
+      x.lineTo(x2 - Math.cos(ang - 0.45) * head, y2 - Math.sin(ang - 0.45) * head);
+      x.lineTo(x2 - Math.cos(ang + 0.45) * head, y2 - Math.sin(ang + 0.45) * head); x.closePath(); x.fill();
+      bb = { x:Math.min(x1, x2) - head / 2, y:Math.min(y1, y2) - head / 2, w:Math.abs(x2 - x1) + head, h:Math.abs(y2 - y1) + head };
+    }else{
+      const [px, py] = P(o.x, o.y), w = o.w * L.iw, h = o.h * L.ih, lw = Math.max(1, o.lw * L.iw);
+      bb = { x:px, y:py, w, h };
+      x.beginPath();
+      if(o.type === 'ellipse') x.ellipse(px + w / 2, py + h / 2, Math.max(0.5, w / 2), Math.max(0.5, h / 2), 0, 0, Math.PI * 2);
+      else x.rect(px, py, w, h);
+      if(o.type === 'highlight'){ x.globalCompositeOperation = 'multiply'; x.globalAlpha = 0.45; x.fillStyle = o.fillColor; x.fill(); }
+      else{
+        if(o.fill){ x.fillStyle = o.fillColor; x.fill(); }
+        x.lineWidth = lw; x.strokeStyle = o.color; x.lineJoin = 'round'; x.stroke();
+      }
+    }
+    x.restore();
+    if(isPreview) o._bb = bb;
+  }
+  function drawDoc(x, d, L, isPreview){
+    x.save();
+    x.clearRect(0, 0, L.W, L.H);
+    if(L.radius > 0){ x.beginPath(); x.roundRect(0, 0, L.W, L.H, L.radius); x.clip(); }
+    if(d.frame.bgOn){ x.fillStyle = d.frame.bg; x.fillRect(0, 0, L.W, L.H); }
+    x.drawImage(adjustedCanvas(d, L, isPreview), L.ix, L.iy, L.iw, L.ih);
+    d.objects.forEach(o => { if(o.visible !== false) drawObj(x, o, L, isPreview); else if(isPreview) o._bb = null; });
+    if(L.bord > 0){ x.lineWidth = L.bord * 2; x.strokeStyle = d.frame.borderColor; x.beginPath(); x.roundRect(0, 0, L.W, L.H, L.radius); x.stroke(); }
+    x.restore();
+  }
+  function exportCanvas(d){ const L = layout(d, 1), c = mk(L.W, L.H); drawDoc(c.getContext('2d'), d, L, false); return c; }
+
+  const selObj = () => cur && selId ? cur.objects.find(o => o.id === selId) || null : null;
+  function handlePt(o){
+    if(o.type === 'arrow'){ const L = view.L; return { x:L.ix + o.x2 * L.iw, y:L.iy + o.y2 * L.ih }; }
+    return { x:o._bb.x + o._bb.w + 3, y:o._bb.y + o._bb.h + 3 };
+  }
+  function render(){
+    const has = !!cur;
+    $('ed_empty').style.display = has ? 'none' : '';
+    $('ed_main').style.display = has ? '' : 'none';
+    $('ed_bottom').style.display = has ? '' : 'none';
+    if(!has){ view = null; renderLayers(); return; }
+    const d = cur, full = layout(d, 1), stage = $('ed_stage');
+    const avail = Math.max(240, stage.clientWidth - 24);
+    const scale = Math.min(1, avail / full.W, 560 / full.H);
+    const L = layout(d, scale);
+    canvas.width = Math.max(1, Math.round(L.W)); canvas.height = Math.max(1, Math.round(L.H));
+    view = { scale, L };
+    drawDoc(ctx, d, L, true);
+    const o = selObj();
+    if(o && o._bb){
+      ctx.save(); ctx.setLineDash([5, 4]); ctx.strokeStyle = '#CA8A04'; ctx.lineWidth = 1.5;
+      if(o.type !== 'arrow') ctx.strokeRect(o._bb.x - 3, o._bb.y - 3, o._bb.w + 6, o._bb.h + 6);
+      ctx.setLineDash([]);
+      const h = handlePt(o); ctx.fillStyle = '#fff'; ctx.lineWidth = 2;
+      ctx.fillRect(h.x - 6, h.y - 6, 12, 12); ctx.strokeRect(h.x - 6, h.y - 6, 12, 12); ctx.restore();
+    }
+    if(tempRect){ ctx.save(); ctx.setLineDash([6, 4]); ctx.strokeStyle = '#DC2626'; ctx.lineWidth = 2; ctx.strokeRect(tempRect.x, tempRect.y, tempRect.w, tempRect.h); ctx.restore(); }
+    $('ed_size').textContent = `${Math.round(full.W)} × ${Math.round(full.H)} px`;
+    $('ed_undo').disabled = d.hi <= 0; $('ed_redo').disabled = d.hi >= d.hist.length - 1;
+    if(tool === 'layers') renderLayers();
+  }
+  let rzT = null;
+  window.addEventListener('resize', () => { clearTimeout(rzT); rzT = setTimeout(() => { if($('t4_editView').style.display !== 'none') render(); }, 120); });
+  function ensureFont(f){
+    if(!document.fonts || !f) return;
+    Promise.all([document.fonts.load(`400 40px "${f}"`), document.fonts.load(`700 40px "${f}"`)]).then(() => render()).catch(() => {});
+  }
+
+  /* ---------- 도구 패널 전환 ---------- */
+  const HINTS = {
+    select:'글자·도형·워터마크를 클릭해서 고르고 끌어서 옮기세요. 오른쪽 아래 네모를 끌면 크기가 바뀌어요. Delete 키로 지울 수 있어요.',
+    rect:'캔버스에서 드래그해서 사각형을 그리세요.', ellipse:'캔버스에서 드래그해서 원을 그리세요.',
+    arrow:'시작점에서 끝점 방향으로 드래그하세요.', highlight:'강조할 부분을 드래그하세요.',
+    brush:'드래그해서 자유롭게 그리세요.', eraser:'드래그한 곳이 투명하게 지워져요. (PNG로 저장해야 투명하게 남아요)',
+    mosaic:'가릴 부분을 드래그하세요.', blurArea:'흐리게 할 부분을 드래그하세요.', pick:'색을 알고 싶은 곳을 클릭하세요.'
+  };
+  function setMode(m){
+    mode = m; drag = null; tempRect = null;
+    $('ed_hint').textContent = HINTS[m] || '';
+    canvas.style.cursor = m === 'select' ? 'default' : m === 'pick' ? 'copy' : 'crosshair';
+  }
+  function setTool(t){
+    if(tool === 'rotate' && t !== 'rotate' && cur && cur.pendingAngle) applyAngle();
+    tool = t;
+    document.querySelectorAll('#ed_tools button').forEach(b => b.classList.toggle('on', b.dataset.tool === t));
+    document.querySelectorAll('.ed-pane').forEach(p => p.classList.toggle('on', p.dataset.pane === t));
+    setMode(t === 'draw' ? drawMode : t === 'mosaic' ? mosMode : t === 'pick' ? 'pick' : 'select');
+    if(t === 'merge') renderMergeList();
+    if(t === 'preset') renderPresets();
+    if(t === 'layers') renderLayers();
+    render();
+  }
+  document.querySelectorAll('#ed_tools button').forEach(b => b.addEventListener('click', () => setTool(b.dataset.tool)));
+
+  /* ---------- 캔버스 마우스 동작 ---------- */
+  function evPt(e){ const r = canvas.getBoundingClientRect(); return { x:(e.clientX - r.left) * canvas.width / r.width, y:(e.clientY - r.top) * canvas.height / r.height }; }
+  function toF(p){ const L = view.L; return { fx:(p.x - L.ix) / L.iw, fy:(p.y - L.iy) / L.ih }; }
+  function inBox(p, b){ return b && p.x >= b.x && p.x <= b.x + b.w && p.y >= b.y && p.y <= b.y + b.h; }
+  function newShape(m, f){
+    return { id:'o' + (++oseq), type:m, x:f.fx, y:f.fy, w:0, h:0, x2:f.fx, y2:f.fy, color:$('ed_dColor').value,
+      lw:+$('ed_dW').value / 1000, fill:$('ed_dFill').checked, fillColor:$('ed_dFillColor').value, visible:true };
+  }
+  function paintSeg(a, b){
+    const base = cur.base, x = base.getContext('2d');
+    x.save();
+    x.globalCompositeOperation = mode === 'eraser' ? 'destination-out' : 'source-over';
+    x.strokeStyle = $('ed_dColor').value; x.lineCap = 'round'; x.lineJoin = 'round';
+    x.lineWidth = Math.max(1, +$('ed_dW').value / 1000 * Math.max(base.width, base.height) * 1.5);
+    x.beginPath(); x.moveTo(a.x, a.y); x.lineTo(b.x + 0.01, b.y + 0.01); x.stroke();
+    x.restore();
+    cur._adj = null;
+  }
+  canvas.addEventListener('pointerdown', e => {
+    if(!cur || !view) return;
+    try{ canvas.setPointerCapture(e.pointerId); }catch(err){}
+    const p = evPt(e), f = toF(p), d = cur;
+    if(mode === 'pick'){ pickAt(p); return; }
+    if(mode === 'select'){
+      const s = selObj();
+      if(s && s._bb){ const h = handlePt(s); if(Math.abs(p.x - h.x) < 10 && Math.abs(p.y - h.y) < 10){ drag = { type:'resize', o:s, orig:{ ...s }, bbw:s._bb.w, bbx:s._bb.x }; return; } }
+      const hit = [...d.objects].reverse().find(o => o.visible !== false && inBox(p, o._bb));
+      selId = hit ? hit.id : null;
+      if(hit){ drag = { type:'move', o:hit, start:f, orig:{ ...hit } }; loadFieldsFromSel(); }
+      render(); return;
+    }
+    if(['rect', 'ellipse', 'highlight', 'arrow'].includes(mode)){
+      const o = newShape(mode, f); d.objects.push(o); selId = o.id; drag = { type:'create', o, start:f }; render(); return;
+    }
+    if(mode === 'brush' || mode === 'eraser'){
+      d.base = clone(effBase(d)); d.pendingAngle = 0;
+      const pt = { x:f.fx * d.base.width, y:f.fy * d.base.height };
+      drag = { type:'paint', last:pt }; paintSeg(pt, pt); render(); return;
+    }
+    if(mode === 'mosaic' || mode === 'blurArea'){ drag = { type:'area', start:f, startP:p }; tempRect = { x:p.x, y:p.y, w:0, h:0 }; render(); }
+  });
+  canvas.addEventListener('pointermove', e => {
+    if(!drag || !cur || !view) return;
+    const p = evPt(e), f = toF(p), o = drag.o, L = view.L;
+    if(drag.type === 'move'){
+      const dx = f.fx - drag.start.fx, dy = f.fy - drag.start.fy;
+      o.x = drag.orig.x + dx; o.y = drag.orig.y + dy;
+      if(o.type === 'arrow'){ o.x2 = drag.orig.x2 + dx; o.y2 = drag.orig.y2 + dy; }
+      drag.changed = true;
+    }else if(drag.type === 'resize'){
+      if(o.type === 'text' || o.type === 'wm'){
+        const ratio = Math.max(0.1, (p.x - drag.bbx) / Math.max(1, drag.bbw));
+        o.size = drag.orig.size * ratio;
+      }else if(o.type === 'arrow'){ o.x2 = f.fx; o.y2 = f.fy; }
+      else{ o.w = Math.max(0.005, f.fx - o.x); o.h = Math.max(0.005, f.fy - o.y); }
+      drag.changed = true;
+    }else if(drag.type === 'create'){
+      if(o.type === 'arrow'){ o.x2 = f.fx; o.y2 = f.fy; }
+      else{ o.x = Math.min(drag.start.fx, f.fx); o.y = Math.min(drag.start.fy, f.fy); o.w = Math.abs(f.fx - drag.start.fx); o.h = Math.abs(f.fy - drag.start.fy); }
+    }else if(drag.type === 'paint'){
+      const pt = { x:f.fx * cur.base.width, y:f.fy * cur.base.height };
+      paintSeg(drag.last, pt); drag.last = pt;
+    }else if(drag.type === 'area'){
+      tempRect = { x:Math.min(drag.startP.x, p.x), y:Math.min(drag.startP.y, p.y), w:Math.abs(p.x - drag.startP.x), h:Math.abs(p.y - drag.startP.y) };
+      drag.endF = f;
+    }
+    render();
+  });
+  function endDrag(){
+    if(!drag || !cur) return;
+    const d = cur, g = drag; drag = null;
+    if(g.type === 'move' || g.type === 'resize'){ if(g.changed) commit(); }
+    else if(g.type === 'create'){
+      const o = g.o;
+      const tiny = o.type === 'arrow' ? Math.hypot(o.x2 - o.x, o.y2 - o.y) < 0.01 : (o.w < 0.005 || o.h < 0.005);
+      if(tiny){ d.objects = d.objects.filter(x => x !== o); selId = null; } else commit();
+    }else if(g.type === 'paint'){ commit(); }
+    else if(g.type === 'area'){
+      tempRect = null;
+      if(g.endF) areaEffect(g.start, g.endF);
+    }
+    render();
+  }
+  canvas.addEventListener('pointerup', endDrag);
+  canvas.addEventListener('pointercancel', endDrag);
+
+  function areaEffect(a, b){
+    const d = cur, src = effBase(d), bw = src.width, bh = src.height;
+    const x0 = Math.max(0, Math.min(a.fx, b.fx) * bw), y0 = Math.max(0, Math.min(a.fy, b.fy) * bh);
+    const x1 = Math.min(bw, Math.max(a.fx, b.fx) * bw), y1 = Math.min(bh, Math.max(a.fy, b.fy) * bh);
+    const w = x1 - x0, h = y1 - y0;
+    if(w < 3 || h < 3) return;
+    const strength = +$('ed_mosS').value, n = clone(src), nx = n.getContext('2d');
+    if(mode === 'mosaic'){
+      const block = Math.max(3, Math.round(strength / 100 * Math.max(bw, bh) / 25));
+      const sm = mk(Math.ceil(w / block), Math.ceil(h / block)), sx = sm.getContext('2d');
+      sx.drawImage(src, x0, y0, w, h, 0, 0, sm.width, sm.height);
+      nx.imageSmoothingEnabled = false; nx.clearRect(x0, y0, w, h);
+      nx.drawImage(sm, 0, 0, sm.width, sm.height, x0, y0, w, h);
+    }else{
+      const rad = Math.max(2, strength / 100 * Math.max(bw, bh) / 40);
+      nx.save(); nx.beginPath(); nx.rect(x0, y0, w, h); nx.clip(); nx.filter = `blur(${rad}px)`; nx.drawImage(src, 0, 0); nx.restore();
+    }
+    d.pendingAngle = 0; d.base = n; d._adj = null; commit();
+  }
+
+  /* ---------- 키보드 ---------- */
+  document.addEventListener('keydown', e => {
+    if($('t4_editView').style.display === 'none' || !$('panel-t4').classList.contains('active') || !cur) return;
+    const tag = (e.target.tagName || '').toLowerCase();
+    if(tag === 'input' || tag === 'textarea' || tag === 'select') return;
+    if((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'z'){ e.preventDefault(); e.shiftKey ? redo() : undo(); return; }
+    if((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'y'){ e.preventDefault(); redo(); return; }
+    if((e.key === 'Delete' || e.key === 'Backspace') && selId){ e.preventDefault(); cur.objects = cur.objects.filter(o => o.id !== selId); selId = null; commit(); render(); }
+  });
+
+  /* ---------- 패널 값 ↔ 현재 이미지 동기화 ---------- */
+  function syncPanes(){
+    const d = cur; if(!d) return;
+    document.querySelectorAll('[data-adj]').forEach(el => { el.value = d.adj[el.dataset.adj]; document.querySelector(`[data-v="${el.dataset.adj}"]`).textContent = d.adj[el.dataset.adj]; });
+    document.querySelectorAll('#ed_filters button').forEach(b => b.classList.toggle('on', b.dataset.f === d.filter.name));
+    $('ed_fs').value = d.filter.strength; $('ed_fsV').textContent = d.filter.strength;
+    document.querySelectorAll('[data-fr]').forEach(el => {
+      const k = el.dataset.fr;
+      if(el.type === 'checkbox') el.checked = !!d.frame[k]; else el.value = d.frame[k];
+      const lab = document.querySelector(`[data-fv="${k}"]`); if(lab) lab.textContent = d.frame[k];
+    });
+    $('ed_ang').value = d.pendingAngle || 0; $('ed_angV').textContent = (d.pendingAngle || 0) + '°';
+  }
+
+  // 조정
+  document.querySelectorAll('[data-adj]').forEach(el => {
+    el.addEventListener('input', () => { if(!cur) return; cur.adj[el.dataset.adj] = +el.value; document.querySelector(`[data-v="${el.dataset.adj}"]`).textContent = el.value; render(); });
+    el.addEventListener('change', () => { if(cur) commit(); });
+  });
+  $('ed_adjReset').addEventListener('click', () => { if(!cur) return; cur.adj = { ...ADJ0 }; commit(); syncPanes(); render(); });
+
+  // 필터
+  $('ed_filters').innerHTML = FILTERS.map(f => `<button type="button" data-f="${f[0]}">${f[1]}</button>`).join('');
+  $('ed_filters').querySelectorAll('button').forEach(b => b.addEventListener('click', () => { if(!cur) return; cur.filter.name = b.dataset.f; commit(); syncPanes(); render(); }));
+  $('ed_fs').addEventListener('input', () => { if(!cur) return; cur.filter.strength = +$('ed_fs').value; $('ed_fsV').textContent = $('ed_fs').value; render(); });
+  $('ed_fs').addEventListener('change', () => { if(cur) commit(); });
+
+  // 회전·반전
+  function bakeBase(fn){ const d = cur; if(!d) return; const src = effBase(d); d.pendingAngle = 0; d.base = fn(src); d._adj = null; commit(); syncPanes(); render(); }
+  const ROT = {
+    l: s => { const n = mk(s.height, s.width), x = n.getContext('2d'); x.translate(0, n.height); x.rotate(-Math.PI / 2); x.drawImage(s, 0, 0); return n; },
+    r: s => { const n = mk(s.height, s.width), x = n.getContext('2d'); x.translate(n.width, 0); x.rotate(Math.PI / 2); x.drawImage(s, 0, 0); return n; },
+    h: s => { const n = mk(s.width, s.height), x = n.getContext('2d'); x.translate(n.width, 0); x.scale(-1, 1); x.drawImage(s, 0, 0); return n; },
+    v: s => { const n = mk(s.width, s.height), x = n.getContext('2d'); x.translate(0, n.height); x.scale(1, -1); x.drawImage(s, 0, 0); return n; }
+  };
+  document.querySelectorAll('[data-rot]').forEach(b => b.addEventListener('click', () => bakeBase(ROT[b.dataset.rot])));
+  $('ed_ang').addEventListener('input', () => { if(!cur) return; cur.pendingAngle = +$('ed_ang').value; $('ed_angV').textContent = $('ed_ang').value + '°'; render(); });
+  function applyAngle(){ if(cur && cur.pendingAngle) bakeBase(s => s); }
+  $('ed_angApply').addEventListener('click', applyAngle);
+  $('ed_angCancel').addEventListener('click', () => { if(!cur) return; cur.pendingAngle = 0; syncPanes(); render(); });
+
+  // 텍스트
+  function readText(){
+    return { text:$('ed_txt').value, font:$('ed_font').value, size:+$('ed_tsize').value / 1000, color:$('ed_tcolor').value,
+      bold:$('ed_tbold').checked, align:$('ed_talign').value, strokeColor:$('ed_tstroke').value, strokeW:+$('ed_tstrokeW').value,
+      shadow:$('ed_tshadow').checked, box:$('ed_tbox').checked, boxColor:$('ed_tboxColor').value, boxOp:+$('ed_tboxOp').value };
+  }
+  ['ed_txt','ed_font','ed_tsize','ed_tcolor','ed_tbold','ed_talign','ed_tstroke','ed_tstrokeW','ed_tshadow','ed_tbox','ed_tboxColor','ed_tboxOp'].forEach(id => {
+    const el = $(id);
+    el.addEventListener('input', () => {
+      $('ed_tsizeV').textContent = $('ed_tsize').value;
+      const o = selObj();
+      if(o && o.type === 'text'){ Object.assign(o, readText()); if(id === 'ed_font') ensureFont(o.font); render(); }
+    });
+    el.addEventListener('change', () => { const o = selObj(); if(o && o.type === 'text') commit(); });
+  });
+  $('ed_addText').addEventListener('click', () => {
+    if(!cur || !view) return;
+    const o = { id:'o' + (++oseq), type:'text', x:0.1, y:0.42, visible:true, ...readText() };
+    if(!o.text.trim()) o.text = '텍스트';
+    cur.objects.push(o); selId = o.id; render();
+    if(o._bb){ o.x = Math.max(0, 0.5 - o._bb.w / 2 / view.L.iw); o.y = Math.max(0, 0.5 - o._bb.h / 2 / view.L.ih); }
+    commit(); ensureFont(o.font); render();
+    if(tool !== 'text') setTool('text');
+  });
+
+  // 워터마크
+  document.querySelectorAll('#ed_wmKind button').forEach(b => b.addEventListener('click', () => {
+    wmKind = b.dataset.k;
+    document.querySelectorAll('#ed_wmKind button').forEach(x => x.classList.toggle('on', x === b));
+    $('ed_wmImgBox').style.display = wmKind === 'image' ? '' : 'none';
+    $('ed_wmTextBox').style.display = wmKind === 'text' ? '' : 'none';
+  }));
+  $('ed_wmFile').addEventListener('change', async e => {
+    const f = e.target.files[0]; if(!f) return;
+    try{ const bmp = await createImageBitmap(f); const c = mk(bmp.width, bmp.height); c.getContext('2d').drawImage(bmp, 0, 0); wmImg = c; $('ed_wmFileName').textContent = f.name; }
+    catch(err){ $('ed_wmFileName').textContent = '이 파일은 열 수 없어요'; }
+  });
+  function readWm(){ return { opacity:+$('ed_wmOp').value, size:+$('ed_wmSize').value / 100, angle:+$('ed_wmAng').value, tile:$('ed_wmTile').checked, text:$('ed_wmText').value, color:$('ed_wmColor').value }; }
+  ['ed_wmOp','ed_wmSize','ed_wmAng','ed_wmTile','ed_wmText','ed_wmColor'].forEach(id => {
+    $(id).addEventListener('input', () => {
+      $('ed_wmOpV').textContent = $('ed_wmOp').value; $('ed_wmSizeV').textContent = $('ed_wmSize').value; $('ed_wmAngV').textContent = $('ed_wmAng').value + '°';
+      const o = selObj();
+      if(o && o.type === 'wm'){ const v = readWm(); if(o.kind === 'image'){ delete v.text; delete v.color; } Object.assign(o, v); render(); }
+    });
+    $(id).addEventListener('change', () => { const o = selObj(); if(o && o.type === 'wm') commit(); });
+  });
+  document.querySelectorAll('#ed_wmPos button').forEach(b => b.addEventListener('click', () => {
+    wmPos = b.dataset.p;
+    document.querySelectorAll('#ed_wmPos button').forEach(x => x.classList.toggle('on', x === b));
+    const o = selObj(); if(o && o.type === 'wm'){ o.pos = wmPos; o.x = null; o.y = null; render(); commit(); }
+  }));
+  $('ed_addWm').addEventListener('click', () => {
+    if(!cur) return;
+    if(wmKind === 'image' && !wmImg){ show(statusEl, '먼저 로고 파일을 골라 주세요.', 'error'); return; }
+    if(wmKind === 'text' && !$('ed_wmText').value.trim()){ show(statusEl, '워터마크 문구를 입력해 주세요.', 'error'); return; }
+    const o = { id:'o' + (++oseq), type:'wm', kind:wmKind, img:wmKind === 'image' ? wmImg : null, pos:wmPos, x:null, y:null, visible:true, ...readWm() };
+    cur.objects.push(o); selId = o.id; render(); commit(); render(); show(statusEl, '', '');
+  });
+
+  // 도형·그리기
+  document.querySelectorAll('#ed_drawModes button').forEach(b => b.addEventListener('click', () => {
+    drawMode = b.dataset.m;
+    document.querySelectorAll('#ed_drawModes button').forEach(x => x.classList.toggle('on', x === b));
+    setMode(drawMode); render();
+  }));
+  ['ed_dColor','ed_dW','ed_dFill','ed_dFillColor'].forEach(id => {
+    $(id).addEventListener('input', () => {
+      $('ed_dWV').textContent = $('ed_dW').value;
+      const o = selObj();
+      if(o && ['rect','ellipse','arrow','highlight'].includes(o.type)){
+        o.color = $('ed_dColor').value; o.lw = +$('ed_dW').value / 1000; o.fill = $('ed_dFill').checked; o.fillColor = $('ed_dFillColor').value; render();
+      }
+    });
+    $(id).addEventListener('change', () => { const o = selObj(); if(o && ['rect','ellipse','arrow','highlight'].includes(o.type)) commit(); });
+  });
+
+  // 모자이크
+  document.querySelectorAll('#ed_mosModes button').forEach(b => b.addEventListener('click', () => {
+    mosMode = b.dataset.m;
+    document.querySelectorAll('#ed_mosModes button').forEach(x => x.classList.toggle('on', x === b));
+    setMode(mosMode);
+  }));
+  $('ed_mosS').addEventListener('input', () => { $('ed_mosSV').textContent = $('ed_mosS').value; });
+
+  // 테두리·여백
+  document.querySelectorAll('[data-fr]').forEach(el => {
+    el.addEventListener('input', () => {
+      if(!cur) return;
+      const k = el.dataset.fr;
+      cur.frame[k] = el.type === 'checkbox' ? el.checked : el.type === 'color' ? el.value : +el.value;
+      const lab = document.querySelector(`[data-fv="${k}"]`); if(lab) lab.textContent = el.value;
+      render();
+    });
+    el.addEventListener('change', () => { if(cur) commit(); });
+  });
+
+  // 선택한 레이어의 값을 패널에 불러오기 (선택 후 바로 고칠 수 있게)
+  function loadFieldsFromSel(){
+    const o = selObj(); if(!o) return;
+    if(o.type === 'text'){
+      $('ed_txt').value = o.text; $('ed_font').value = o.font; $('ed_tsize').value = Math.round(o.size * 1000); $('ed_tsizeV').textContent = $('ed_tsize').value;
+      $('ed_tcolor').value = o.color; $('ed_tbold').checked = o.bold; $('ed_talign').value = o.align; $('ed_tstroke').value = o.strokeColor;
+      $('ed_tstrokeW').value = o.strokeW; $('ed_tshadow').checked = o.shadow; $('ed_tbox').checked = o.box; $('ed_tboxColor').value = o.boxColor; $('ed_tboxOp').value = o.boxOp;
+      if(tool !== 'text') setTool('text');
+    }else if(o.type === 'wm'){
+      $('ed_wmOp').value = o.opacity; $('ed_wmSize').value = Math.round(o.size * 100); $('ed_wmAng').value = o.angle; $('ed_wmTile').checked = o.tile;
+      $('ed_wmOpV').textContent = o.opacity; $('ed_wmSizeV').textContent = Math.round(o.size * 100); $('ed_wmAngV').textContent = o.angle + '°';
+      if(o.kind === 'text'){ $('ed_wmText').value = o.text; $('ed_wmColor').value = o.color; }
+      if(tool !== 'wm') setTool('wm');
+    }else{
+      $('ed_dColor').value = o.color; $('ed_dW').value = Math.round(o.lw * 1000); $('ed_dWV').textContent = $('ed_dW').value;
+      $('ed_dFill').checked = !!o.fill; $('ed_dFillColor').value = o.fillColor;
+    }
+  }
+
+  // 규격 프리셋
+  const PRESET_KEY = 'wb_ed_presets';
+  const DEFAULT_PRESETS = [
+    { n:'정사각형', w:1080, h:1080 }, { n:'가로형', w:1200, h:628 }, { n:'세로형', w:1080, h:1350 },
+    { n:'와이드 16:9', w:1920, h:1080 }, { n:'세로 9:16', w:1080, h:1920 }, { n:'썸네일', w:600, h:600 }
+  ];
+  function getPresets(){
+    let custom = [];
+    try{ custom = JSON.parse(localStorage.getItem(PRESET_KEY) || '[]'); }catch(e){}
+    return DEFAULT_PRESETS.map(p => ({ ...p, def:true })).concat(custom);
+  }
+  function saveCustom(list){ try{ localStorage.setItem(PRESET_KEY, JSON.stringify(list.filter(p => !p.def).map(({ n, w, h }) => ({ n, w, h })))); }catch(e){} }
+  function renderPresets(){
+    const list = getPresets();
+    if(presetSel >= list.length) presetSel = 0;
+    $('ed_presets').innerHTML = list.map((p, i) => `<div class="pw"><button type="button" class="p${i === presetSel ? ' on' : ''}" data-i="${i}">${esc(p.n)}<small>${p.w}×${p.h}</small></button>${p.def ? '' : `<button type="button" class="x" data-del="${i}" title="삭제">✕</button>`}</div>`).join('');
+    $('ed_presets').querySelectorAll('button.p').forEach(b => b.addEventListener('click', () => { presetSel = +b.dataset.i; renderPresets(); }));
+    $('ed_presets').querySelectorAll('button.x').forEach(b => b.addEventListener('click', () => { const l = getPresets(); l.splice(+b.dataset.del, 1); saveCustom(l); presetSel = 0; renderPresets(); }));
+  }
+  document.querySelectorAll('#ed_presetMode button').forEach(b => b.addEventListener('click', () => {
+    presetMode = b.dataset.m; document.querySelectorAll('#ed_presetMode button').forEach(x => x.classList.toggle('on', x === b));
+  }));
+  function applyPreset(d, p){
+    const src = effBase(d), n = mk(p.w, p.h), x = n.getContext('2d');
+    if(presetMode === 'contain'){ x.fillStyle = $('ed_presetBg').value; x.fillRect(0, 0, p.w, p.h); }
+    const s = presetMode === 'cover' ? Math.max(p.w / src.width, p.h / src.height) : Math.min(p.w / src.width, p.h / src.height);
+    const dw = src.width * s, dh = src.height * s;
+    x.imageSmoothingQuality = 'high';
+    x.drawImage(src, (p.w - dw) / 2, (p.h - dh) / 2, dw, dh);
+    d.pendingAngle = 0; d.base = n; d._adj = null; commit(d);
+  }
+  $('ed_presetOne').addEventListener('click', () => { if(!cur) return; const p = getPresets()[presetSel]; applyPreset(cur, p); syncPanes(); render(); show(statusEl, `${p.n} (${p.w}×${p.h})로 맞췄어요.`, 'ok'); });
+  $('ed_presetAll').addEventListener('click', () => { if(!docs.length) return; const p = getPresets()[presetSel]; docs.forEach(d => applyPreset(d, p)); renderStrip(); syncPanes(); render(); show(statusEl, `이미지 ${docs.length}장을 ${p.n} (${p.w}×${p.h})로 맞췄어요.`, 'ok'); });
+  $('ed_pAdd').addEventListener('click', () => {
+    const n = $('ed_pName').value.trim(), w = Math.round(+$('ed_pW').value), h = Math.round(+$('ed_pH').value);
+    if(!n || !(w > 0) || !(h > 0) || w > 8000 || h > 8000){ show(statusEl, '이름과 가로·세로(1~8000)를 모두 입력해 주세요.', 'error'); return; }
+    const l = getPresets(); l.push({ n, w, h }); saveCustom(l); presetSel = l.length - 1;
+    $('ed_pName').value = ''; $('ed_pW').value = ''; $('ed_pH').value = ''; renderPresets(); show(statusEl, `규격 "${n}"을 추가했어요.`, 'ok');
+  });
+
+  // 합치기
+  function renderMergeList(){
+    if(!mergeSel.size) docs.forEach(d => mergeSel.add(d.id));
+    $('ed_mergeList').innerHTML = docs.length ? docs.map(d => `<label><input type="checkbox" data-id="${d.id}" ${mergeSel.has(d.id) ? 'checked' : ''}><img src="${d.thumb}" alt=""><span>${esc(d.name)}</span></label>`).join('') : '<div class="ed-empty-msg">이미지를 먼저 올려 주세요.</div>';
+    $('ed_mergeList').querySelectorAll('input').forEach(c => c.addEventListener('change', () => { c.checked ? mergeSel.add(c.dataset.id) : mergeSel.delete(c.dataset.id); }));
+  }
+  document.querySelectorAll('#ed_mergeLayout button').forEach(b => b.addEventListener('click', () => {
+    mergeLayout = b.dataset.m; document.querySelectorAll('#ed_mergeLayout button').forEach(x => x.classList.toggle('on', x === b));
+  }));
+  $('ed_mGap').addEventListener('input', () => { $('ed_mGapV').textContent = $('ed_mGap').value; });
+  $('ed_merge').addEventListener('click', () => {
+    const picked = docs.filter(d => mergeSel.has(d.id));
+    if(picked.length < 2){ show(statusEl, '합칠 이미지를 2장 이상 골라 주세요.', 'error'); return; }
+    const cs = picked.map(exportCanvas);
+    const gap = +$('ed_mGap').value / 1000 * Math.max(...cs.map(c => Math.max(c.width, c.height)));
+    let out, x;
+    if(mergeLayout === 'h'){
+      const H = Math.min(...cs.map(c => c.height)), ws = cs.map(c => c.width * H / c.height);
+      out = mk(ws.reduce((a, b) => a + b, 0) + gap * (cs.length + 1), H + gap * 2); x = out.getContext('2d');
+      x.fillStyle = $('ed_mBg').value; x.fillRect(0, 0, out.width, out.height);
+      let xx = gap; cs.forEach((c, i) => { x.drawImage(c, xx, gap, ws[i], H); xx += ws[i] + gap; });
+    }else if(mergeLayout === 'v'){
+      const W = Math.min(...cs.map(c => c.width)), hs = cs.map(c => c.height * W / c.width);
+      out = mk(W + gap * 2, hs.reduce((a, b) => a + b, 0) + gap * (cs.length + 1)); x = out.getContext('2d');
+      x.fillStyle = $('ed_mBg').value; x.fillRect(0, 0, out.width, out.height);
+      let yy = gap; cs.forEach((c, i) => { x.drawImage(c, gap, yy, W, hs[i]); yy += hs[i] + gap; });
+    }else{
+      const cols = 2, rows = Math.ceil(cs.length / cols);
+      const cw = Math.min(...cs.map(c => c.width)), chh = Math.min(...cs.map(c => c.height));
+      out = mk(cols * cw + gap * (cols + 1), rows * chh + gap * (rows + 1)); x = out.getContext('2d');
+      x.fillStyle = $('ed_mBg').value; x.fillRect(0, 0, out.width, out.height);
+      cs.forEach((c, i) => {
+        const s = Math.min(cw / c.width, chh / c.height), dw = c.width * s, dh = c.height * s;
+        const cx = gap + (i % cols) * (cw + gap), cy = gap + Math.floor(i / cols) * (chh + gap);
+        x.drawImage(c, cx + (cw - dw) / 2, cy + (chh - dh) / 2, dw, dh);
+      });
+    }
+    const d = addDoc('합친 이미지.png', out);
+    selectDoc(d); renderMergeList();
+    show(statusEl, `${picked.length}장을 합쳐서 새 이미지(${out.width}×${out.height})를 만들었어요.`, 'ok');
+  });
+
+  // 스포이드
+  function showColor(hex, rgb){
+    $('ed_pickSw').style.background = hex; $('ed_pickHex').textContent = hex.toUpperCase(); $('ed_pickRgb').textContent = rgb || '';
+  }
+  function pickAt(p){
+    const px = ctx.getImageData(Math.max(0, Math.min(canvas.width - 1, Math.floor(p.x))), Math.max(0, Math.min(canvas.height - 1, Math.floor(p.y))), 1, 1).data;
+    if(px[3] === 0){ showColor('#00000000', '투명한 곳이에요'); return; }
+    const hex = '#' + [px[0], px[1], px[2]].map(v => v.toString(16).padStart(2, '0')).join('');
+    const rgb = `RGB ${px[0]}, ${px[1]}, ${px[2]}`;
+    showColor(hex, rgb);
+    const i = recentColors.indexOf(hex); if(i >= 0) recentColors.splice(i, 1);
+    recentColors.unshift(hex); recentColors.length = Math.min(recentColors.length, 10);
+    $('ed_pickRecent').innerHTML = recentColors.map(c => `<button type="button" title="${c}" style="background:${c}" data-c="${c}"></button>`).join('');
+    $('ed_pickRecent').querySelectorAll('button').forEach(b => b.addEventListener('click', () => showColor(b.dataset.c, '')));
+  }
+  $('ed_pickCopy').addEventListener('click', async () => {
+    const hex = $('ed_pickHex').textContent; if(!hex || hex === '-') return;
+    try{ await navigator.clipboard.writeText(hex); show(statusEl, hex + ' 복사했어요.', 'ok'); }catch(e){ show(statusEl, '복사가 막혀 있어요. 직접 드래그해서 복사해 주세요.', 'warn'); }
+  });
+
+  // 배경 제거 (AI 모델을 처음 누를 때만 불러옴)
+  let bgLib = null;
+  async function loadBgLib(){
+    if(bgLib) return bgLib;
+    const urls = ['https://cdn.jsdelivr.net/npm/@imgly/background-removal@1.4.5/+esm', 'https://esm.sh/@imgly/background-removal@1.4.5'];
+    let lastErr = null;
+    for(const u of urls){ try{ bgLib = await import(u); if(bgLib && bgLib.removeBackground) return bgLib; }catch(e){ lastErr = e; } }
+    throw lastErr || new Error('라이브러리를 불러오지 못했어요');
+  }
+  $('ed_bgBtn').addEventListener('click', async () => {
+    const d = cur; if(!d) return;
+    const st = $('ed_bgStatus'), btn = $('ed_bgBtn');
+    btn.disabled = true;
+    try{
+      show(st, 'AI 모델을 불러오는 중… (처음 한 번은 1분 정도 걸려요)', 'warn');
+      const lib = await loadBgLib();
+      const src = effBase(d);
+      const blob = await new Promise(r => src.toBlob(r, 'image/png'));
+      const out = await lib.removeBackground(blob, {
+        progress:(key, now, total) => { if(total) show(st, (String(key).includes('fetch') ? 'AI 모델 내려받는 중… ' : '처리 중… ') + Math.round(now / total * 100) + '%', 'warn'); }
+      });
+      const bmp = await createImageBitmap(out);
+      const c = mk(bmp.width, bmp.height); c.getContext('2d').drawImage(bmp, 0, 0);
+      if(c.width !== src.width || c.height !== src.height){ const n = mk(src.width, src.height); n.getContext('2d').drawImage(c, 0, 0, n.width, n.height); d.base = n; } else d.base = c;
+      d.pendingAngle = 0; d._adj = null; commit(d); render();
+      show(st, '배경을 지웠어요. 마음에 안 들면 되돌리기를 누르세요.', 'ok');
+    }catch(e){
+      show(st, '배경을 지우지 못했어요. 인터넷 연결을 확인하고 다시 시도해 주세요. (' + (e && e.message ? e.message : e) + ')', 'error');
+    }finally{ btn.disabled = false; }
+  });
+
+  // 레이어
+  function objLabel(o){
+    if(o.type === 'text') return '텍스트 · ' + (String(o.text || '').split('\n')[0].slice(0, 14) || '(빈 글자)');
+    if(o.type === 'wm') return o.kind === 'image' ? '워터마크 · 로고' + (o.tile ? ' (반복)' : '') : '워터마크 · ' + String(o.text || '').slice(0, 12) + (o.tile ? ' (반복)' : '');
+    return { rect:'사각형', ellipse:'원', arrow:'화살표', highlight:'형광펜' }[o.type] || o.type;
+  }
+  function renderLayers(){
+    const el = $('ed_layers');
+    if(!cur || !cur.objects.length){ el.innerHTML = '<div class="ed-empty-msg">아직 레이어가 없어요. 텍스트·워터마크·도형을 넣으면 여기에 나와요.</div>'; return; }
+    const list = cur.objects.slice().reverse();
+    el.innerHTML = list.map(o => `<div class="ed-layer${o.id === selId ? ' on' : ''}${o.visible === false ? ' off' : ''}" data-id="${o.id}">
+      <span class="nm">${esc(objLabel(o))}</span>
+      <button type="button" data-a="up" title="앞으로">▲</button><button type="button" data-a="down" title="뒤로">▼</button>
+      <button type="button" data-a="vis">${o.visible === false ? '보이기' : '숨기기'}</button><button type="button" data-a="del" title="삭제">✕</button></div>`).join('');
+    el.querySelectorAll('.ed-layer').forEach(row => row.addEventListener('click', e => {
+      const id = row.dataset.id, a = e.target.dataset.a, arr = cur.objects, i = arr.findIndex(o => o.id === id);
+      if(i < 0) return;
+      if(a === 'up' && i < arr.length - 1){ [arr[i], arr[i + 1]] = [arr[i + 1], arr[i]]; commit(); }
+      else if(a === 'down' && i > 0){ [arr[i], arr[i - 1]] = [arr[i - 1], arr[i]]; commit(); }
+      else if(a === 'vis'){ arr[i].visible = arr[i].visible === false; commit(); }
+      else if(a === 'del'){ arr.splice(i, 1); if(selId === id) selId = null; commit(); }
+      else { selId = id; }
+      render(); renderLayers();
+    }));
+  }
+
+  /* ---------- 일괄 적용·저장·보내기 ---------- */
+  $('ed_applyAll').addEventListener('click', () => {
+    if(!cur || docs.length < 2){ show(statusEl, '이미지가 2장 이상일 때 쓸 수 있어요.', 'warn'); return; }
+    docs.forEach(d => {
+      if(d === cur) return;
+      d.adj = { ...cur.adj }; d.filter = { ...cur.filter }; d.frame = { ...cur.frame };
+      d.objects = cur.objects.map(o => ({ ...o, id:'o' + (++oseq), _bb:null }));
+      d._adj = null; commit(d);
+    });
+    show(statusEl, `색 보정·필터·테두리·텍스트·워터마크·도형을 다른 이미지 ${docs.length - 1}장에도 똑같이 적용했어요. (브러시·모자이크·회전처럼 사진에 합쳐진 편집은 제외)`, 'ok');
+  });
+  const EXT = { png:'png', jpeg:'jpg', webp:'webp' };
+  const outName = (d, fmt) => d.name.replace(/\.[^.]+$/, '') + '_수정.' + EXT[fmt];
+  async function toBlob(d, fmt){
+    const c = exportCanvas(d); let out = c;
+    if(fmt === 'jpeg'){ out = mk(c.width, c.height); const x = out.getContext('2d'); x.fillStyle = '#ffffff'; x.fillRect(0, 0, out.width, out.height); x.drawImage(c, 0, 0); }
+    return await new Promise(r => out.toBlob(r, 'image/' + fmt, 0.92));
+  }
+  $('ed_save').addEventListener('click', async () => {
+    if(!cur) return;
+    const fmt = $('ed_fmt').value;
+    try{ await saveFile(outName(cur, fmt), await toBlob(cur, fmt)); show(statusEl, '저장했어요.', 'ok'); }
+    catch(err){ show(statusEl, downloadErrorMessage(err), 'error'); }
+  });
+  $('ed_saveAll').addEventListener('click', async () => {
+    if(!docs.length) return;
+    const fmt = $('ed_fmt').value;
+    show(statusEl, 'ZIP 파일을 만드는 중…', 'warn');
+    try{
+      const zip = new JSZip(), used = {};
+      for(const d of docs){ let n = outName(d, fmt); if(used[n]) n = n.replace(/(\.\w+)$/, `_${++used[n]}$1`); else used[n] = 1; zip.file(n, await toBlob(d, fmt)); }
+      await saveFile('이미지_수정결과.zip', await zip.generateAsync({ type:'blob' }));
+      show(statusEl, `${docs.length}장을 ZIP으로 저장했어요.`, 'ok');
+    }catch(err){ show(statusEl, downloadErrorMessage(err), 'error'); }
+  });
+  $('ed_send').addEventListener('click', async () => {
+    if(!docs.length || typeof window.__t4AddFiles !== 'function') return;
+    show(statusEl, '형식 변경 탭으로 보내는 중…', 'warn');
+    const files = [];
+    for(const d of docs){ files.push(new File([await toBlob(d, 'png')], outName(d, 'png'), { type:'image/png' })); }
+    window.__t4AddFiles(files);
+    show(statusEl, '', '');
+    setSubView('convert');
+    const st = document.getElementById('t4_status');
+    if(st){ st.textContent = `이미지 수정에서 ${files.length}장을 받아왔어요. 아래에서 크기·용량·형식을 정하고 변환하세요.`; st.className = 'status ok'; }
+  });
+
+  setTool('adjust');
+  render();
 })();
 
 /* ================= Tool 5/6 : 브랜드검색 노출 모니터링 (05 현황) + 모니터링 설정 (06) — Apps Script 웹앱 연동 ================= */
