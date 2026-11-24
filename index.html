@@ -599,6 +599,28 @@
   .ed-top{ display:flex; align-items:center; gap:10px; }
   .ed-add{ position:relative; flex:0 0 auto; display:inline-flex; align-items:center; padding:9px 14px; border-radius:9px; background:var(--accent); color:var(--on-accent); font-weight:700; font-size:13px; cursor:pointer; }
   .ed-add input{ position:absolute; inset:0; opacity:0; cursor:pointer; }
+  .ed-add2{ border:none; font-family:var(--font-body); background:var(--surface); color:var(--ink); border:1px solid var(--line-strong); }
+  .ed-add2:hover{ background:var(--accent-soft); }
+  .ed-newbox{ margin-top:12px; padding:14px; border:1px solid var(--accent-strong); border-radius:12px; background:var(--accent-soft); }
+  .ed-newbox[hidden]{ display:none; }
+  .ed-newsizes{ display:flex; gap:6px; flex-wrap:wrap; margin-bottom:12px; }
+  .ed-newsizes button{ all:unset; box-sizing:border-box; padding:6px 10px; border-radius:8px; font-size:12px; font-weight:600; cursor:pointer; background:var(--surface); border:1px solid var(--line); font-family:var(--font-body); line-height:1.3; text-align:center; }
+  .ed-newsizes button small{ display:block; font-family:var(--font-mono); font-weight:400; font-size:10.5px; color:var(--ink-soft); }
+  .ed-newsizes button.on{ border-color:var(--accent-strong); color:var(--accent-dark); }
+  .ed-or{ margin-top:12px; text-align:center; font-size:13px; color:var(--ink-soft); display:flex; align-items:center; justify-content:center; gap:10px; flex-wrap:wrap; }
+  .ed-or button{ padding:9px 16px; font-size:13px; }
+  .ed-fontpick{ position:relative; margin-bottom:10px; }
+  .ed-fontbtn{ all:unset; box-sizing:border-box; width:100%; display:flex; align-items:center; justify-content:space-between; gap:8px; padding:8px 10px; border:1px solid var(--line); border-radius:8px; background:var(--surface); cursor:pointer; font-size:17px; color:var(--ink); }
+  .ed-fontbtn:hover{ border-color:var(--accent-strong); }
+  .ed-fontbtn em{ font-style:normal; font-size:11px; color:var(--ink-soft); font-family:var(--font-body); }
+  .ed-fontlist{ position:absolute; left:0; right:0; top:calc(100% + 4px); z-index:50; max-height:340px; overflow-y:auto; background:var(--surface); border:1px solid var(--line-strong); border-radius:10px; box-shadow:0 10px 28px -12px rgba(24,24,27,.35); padding:6px; }
+  .ed-fontlist[hidden]{ display:none; }
+  .ed-fontlist .grp{ font-family:var(--font-body); font-size:11px; font-weight:700; color:var(--ink-soft); padding:8px 8px 4px; }
+  .ed-fontlist button{ all:unset; box-sizing:border-box; width:100%; display:flex; align-items:baseline; justify-content:space-between; gap:8px; padding:7px 9px; border-radius:7px; cursor:pointer; color:var(--ink); }
+  .ed-fontlist button:hover{ background:var(--bg-soft); }
+  .ed-fontlist button.on{ background:var(--accent-soft); }
+  .ed-fontlist button .fn{ font-size:18px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .ed-fontlist button .fs{ font-size:13px; color:var(--ink-soft); white-space:nowrap; }
   .ed-strip{ display:flex; gap:8px; overflow-x:auto; min-width:0; padding:2px; }
   .ed-thumb{ position:relative; flex:0 0 auto; width:64px; cursor:pointer; border:2px solid transparent; border-radius:9px; padding:2px; text-align:center; }
   .ed-thumb.on{ border-color:var(--accent-strong); background:var(--accent-soft); }
@@ -1077,15 +1099,33 @@
         <div class="card ed-card">
           <div class="ed-top">
             <label class="ed-add">＋ 이미지 추가<input type="file" id="ed_file" accept="image/*" multiple></label>
+            <button type="button" class="ed-add ed-add2" id="ed_newBtn">⬜ 빈 캔버스</button>
             <div class="ed-strip" id="ed_strip"></div>
           </div>
 
-          <label class="upload-zone" id="ed_empty" style="margin-top:14px;">
-            <input type="file" id="ed_file2" accept="image/*" multiple>
-            <div class="u-icon">✎</div>
-            <div class="u-title">수정할 이미지를 클릭해서 고르거나 끌어다 놓으세요</div>
-            <div class="u-sub">여러 장을 올려두고 하나씩 고쳐도 되고, 같은 편집을 모든 이미지에 한 번에 적용할 수도 있어요</div>
-          </label>
+          <div class="ed-newbox" id="ed_newBox" hidden>
+            <div class="ed-label" style="margin-top:0;">빈 캔버스 만들기</div>
+            <div class="ed-newsizes" id="ed_newSizes"></div>
+            <div class="ed-row" style="margin-bottom:0;">
+              <label class="ed-c">가로 <input type="number" id="ed_newW" value="1080" min="1" max="8000" style="width:84px;"></label>
+              <label class="ed-c">세로 <input type="number" id="ed_newH" value="1080" min="1" max="8000" style="width:84px;"></label>
+              <label class="ed-c">배경색 <input type="color" id="ed_newBg" value="#ffffff"></label>
+              <label class="ed-chk"><input type="checkbox" id="ed_newClear"> 투명 배경</label>
+              <span class="ed-sp"></span>
+              <button type="button" class="ghost" id="ed_newCancel">닫기</button>
+              <button type="button" class="primary" id="ed_newMake">만들기</button>
+            </div>
+          </div>
+
+          <div id="ed_empty">
+            <label class="upload-zone" style="margin-top:14px;">
+              <input type="file" id="ed_file2" accept="image/*" multiple>
+              <div class="u-icon">✎</div>
+              <div class="u-title">수정할 이미지를 클릭해서 고르거나 끌어다 놓으세요</div>
+              <div class="u-sub">여러 장을 올려두고 하나씩 고쳐도 되고, 같은 편집을 모든 이미지에 한 번에 적용할 수도 있어요</div>
+            </label>
+            <div class="ed-or">이미지 없이 시작하려면 <button type="button" class="primary" id="ed_newBtn2">⬜ 흰 배경에서 시작하기</button></div>
+          </div>
 
           <div class="ed-main" id="ed_main" style="display:none;">
             <div class="ed-left">
@@ -1146,15 +1186,11 @@
 
               <div class="ed-pane" data-pane="text">
                 <textarea class="ed-ta" id="ed_txt" rows="2">텍스트를 입력하세요</textarea>
-                <div class="ed-row"><select class="ed-sel" id="ed_font">
-                  <option value="Pretendard Variable">프리텐다드 (기본)</option>
-                  <option value="Black Han Sans">검은고딕 (굵은 제목)</option>
-                  <option value="Do Hyeon">도현체</option>
-                  <option value="Jua">주아체 (동글)</option>
-                  <option value="Nanum Myeongjo">나눔명조</option>
-                  <option value="Nanum Pen Script">나눔펜 (손글씨)</option>
-                  <option value="Gaegu">개구체 (손글씨)</option>
-                </select></div>
+                <input type="hidden" id="ed_font" value="Pretendard Variable">
+                <div class="ed-fontpick" id="ed_fontPick">
+                  <button type="button" class="ed-fontbtn" id="ed_fontBtn"><span id="ed_fontLabel">프리텐다드</span><em>▾</em></button>
+                  <div class="ed-fontlist" id="ed_fontList" hidden></div>
+                </div>
                 <div class="ed-sl"><div><span>글자 크기</span><b id="ed_tsizeV">60</b></div><input type="range" id="ed_tsize" min="10" max="300" value="60"></div>
                 <div class="ed-row">
                   <label class="ed-c">글자색 <input type="color" id="ed_tcolor" value="#ffffff"></label>
@@ -2990,7 +3026,7 @@ async function saveWorkbookFile(wb, filename){
   function loadFieldsFromSel(){
     const o = selObj(); if(!o) return;
     if(o.type === 'text'){
-      $('ed_txt').value = o.text; $('ed_font').value = o.font; $('ed_tsize').value = Math.round(o.size * 1000); $('ed_tsizeV').textContent = $('ed_tsize').value;
+      $('ed_txt').value = o.text; $('ed_font').value = o.font; setFontLabel(o.font); $('ed_tsize').value = Math.round(o.size * 1000); $('ed_tsizeV').textContent = $('ed_tsize').value;
       $('ed_tcolor').value = o.color; $('ed_tbold').checked = o.bold; $('ed_talign').value = o.align; $('ed_tstroke').value = o.strokeColor;
       $('ed_tstrokeW').value = o.strokeW; $('ed_tshadow').checked = o.shadow; $('ed_tbox').checked = o.box; $('ed_tboxColor').value = o.boxColor; $('ed_tboxOp').value = o.boxOp;
       if(tool !== 'text') setTool('text');
@@ -3209,6 +3245,105 @@ async function saveWorkbookFile(wb, filename){
     setSubView('convert');
     const st = document.getElementById('t4_status');
     if(st){ st.textContent = `이미지 수정에서 ${files.length}장을 받아왔어요. 아래에서 크기·용량·형식을 정하고 변환하세요.`; st.className = 'status ok'; }
+  });
+
+  /* ---------- 글꼴 고르기 (이름을 그 글꼴로 미리 보여줌) ---------- */
+  // [CSS 글꼴 이름, 화면에 보일 이름, Google Fonts 요청값(null = 이미 불러온 글꼴)]
+  const FONT_GROUPS = [
+    ['깔끔한 고딕', [
+      ['Pretendard Variable', '프리텐다드', null], ['Noto Sans KR', '본고딕 (Noto Sans)', 'Noto+Sans+KR:wght@400;700'],
+      ['Nanum Gothic', '나눔고딕', 'Nanum+Gothic:wght@400;700'], ['IBM Plex Sans KR', 'IBM 플렉스 산스', 'IBM+Plex+Sans+KR:wght@400;700'],
+      ['Gothic A1', '고딕 A1', 'Gothic+A1:wght@400;700'], ['Gowun Dodum', '고운돋움', 'Gowun+Dodum'],
+      ['Orbit', '오르빗', 'Orbit'], ['Sunflower', '해바라기', 'Sunflower:wght@500;700']
+    ]],
+    ['굵은 제목·디자인', [
+      ['Black Han Sans', '검은고딕', null], ['Do Hyeon', '도현체', null], ['Jua', '주아체', null],
+      ['Bagel Fat One', '베이글체', 'Bagel+Fat+One'], ['Gasoek One', '가석체', 'Gasoek+One'], ['Gugi', '구기체', 'Gugi'],
+      ['Black And White Picture', '흑백사진체', 'Black+And+White+Picture'], ['Yeon Sung', '연성체', 'Yeon+Sung'],
+      ['Stylish', '스타일리시', 'Stylish'], ['Kirang Haerang', '기랑해랑', 'Kirang+Haerang'], ['Moirai One', '모이라이', 'Moirai+One'],
+      ['Grandiflora One', '그랜디플로라', 'Grandiflora+One'], ['Diphylleia', '디필레이아', 'Diphylleia']
+    ]],
+    ['우아한 명조', [
+      ['Nanum Myeongjo', '나눔명조', null], ['Noto Serif KR', '본명조 (Noto Serif)', 'Noto+Serif+KR:wght@400;700'],
+      ['Gowun Batang', '고운바탕', 'Gowun+Batang:wght@400;700'], ['Song Myung', '송명체', 'Song+Myung'], ['Hahmlet', '함렛', 'Hahmlet:wght@400;700']
+    ]],
+    ['손글씨·귀여운', [
+      ['Nanum Pen Script', '나눔펜', null], ['Nanum Brush Script', '나눔붓', 'Nanum+Brush+Script'], ['Gaegu', '개구체', null],
+      ['Hi Melody', '하이멜로디', 'Hi+Melody'], ['Gamja Flower', '감자꽃', 'Gamja+Flower'], ['Dongle', '동글체', 'Dongle:wght@400;700'],
+      ['Poor Story', '푸어스토리', 'Poor+Story'], ['Cute Font', '귀여운체', 'Cute+Font'], ['Single Day', '싱글데이', 'Single+Day'],
+      ['Dokdo', '독도체', 'Dokdo'], ['East Sea Dokdo', '동해독도', 'East+Sea+Dokdo']
+    ]]
+  ];
+  const FONT_NAME = {};
+  FONT_GROUPS.forEach(g => g[1].forEach(f => { FONT_NAME[f[0]] = f[1]; }));
+  let fontsRequested = false;
+  function requestAllFonts(){
+    if(fontsRequested) return; fontsRequested = true;
+    // 글꼴마다 따로 불러와서, 하나가 실패해도 나머지는 정상으로 보이게 함
+    FONT_GROUPS.forEach(g => g[1].forEach(f => {
+      if(!f[2]) return;
+      const l = document.createElement('link'); l.rel = 'stylesheet';
+      l.href = 'https://fonts.googleapis.com/css2?family=' + f[2] + '&display=swap';
+      document.head.appendChild(l);
+    }));
+  }
+  function setFontLabel(f){
+    const lab = $('ed_fontLabel');
+    lab.textContent = FONT_NAME[f] || f;
+    lab.style.fontFamily = `"${f}", "Pretendard Variable", sans-serif`;
+    document.querySelectorAll('#ed_fontList button').forEach(b => b.classList.toggle('on', b.dataset.f === f));
+  }
+  function buildFontList(){
+    $('ed_fontList').innerHTML = FONT_GROUPS.map(g => `<div class="grp">${esc(g[0])}</div>` + g[1].map(f =>
+      `<button type="button" data-f="${esc(f[0])}" style="font-family:'${f[0]}','Pretendard Variable',sans-serif;"><span class="fn">${esc(f[1])}</span><span class="fs">가나다 Abc 123</span></button>`).join('')).join('');
+    $('ed_fontList').querySelectorAll('button').forEach(b => b.addEventListener('click', () => {
+      const el = $('ed_font');
+      el.value = b.dataset.f; setFontLabel(el.value);
+      $('ed_fontList').hidden = true;
+      ensureFont(el.value);
+      el.dispatchEvent(new Event('input')); el.dispatchEvent(new Event('change'));
+    }));
+    setFontLabel($('ed_font').value);
+  }
+  $('ed_fontBtn').addEventListener('click', e => {
+    e.stopPropagation();
+    requestAllFonts();
+    const list = $('ed_fontList');
+    list.hidden = !list.hidden;
+    if(!list.hidden){ const on = list.querySelector('button.on'); if(on) on.scrollIntoView({ block:'nearest' }); }
+  });
+  document.addEventListener('click', e => { if(!$('ed_fontPick').contains(e.target)) $('ed_fontList').hidden = true; });
+  buildFontList();
+  // 텍스트 패널을 열면 미리 글꼴을 불러와 둠 (목록을 펼쳤을 때 바로 보이게)
+  document.querySelector('#ed_tools [data-tool="text"]').addEventListener('click', requestAllFonts);
+
+  /* ---------- 빈 캔버스 (이미지 없이 시작) ---------- */
+  const NEW_SIZES = [
+    { n:'정사각형', w:1080, h:1080 }, { n:'가로형', w:1200, h:628 }, { n:'세로형', w:1080, h:1350 },
+    { n:'와이드 16:9', w:1920, h:1080 }, { n:'세로 9:16', w:1080, h:1920 }, { n:'A4 (세로)', w:2480, h:3508 }
+  ];
+  $('ed_newSizes').innerHTML = NEW_SIZES.map((s, i) => `<button type="button" data-i="${i}"${i === 0 ? ' class="on"' : ''}>${esc(s.n)}<small>${s.w}×${s.h}</small></button>`).join('');
+  $('ed_newSizes').querySelectorAll('button').forEach(b => b.addEventListener('click', () => {
+    const s = NEW_SIZES[+b.dataset.i];
+    $('ed_newW').value = s.w; $('ed_newH').value = s.h;
+    $('ed_newSizes').querySelectorAll('button').forEach(x => x.classList.toggle('on', x === b));
+  }));
+  ['ed_newW','ed_newH'].forEach(id => $(id).addEventListener('input', () => $('ed_newSizes').querySelectorAll('button').forEach(x => x.classList.remove('on'))));
+  const openNew = () => { $('ed_newBox').hidden = false; $('ed_newBox').scrollIntoView({ block:'nearest', behavior:'smooth' }); };
+  $('ed_newBtn').addEventListener('click', openNew);
+  $('ed_newBtn2').addEventListener('click', openNew);
+  $('ed_newCancel').addEventListener('click', () => { $('ed_newBox').hidden = true; });
+  let blankSeq = 0;
+  $('ed_newMake').addEventListener('click', () => {
+    const w = Math.round(+$('ed_newW').value), h = Math.round(+$('ed_newH').value);
+    if(!(w > 0 && h > 0 && w <= 8000 && h <= 8000)){ show(statusEl, '가로·세로는 1~8000 사이로 입력해 주세요.', 'error'); return; }
+    const c = mk(w, h);
+    if(!$('ed_newClear').checked){ const x = c.getContext('2d'); x.fillStyle = $('ed_newBg').value; x.fillRect(0, 0, w, h); }
+    const d = addDoc(`빈 캔버스${++blankSeq > 1 ? ' ' + blankSeq : ''}.png`, c);
+    $('ed_newBox').hidden = true;
+    selectDoc(d);
+    setTool('text');
+    show(statusEl, `${w}×${h} 빈 캔버스를 만들었어요. 텍스트·도형·워터마크를 넣어 꾸며 보세요. 사진도 '합치기'나 워터마크(로고 이미지)로 얹을 수 있어요.`, 'ok');
   });
 
   setTool('adjust');
