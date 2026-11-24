@@ -617,7 +617,8 @@
   .ed-hint{ font-size:12px; color:var(--ink-soft); margin-top:8px; min-height:18px; }
   .ed-panel{ border:1px solid var(--line); border-radius:12px; padding:12px; background:var(--surface-2); align-self:start; }
   .ed-tools{ display:grid; grid-template-columns:repeat(4,1fr); gap:4px; margin-bottom:12px; }
-  .ed-tools button{ all:unset; box-sizing:border-box; text-align:center; padding:7px 2px; border-radius:8px; font-size:11.5px; font-weight:600; color:var(--ink-soft); cursor:pointer; background:var(--surface); border:1px solid var(--line); font-family:var(--font-body); white-space:nowrap; }
+  .ed-tools button{ all:unset; box-sizing:border-box; display:flex; flex-direction:column; align-items:center; gap:2px; text-align:center; padding:7px 2px 6px; border-radius:8px; font-size:11px; font-weight:600; color:var(--ink-soft); cursor:pointer; background:var(--surface); border:1px solid var(--line); font-family:var(--font-body); white-space:nowrap; }
+  .ed-tools button i{ font-style:normal; font-size:18px; line-height:1.15; }
   .ed-tools button:hover{ border-color:var(--accent-strong); }
   .ed-tools button.on{ background:var(--accent); border-color:var(--accent); color:var(--on-accent); }
   .ed-pane{ display:none; }
@@ -1100,19 +1101,19 @@
 
             <div class="ed-panel">
               <div class="ed-tools" id="ed_tools">
-                <button type="button" data-tool="adjust" class="on">조정</button>
-                <button type="button" data-tool="filter">필터</button>
-                <button type="button" data-tool="rotate">회전·반전</button>
-                <button type="button" data-tool="text">텍스트</button>
-                <button type="button" data-tool="wm">워터마크</button>
-                <button type="button" data-tool="draw">도형·그리기</button>
-                <button type="button" data-tool="mosaic">모자이크</button>
-                <button type="button" data-tool="frame">테두리·여백</button>
-                <button type="button" data-tool="preset">규격</button>
-                <button type="button" data-tool="merge">합치기</button>
-                <button type="button" data-tool="pick">스포이드</button>
-                <button type="button" data-tool="bg">배경 제거</button>
-                <button type="button" data-tool="layers">레이어</button>
+                <button type="button" data-tool="adjust" class="on" title="밝기·대비·채도 등 색 보정"><i>🎚️</i>조정</button>
+                <button type="button" data-tool="filter" title="원클릭 색감 필터"><i>🎨</i>필터</button>
+                <button type="button" data-tool="rotate" title="돌리기·뒤집기"><i>🔄</i>회전·반전</button>
+                <button type="button" data-tool="text" title="글자 넣기"><i>🔤</i>텍스트</button>
+                <button type="button" data-tool="wm" title="로고·문구 워터마크"><i>💧</i>워터마크</button>
+                <button type="button" data-tool="draw" title="사각형·원·화살표·형광펜·브러시"><i>🖌️</i>도형·그리기</button>
+                <button type="button" data-tool="mosaic" title="개인정보 가리기"><i>🙈</i>모자이크</button>
+                <button type="button" data-tool="frame" title="테두리·둥근 모서리·여백"><i>🖼️</i>테두리·여백</button>
+                <button type="button" data-tool="preset" title="정해진 크기로 맞추기"><i>📐</i>규격</button>
+                <button type="button" data-tool="merge" title="여러 장 붙이기"><i>🧩</i>합치기</button>
+                <button type="button" data-tool="pick" title="이미지 속 색 코드 알아내기"><i>🎯</i>스포이드</button>
+                <button type="button" data-tool="bg" title="AI로 배경 지우기"><i>✂️</i>배경 제거</button>
+                <button type="button" data-tool="layers" title="글자·도형 순서 바꾸기"><i>📚</i>레이어</button>
               </div>
 
               <div class="ed-pane" data-pane="adjust">
