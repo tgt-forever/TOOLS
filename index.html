@@ -815,24 +815,20 @@
         <span class="nav-index">02</span>
         <span class="nav-name">제외검색어</span>
       </button>
-      <button class="nav-item" data-tab="t3">
-        <span class="nav-index">03</span>
-        <span class="nav-name">자동입찰 키워드</span>
-      </button>
       <button class="nav-item" data-tab="t4">
-        <span class="nav-index">04</span>
+        <span class="nav-index">03</span>
         <span class="nav-name">이미지 편집</span>
       </button>
       <button class="nav-item" data-tab="t5">
-        <span class="nav-index">05</span>
+        <span class="nav-index">04</span>
         <span class="nav-name">노출 모니터링</span>
       </button>
       <button class="nav-item" data-tab="t6">
-        <span class="nav-index">06</span>
+        <span class="nav-index">05</span>
         <span class="nav-name">모니터링 설정</span>
       </button>
       <button class="nav-item" data-tab="t7">
-        <span class="nav-index">07</span>
+        <span class="nav-index">06</span>
         <span class="nav-name">비즈머니</span>
       </button>
     </div>
@@ -941,71 +937,10 @@
       </div>
     </section>
 
-    <!-- ============ TAB 3 ============ -->
-    <section class="panel" id="panel-t3">
-      <div class="panel-head">
-        <div class="eyebrow">TOOL 03 · NAVER 파워링크</div>
-        <h1>자동입찰 키워드</h1>
-        <p class="lead">A파일(분야·캠페인·광고그룹·키워드·키워드ID·입찰가 마스터 목록)에서 B파일(분야·키워드·목표순위 목록)에 해당하는 캠페인명·광고그룹명·키워드·키워드ID·입찰가·목표순위를 찾아 결과 엑셀 파일로 만들어줍니다. 결과 파일은 <b>매칭결과 · 매칭성공 · 중복오류키워드</b> 3개 시트로 구성됩니다.</p>
-      </div>
-
-      <div class="card">
-        <div class="grid-2">
-          <label class="drop" id="t3_dropA">
-            <input type="file" id="t3_fileA" accept=".xlsx,.xls">
-            <div class="drop-icon">XLS</div>
-            <div class="drop-text">
-              <div class="drop-name">A파일 업로드</div>
-              <div class="drop-meta">분야·캠페인·광고그룹·키워드·키워드ID·입찰가</div>
-              <div class="colspec">A열 분야 · B열 캠페인 · C열 광고그룹 · D열 키워드 · E열 키워드ID · F열 입찰가 (2행부터)</div>
-              <div class="drop-name" id="t3_nameA" style="margin-top:6px;color:var(--accent-dark);"></div>
-            </div>
-          </label>
-          <label class="drop" id="t3_dropB">
-            <input type="file" id="t3_fileB" accept=".xlsx,.xls">
-            <div class="drop-icon">XLS</div>
-            <div class="drop-text">
-              <div class="drop-name">B파일 업로드</div>
-              <div class="drop-meta">매칭할 분야·키워드·목표순위</div>
-              <div class="colspec">A열 분야 · B열 키워드 · C열 목표순위 (2행부터)</div>
-              <div class="drop-name" id="t3_nameB" style="margin-top:6px;color:var(--accent-dark);"></div>
-            </div>
-          </label>
-        </div>
-
-        <button class="primary" id="t3_runBtn" disabled style="width:100%;margin-top:18px;">매칭 실행</button>
-        <div class="status" id="t3_status"></div>
-      </div>
-
-      <div class="card" id="t3_resultCard" style="display:none;">
-        <div class="summary">
-          <div class="stat"><div class="num" id="t3_statTotal">0</div><div class="lbl">B파일 키워드 수</div></div>
-          <div class="stat"><div class="num" id="t3_statRows">0</div><div class="lbl">결과 행 수</div></div>
-          <div class="stat gold"><div class="num" id="t3_statMulti">0</div><div class="lbl">중복 값 수</div></div>
-          <div class="stat danger"><div class="num" id="t3_statError">0</div><div class="lbl">오류(미매칭)</div></div>
-        </div>
-
-        <div class="legend">
-          <span><span class="swatch gold"></span>다중매칭 (동일 분야+키워드가 A파일에 여러 행 존재 → 직접 확인 필요)</span>
-          <span><span class="swatch danger"></span>오류 (미매칭)</span>
-        </div>
-
-        <div class="tablewrap">
-          <table>
-            <thead><tr><th>캠페인명</th><th>광고그룹명</th><th>키워드</th><th>키워드ID</th><th>입찰가</th><th>목표순위</th></tr></thead>
-            <tbody id="t3_resultBody"></tbody>
-          </table>
-        </div>
-        <div class="more-note" id="t3_moreNote" style="display:none;"></div>
-
-        <button class="dark" id="t3_downloadBtn" style="margin-top:16px;">결과 엑셀 다운로드</button>
-      </div>
-    </section>
-
     <!-- ============ TAB 4 ============ -->
     <section class="panel" id="panel-t4">
       <div class="panel-head">
-        <div class="eyebrow">TOOL 04 · IMAGE</div>
+        <div class="eyebrow">TOOL 03 · IMAGE</div>
         <h1>이미지 편집</h1>
         <p class="lead"><b>형식 변경</b>에서는 자르기·용량·크기·파일 형식을, <b>이미지 수정</b>에서는 색 보정·글자·워터마크·모자이크·배경 제거 같은 편집을 해요. 모든 처리는 브라우저 안에서 끝나고, 이미지가 서버로 전송되지 않아요.</p>
       </div>
@@ -1303,14 +1238,14 @@
     <!-- ============ TAB 5 ============ -->
     <section class="panel" id="panel-t5">
       <div class="panel-head">
-        <div class="eyebrow">TOOL 05 · MONITOR</div>
+        <div class="eyebrow">TOOL 04 · MONITOR</div>
         <h1>브랜드검색 노출 모니터링</h1>
-        <p class="lead">등록한 키워드의 브랜드검색 광고 노출 상태예요. <b>PC</b>·<b>모바일</b> 버튼이 <b>초록이면 노출, 빨강이면 미노출</b>이에요. 광고주·키워드 등록과 알림 설정은 <b>06 모니터링 설정</b> 탭에서 해요.</p>
+        <p class="lead">등록한 키워드의 브랜드검색 광고 노출 상태예요. <b>PC</b>·<b>모바일</b> 버튼이 <b>초록이면 노출, 빨강이면 미노출</b>이에요. 광고주·키워드 등록과 알림 설정은 <b>모니터링 설정</b> 탭에서 해요.</p>
       </div>
 
       <div class="card" id="t5_notConnected">
         <div class="card-head"><span class="card-num">!</span><h2 class="card-title">모니터링 서버에 아직 연결되지 않았어요</h2></div>
-        <p class="card-desc"><b>06 모니터링 설정</b> 탭에서 계정(정이사님 / 박이사님)을 누르면 여기에 현황이 나타나요.</p>
+        <p class="card-desc"><b>모니터링 설정</b> 탭에서 계정(정이사님 / 박이사님)을 누르면 여기에 현황이 나타나요.</p>
         <button class="primary" id="t5_goSetupBtn">설정 탭으로 이동</button>
         <div class="status" id="t5_connHint"></div>
       </div>
@@ -1351,7 +1286,7 @@
             <div class="head-left"><span class="card-num">2</span><h2 class="card-title">브랜드검색 계약 기간</h2></div>
             <button class="ghost" id="t5_syncBtn">계약 동기화</button>
           </div>
-          <p class="card-desc">네이버 검색광고 API에서 가져온 브랜드검색(시간 계약) 정보예요. 매일 06 탭에서 정한 시각에 자동 갱신되고, 노출 종료 <b>기준일(기본 5일) 전부터 매일</b> 만료 메일이 와요. 새 계약이 잡히면 자동으로 멈춰요. <span id="t5_contractUpdated" style="color:var(--ink-soft);"></span></p>
+          <p class="card-desc">네이버 검색광고 API에서 가져온 브랜드검색(시간 계약) 정보예요. 매일 모니터링 설정에서 정한 시각에 자동 갱신되고, 노출 종료 <b>기준일(기본 5일) 전부터 매일</b> 만료 메일이 와요. 새 계약이 잡히면 자동으로 멈춰요. <span id="t5_contractUpdated" style="color:var(--ink-soft);"></span></p>
           <div class="tablewrap">
             <table>
               <thead><tr><th>광고주</th><th>광고그룹</th><th>계약 상태</th><th>노출 기간</th><th>남은 일수</th></tr></thead>
@@ -1375,14 +1310,14 @@
     <!-- ============ TAB 6 ============ -->
     <section class="panel" id="panel-t6">
       <div class="panel-head">
-        <div class="eyebrow">TOOL 06 · SETTINGS</div>
+        <div class="eyebrow">TOOL 05 · SETTINGS</div>
         <h1>모니터링 설정</h1>
-        <p class="lead">05 탭에서 감시할 <b>광고주와 키워드</b>를 등록하고 <b>알림</b>을 설정해요. 처음 한 번은 Apps Script 웹앱에 연결해야 해요 (설치 방법은 저장소의 <b>노출모니터링_설치안내.md</b>).</p>
+        <p class="lead">노출 모니터링에서 감시할 <b>광고주와 키워드</b>를 등록하고 <b>알림</b>을 설정해요. 처음 한 번은 Apps Script 웹앱에 연결해야 해요 (설치 방법은 저장소의 <b>노출모니터링_설치안내.md</b>).</p>
       </div>
 
       <div class="card" id="t5_connectCard">
         <div class="card-head"><span class="card-num">1</span><h2 class="card-title">모니터링 서버 연결</h2></div>
-        <p class="card-desc">계정을 누르면 바로 연결돼요. 선택한 계정은 이 브라우저에 기억되고, 05·07 탭도 같은 계정으로 보여요.</p>
+        <p class="card-desc">계정을 누르면 바로 연결돼요. 선택한 계정은 이 브라우저에 기억되고, 노출 모니터링·비즈머니 탭도 같은 계정으로 보여요.</p>
         <div class="mon-accounts" id="t5_accounts"></div>
         <div class="toolbar" style="margin-top:14px;">
           <button class="ghost" id="t5_disconnectBtn">연결 해제</button>
@@ -1487,7 +1422,7 @@
             <div>
               <label class="field-label">비즈머니 알림 기준 금액 (원)</label>
               <input type="number" id="t5_setBizThreshold" data-key="BIZMONEY_THRESHOLD" min="0" step="10000">
-              <div class="hint">이 금액 이하이거나 예산 잠금이면 알림. 07 비즈머니 탭에서 확인해요.</div>
+              <div class="hint">이 금액 이하이거나 예산 잠금이면 알림. 비즈머니 탭에서 확인해요.</div>
             </div>
             <div>
               <label class="field-label">비즈머니 계속 부족할 때 재알림 간격 (시간)</label>
@@ -1503,14 +1438,14 @@
     <!-- ============ TAB 7 ============ -->
     <section class="panel" id="panel-t7">
       <div class="panel-head">
-        <div class="eyebrow">TOOL 07 · BIZMONEY</div>
+        <div class="eyebrow">TOOL 06 · BIZMONEY</div>
         <h1>비즈머니 잔액</h1>
-        <p class="lead">06 탭에 등록한 광고주의 네이버 비즈머니 잔액을 <b>노출 확인과 같은 간격(기본 10분)</b>으로 가져와요. 잔액이 기준 금액(기본 10만원) 이하이거나 예산 잠금이 걸리면 이메일로 알려줘요.</p>
+        <p class="lead">모니터링 설정 탭에 등록한 광고주의 네이버 비즈머니 잔액을 <b>노출 확인과 같은 간격(기본 10분)</b>으로 가져와요. 잔액이 기준 금액(기본 10만원) 이하이거나 예산 잠금이 걸리면 이메일로 알려줘요.</p>
       </div>
 
       <div class="card" id="t7_notConnected">
         <div class="card-head"><span class="card-num">!</span><h2 class="card-title">모니터링 서버에 아직 연결되지 않았어요</h2></div>
-        <p class="card-desc"><b>06 모니터링 설정</b> 탭에서 계정(정이사님 / 박이사님)을 누르면, 05 노출 모니터링과 같은 연결로 여기에도 잔액이 나타나요.</p>
+        <p class="card-desc"><b>모니터링 설정</b> 탭에서 계정(정이사님 / 박이사님)을 누르면, 노출 모니터링과 같은 연결로 여기에도 잔액이 나타나요.</p>
         <button class="primary" id="t7_goSetupBtn">설정 탭으로 이동</button>
       </div>
 
@@ -1526,7 +1461,7 @@
               <button class="ghost" id="t7_checkBtn">지금 바로 확인</button>
             </div>
           </div>
-          <p class="card-desc">마지막 갱신 <span id="t7_updated">-</span> · 알림 기준 <b id="t7_threshold">-</b> 이하 · 광고주 추가와 customerId 입력은 06 탭에서 해요.</p>
+          <p class="card-desc">마지막 갱신 <span id="t7_updated">-</span> · 알림 기준 <b id="t7_threshold">-</b> 이하 · 광고주 추가와 customerId 입력은 모니터링 설정 탭에서 해요.</p>
           <div class="mon-search">
             <input type="search" id="t7_search" placeholder="광고주명 또는 customerId로 검색" autocomplete="off" style="font-family:var(--font-body);">
             <span class="hint" id="t7_searchInfo" style="margin:0;white-space:nowrap;"></span>
@@ -1589,7 +1524,6 @@
 </div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/exceljs/4.4.0/exceljs.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.2/cropper.min.js"></script>
 <script>
@@ -1862,199 +1796,6 @@ async function saveWorkbookFile(wb, filename){
     const statusEl = document.getElementById('t2_status');
     const res = await saveWorkbookFile(pendingWb, pendingFilename);
     if(!res.ok){ statusEl.textContent = downloadErrorMessage(res.err); statusEl.className = 'status error'; }
-  });
-})();
-
-/* ================= TOOL 3 : 파워링크 키워드 매칭 ================= */
-(function(){
-  let workbookA = null, workbookB = null, lastResults = null;
-
-  function cellText(v){
-    if(v===undefined || v===null) return "";
-    if(typeof v === 'object'){
-      if('result' in v) return cellText(v.result);
-      if('richText' in v) return v.richText.map(t=>t.text).join('');
-      if('text' in v) return String(v.text);
-      return "";
-    }
-    return String(v);
-  }
-  function normalize(v){ return cellText(v).trim(); }
-
-  function setupDrop(dropId, inputId, nameId, onLoaded){
-    const drop = document.getElementById(dropId);
-    const input = document.getElementById(inputId);
-    const nameEl = document.getElementById(nameId);
-    input.addEventListener('change', async () => {
-      const file = input.files[0];
-      if(!file) return;
-      nameEl.textContent = '불러오는 중...';
-      try{
-        const buffer = await file.arrayBuffer();
-        const wb = new ExcelJS.Workbook();
-        await wb.xlsx.load(buffer);
-        nameEl.textContent = file.name;
-        drop.classList.add('filled');
-        onLoaded(wb);
-      } catch(err){
-        nameEl.textContent = '읽기 실패: ' + err.message;
-        onLoaded(null);
-      }
-      checkReady();
-    });
-    drop.addEventListener('dragover', (e)=>{e.preventDefault(); drop.classList.add('drag');});
-    drop.addEventListener('dragleave', ()=> drop.classList.remove('drag'));
-    drop.addEventListener('drop', (e)=>{
-      e.preventDefault();
-      drop.classList.remove('drag');
-      if(e.dataTransfer.files[0]){ input.files = e.dataTransfer.files; input.dispatchEvent(new Event('change')); }
-    });
-  }
-  setupDrop('t3_dropA','t3_fileA','t3_nameA', (wb)=>{ workbookA = wb; });
-  setupDrop('t3_dropB','t3_fileB','t3_nameB', (wb)=>{ workbookB = wb; });
-
-  function checkReady(){ document.getElementById('t3_runBtn').disabled = !(workbookA && workbookB); }
-
-  function sheetRows(wb, colCount){
-    const ws = wb.worksheets[0];
-    const rows = [];
-    ws.eachRow({includeEmpty:true}, (row, rowNumber) => {
-      if(rowNumber === 1) return;
-      const vals = [];
-      for(let c=1; c<=colCount; c++){ vals.push(row.getCell(c).value); }
-      if(vals.every(v => normalize(v) === "")) return;
-      rows.push(vals);
-    });
-    return rows;
-  }
-
-  document.getElementById('t3_runBtn').addEventListener('click', () => {
-    const statusEl = document.getElementById('t3_status');
-    statusEl.className = 'status';
-    try{
-      const rowsA = sheetRows(workbookA, 6);
-      const rowsB = sheetRows(workbookB, 3);
-      if(rowsA.length === 0) throw new Error('A파일에 데이터가 없습니다.');
-      if(rowsB.length === 0) throw new Error('B파일에 데이터가 없습니다.');
-
-      const index = {};
-      rowsA.forEach(row => {
-        const field = normalize(row[0]);
-        const campaign = row[1], adgroup = row[2], keyword = row[3], keywordId = row[4], bidPrice = row[5];
-        const key = field + '|||' + normalize(keyword);
-        if(!index[key]) index[key] = [];
-        index[key].push({campaign, adgroup, keyword, keywordId, bidPrice});
-      });
-
-      const results = [];
-      let errorCount = 0, multiCount = 0;
-
-      rowsB.forEach(row => {
-        const field = normalize(row[0]);
-        const keywordRaw = row[1], targetRank = row[2];
-        const key = field + '|||' + normalize(keywordRaw);
-        const matches = index[key];
-        if(!matches || matches.length === 0){
-          results.push({campaign:'오류', adgroup:'오류', keyword:keywordRaw, keywordId:'', bidPrice:'', targetRank, isError:true, isMulti:false});
-          errorCount++;
-        } else {
-          const isMulti = matches.length > 1;
-          matches.forEach(m => {
-            results.push({campaign:m.campaign, adgroup:m.adgroup, keyword:m.keyword, keywordId:m.keywordId, bidPrice:m.bidPrice, targetRank, isError:false, isMulti});
-            if(isMulti) multiCount++;
-          });
-        }
-      });
-
-      lastResults = results;
-      renderResults(rowsB.length, results, errorCount, multiCount);
-    } catch(err){
-      statusEl.textContent = '오류: ' + err.message;
-      statusEl.className = 'status error';
-    }
-  });
-
-  function renderResults(totalB, results, errorCount, multiCount){
-    document.getElementById('t3_resultCard').style.display = 'block';
-    document.getElementById('t3_statTotal').textContent = totalB;
-    document.getElementById('t3_statRows').textContent = results.length;
-    document.getElementById('t3_statMulti').textContent = multiCount;
-    document.getElementById('t3_statError').textContent = errorCount;
-
-    const body = document.getElementById('t3_resultBody');
-    body.innerHTML = '';
-    const previewLimit = 300;
-    results.slice(0, previewLimit).forEach(r => {
-      const tr = document.createElement('tr');
-      if(r.isError) tr.classList.add('error-row');
-      else if(r.isMulti) tr.classList.add('multi-row');
-      tr.innerHTML = `<td>${escapeHtml(r.campaign)}</td><td>${escapeHtml(r.adgroup)}</td><td>${escapeHtml(r.keyword)}</td><td>${escapeHtml(r.keywordId)}</td><td>${escapeHtml(r.bidPrice)}</td><td>${escapeHtml(r.targetRank)}</td>`;
-      body.appendChild(tr);
-    });
-
-    const moreNote = document.getElementById('t3_moreNote');
-    if(results.length > previewLimit){
-      moreNote.textContent = `미리보기는 ${previewLimit}행까지만 표시됩니다. 전체 ${results.length}행은 다운로드 파일에서 확인하세요.`;
-      moreNote.style.display = 'block';
-    } else { moreNote.style.display = 'none'; }
-
-    document.getElementById('t3_status').textContent = '매칭 완료';
-    document.getElementById('t3_status').className = 'status';
-  }
-
-  function escapeHtml(v){
-    const s = cellText(v);
-    return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
-  }
-
-  document.getElementById('t3_downloadBtn').addEventListener('click', async () => {
-    if(!lastResults) return;
-    const wbOut = new ExcelJS.Workbook();
-    const YELLOW = {type:'pattern', pattern:'solid', fgColor:{argb:'FFFFF2CC'}};
-
-    const wsAll = wbOut.addWorksheet('매칭결과');
-    wsAll.columns = [
-      {header:'캠페인명', key:'campaign', width:25},{header:'광고그룹명', key:'adgroup', width:25},
-      {header:'키워드', key:'keyword', width:25},{header:'키워드ID', key:'keywordId', width:18},
-      {header:'입찰가', key:'bidPrice', width:12},{header:'목표순위', key:'targetRank', width:12},
-    ];
-    wsAll.getRow(1).font = {name:'Arial', bold:true};
-    lastResults.forEach(r => {
-      const row = wsAll.addRow({campaign: cellText(r.campaign), adgroup: cellText(r.adgroup), keyword: cellText(r.keyword), keywordId: cellText(r.keywordId), bidPrice: cellText(r.bidPrice), targetRank: cellText(r.targetRank)});
-      if(r.isMulti) row.eachCell({includeEmpty:true}, cell => { cell.fill = YELLOW; });
-    });
-
-    const wsOk = wbOut.addWorksheet('매칭성공');
-    wsOk.columns = [
-      {header:'캠페인명', key:'campaign', width:25},{header:'광고그룹명', key:'adgroup', width:25},
-      {header:'키워드', key:'keyword', width:25},{header:'키워드ID', key:'keywordId', width:18},
-      {header:'입찰가', key:'bidPrice', width:12},{header:'목표순위', key:'targetRank', width:12},
-    ];
-    wsOk.getRow(1).font = {name:'Arial', bold:true};
-    lastResults.filter(r => !r.isError && !r.isMulti).forEach(r => {
-      wsOk.addRow({campaign: cellText(r.campaign), adgroup: cellText(r.adgroup), keyword: cellText(r.keyword), keywordId: cellText(r.keywordId), bidPrice: cellText(r.bidPrice), targetRank: cellText(r.targetRank)});
-    });
-
-    const wsProblem = wbOut.addWorksheet('중복오류키워드');
-    wsProblem.columns = [{header:'키워드', key:'keyword', width:25}];
-    wsProblem.getRow(1).font = {name:'Arial', bold:true};
-    const seen = new Set();
-    lastResults.filter(r => r.isError || r.isMulti).forEach(r => {
-      const norm = normalize(r.keyword);
-      if(seen.has(norm)) return;
-      seen.add(norm);
-      wsProblem.addRow({ keyword: cellText(r.keyword) });
-    });
-
-    const buffer = await wbOut.xlsx.writeBuffer();
-    const blob = new Blob([buffer], {type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'});
-    const statusEl = document.getElementById('t3_status');
-    try{
-      await saveFile('매칭결과.xlsx', blob);
-    }catch(err){
-      statusEl.textContent = downloadErrorMessage(err);
-      statusEl.className = 'status error';
-    }
   });
 })();
 
@@ -3391,7 +3132,7 @@ async function saveWorkbookFile(wb, filename){
 
   async function api(action, data){
     const c = cfg();
-    if(!c.url || !c.token) throw new Error('먼저 06 모니터링 설정 탭에서 계정을 선택해 연결하세요.');
+    if(!c.url || !c.token) throw new Error('먼저 모니터링 설정 탭에서 계정을 선택해 연결하세요.');
     let res;
     if(!action){
       res = await fetch(c.url + (c.url.includes('?') ? '&' : '?') + 'token=' + encodeURIComponent(c.token), { method:'GET', redirect:'follow' });
@@ -3466,7 +3207,7 @@ async function saveWorkbookFile(wb, filename){
         <td>${pill(g.M, '모바일')}</td>
         <td style="font-family:var(--font-mono);font-size:11.5px;white-space:nowrap;">${esc(last)}</td>
         <td><div class="mon-evidence" title="${esc(tip)}">${esc(text)}</div></td></tr>`;
-    }).join('') : '<tr><td colspan="6"><div class="mon-empty">등록된 키워드가 없어요. 06 모니터링 설정 탭에서 광고주와 키워드를 추가하세요.</div></td></tr>';
+    }).join('') : '<tr><td colspan="6"><div class="mon-empty">등록된 키워드가 없어요. 모니터링 설정 탭에서 광고주와 키워드를 추가하세요.</div></td></tr>';
 
     // 계약 표
     const cts = state.contracts || [];
@@ -3479,7 +3220,7 @@ async function saveWorkbookFile(wb, filename){
       }else if(c.status === 'UPCOMING_EXPOSE'){ dd = '<span style="color:var(--ink-soft);font-size:11.5px;">예정</span>'; }
       const period = c.exposureStartDt ? `${esc(c.exposureStartDt)} ~ ${esc(c.exposureEndDt)}` : '';
       return `<tr><td>${esc(c.advertiser)}</td><td>${esc(c.adgroupName)}${c.contractName && !c.adgroupName ? esc(c.contractName) : ''}</td><td>${c.status ? `<span class="mon-badge ${c.status === 'ON_EXPOSING' ? 'up' : (c.status === 'UPCOMING_EXPOSE' ? 'none' : 'fail')}">${esc(CT_LABEL[c.status] || c.status)}</span>` : esc(c.contractName)}</td><td style="font-family:var(--font-mono);font-size:11.5px;white-space:nowrap;">${period}</td><td>${dd}</td></tr>`;
-    }).join('') : '<tr><td colspan="5"><div class="mon-empty">계약 정보가 없어요. 06 탭에서 광고주에 customerId를 넣고 "계약 동기화"를 누르세요.</div></td></tr>';
+    }).join('') : '<tr><td colspan="5"><div class="mon-empty">계약 정보가 없어요. 모니터링 설정 탭에서 광고주에 customerId를 넣고 "계약 동기화"를 누르세요.</div></td></tr>';
 
     // 로그
     const log = state.log || [];
@@ -3515,7 +3256,7 @@ async function saveWorkbookFile(wb, filename){
       ? (tz === 'Asia/Seoul' ? '서버 시간대 Asia/Seoul (한국 시간) · 해당 시각부터 1시간 안에 실행돼요.' : `<span style="color:var(--danger);font-weight:600;">⚠ 서버 시간대가 ${esc(tz)}예요.</span> Apps Script 프로젝트 설정에서 시간대를 Asia/Seoul로 바꿔야 한국 시간 기준으로 와요.`)
       : '해당 시각부터 1시간 안에 실행돼요.';
 
-    /* ----- 07 비즈머니 탭 ----- */
+    /* ----- 비즈머니 탭 ----- */
     const biz = state.bizmoney || [];
     const thr = Number(s.BIZMONEY_THRESHOLD || 100000);
     const won = n => (n == null || n === '') ? '-' : Math.round(Number(n)).toLocaleString('ko-KR') + '원';
@@ -3543,7 +3284,7 @@ async function saveWorkbookFile(wb, filename){
         <td><div class="mon-evidence" title="${esc(b.note)}">${esc(b.note)}</div></td></tr>`;
     }).join('') : (biz.length
       ? `<tr><td colspan="7"><div class="mon-empty">"${esc($('t7_search').value.trim())}"에 해당하는 광고주가 없어요.</div></td></tr>`
-      : '<tr><td colspan="7"><div class="mon-empty">아직 잔액 정보가 없어요. "지금 바로 확인"을 누르거나, 06 탭에서 광고주에 customerId를 입력하세요.</div></td></tr>');
+      : '<tr><td colspan="7"><div class="mon-empty">아직 잔액 정보가 없어요. "지금 바로 확인"을 누르거나, 모니터링 설정 탭에서 광고주에 customerId를 입력하세요.</div></td></tr>');
     renderWidget();
   }
 
@@ -3554,7 +3295,7 @@ async function saveWorkbookFile(wb, filename){
   const WG_KITTY = '<svg viewBox="0 0 40 40" aria-hidden="true"><path d="M7 18L8.5 5.5L17 12Z" fill="#FFE4EF" stroke="#E5689A" stroke-width="1.4" stroke-linejoin="round"/><path d="M9.5 15L10 9L14 12Z" fill="#F9A8CB"/><path d="M33 18L31.5 5.5L23 12Z" fill="#FFE4EF" stroke="#E5689A" stroke-width="1.4" stroke-linejoin="round"/><path d="M30.5 15L30 9L26 12Z" fill="#F9A8CB"/><ellipse cx="20" cy="24" rx="14.5" ry="12" fill="#FFE4EF" stroke="#E5689A" stroke-width="1.4"/><circle cx="15" cy="22" r="1.6" fill="#4A1D2E"/><circle cx="25" cy="22" r="1.6" fill="#4A1D2E"/><circle cx="14.5" cy="21.4" r=".5" fill="#fff"/><circle cx="24.5" cy="21.4" r=".5" fill="#fff"/><ellipse cx="12" cy="25.5" rx="2.4" ry="1.4" fill="#F472A8" opacity=".55"/><ellipse cx="28" cy="25.5" rx="2.4" ry="1.4" fill="#F472A8" opacity=".55"/><path d="M19.2 25.6h1.6l-.8 .9z" fill="#E5689A"/><path d="M17.6 27q1.2 1.6 2.4 0q1.2 1.6 2.4 0" stroke="#4A1D2E" stroke-width="1.2" fill="none" stroke-linecap="round"/><path d="M5 24.5h5M5.5 27.5l4.5-1.2M35 24.5h-5M34.5 27.5l-4.5-1.2" stroke="#E5689A" stroke-width="1" stroke-linecap="round"/></svg>';
 
   async function openWidget(statusTarget){
-    if(!state){ show(statusTarget, '먼저 06 탭에서 계정을 연결하세요.', 'error'); return; }
+    if(!state){ show(statusTarget, '먼저 모니터링 설정 탭에서 계정을 연결하세요.', 'error'); return; }
     if(widgetAlive()){ try{ wgWin.focus(); }catch(e){} return; }
     let pip = false;
     try{
@@ -3673,7 +3414,7 @@ async function saveWorkbookFile(wb, filename){
       state = j; render();
       setConnected(true);
       const acc = currentAccount();
-      if(!silent) show(connStatus, (acc ? acc.name + ' 계정에 ' : '') + '연결됐어요. 05 모니터링 탭에서 현황을 볼 수 있어요.', 'ok');
+      if(!silent) show(connStatus, (acc ? acc.name + ' 계정에 ' : '') + '연결됐어요. 노출 모니터링 탭에서 현황을 볼 수 있어요.', 'ok');
       connInfo.textContent = '연결됨 · ' + (acc ? acc.name : cfg().url.replace(/^https?:\/\//, '').slice(0, 40) + '…');
       renderAccounts(true);
       startTimer();

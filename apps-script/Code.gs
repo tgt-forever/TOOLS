@@ -6,14 +6,14 @@
  *     "우리 광고주 것으로" 노출되는지 확인하고 시트에 기록
  *  2) 하루 한 번(+수동) 네이버 검색광고 API로 브랜드검색 계약(time-contract) 기간 동기화
  *  3) 미노출 / 확인실패 / 계약 만료 임박 시 이메일 알림
- *  4) 웹앱(doGet/doPost)으로 index.html의 05 탭과 JSON으로 통신
+ *  4) 웹앱(doGet/doPost)으로 index.html의 노출 모니터링 탭과 JSON으로 통신
  *
  * 설치 순서는 저장소의 `노출모니터링_설치안내.md` 참고.
  *
  * 스크립트 속성(프로젝트 설정 > 스크립트 속성)에 넣어야 하는 값
  *   NAVER_API_KEY     네이버 검색광고 API 액세스 라이선스
  *   NAVER_API_SECRET  비밀키
- *   WEB_TOKEN         05 탭에서 입력할 접속 토큰 (아무 긴 문자열)
+ *   WEB_TOKEN         모니터링 설정 탭에서 입력할 접속 토큰 (아무 긴 문자열)
  *   ALERT_EMAIL       (선택) 알림 받을 이메일, 쉼표로 여러 개. 없으면 설정 시트 → 없으면 본인 계정
  */
 
@@ -28,12 +28,12 @@ HEADERS[SHEET.SET] = ['항목', '값', '설명'];
 HEADERS[SHEET.BIZ] = ['광고주명', 'customerId', '잔액', '예산 잠금', '상태', '갱신시각', '마지막 알림시각', '마지막 알림 상태', '메모'];
 
 var DEFAULT_SETTINGS = [
-  ['CHECK_INTERVAL_MIN', '10', '노출 확인 간격(분). 5/10/15/30 중 하나. 바꾼 뒤 setup() 또는 05 탭 "설정 저장"으로 트리거 재설치'],
+  ['CHECK_INTERVAL_MIN', '10', '노출 확인 간격(분). 5/10/15/30 중 하나. 바꾼 뒤 setup() 또는 모니터링 설정 탭 "설정 저장"으로 트리거 재설치'],
   ['DOWN_ALERT_AFTER', '2', '연속 몇 번 미노출이면 알림을 보낼지 (10분 간격이므로 2 = 20분 연속)'],
   ['FAIL_ALERT_AFTER', '3', '연속 몇 번 확인실패(차단·오류)면 알림을 보낼지'],
   ['REALERT_HOURS', '3', '같은 문제가 계속될 때 몇 시간마다 다시 알릴지'],
   ['EXPIRE_NOTICE_DAYS', '5', '계약 노출 종료 며칠 전부터 만료 임박 알림을 매일 보낼지. 같은 광고그룹에 새 계약이 잡혀 남은 기간이 이 일수를 넘으면 자동으로 멈춤'],
-  ['EXPIRE_ALERT_HOUR', '9', '계약 확인·만료 알림을 보낼 시각(0~23시). 바꾼 뒤 setup() 또는 06 탭 "설정 저장"으로 트리거 재설치'],
+  ['EXPIRE_ALERT_HOUR', '9', '계약 확인·만료 알림을 보낼 시각(0~23시). 바꾼 뒤 setup() 또는 모니터링 설정 탭 "설정 저장"으로 트리거 재설치'],
   ['BIZMONEY_THRESHOLD', '100000', '비즈머니 잔액이 이 금액(원) 이하로 내려가면 알림'],
   ['BIZMONEY_REALERT_HOURS', '24', '비즈머니가 계속 부족할 때 몇 시간마다 다시 알릴지'],
   ['ALERT_EMAIL', '', '알림 받을 이메일 (쉼표로 여러 개). 비우면 스크립트 속성 또는 본인 계정'],
@@ -77,7 +77,7 @@ function setup() {
   });
 
   installTriggers_();
-  Logger.log('설치 완료. 이제 "광고주" 시트와 "키워드" 시트를 채우거나 05 탭에서 등록하세요.');
+  Logger.log('설치 완료. 이제 "광고주" 시트와 "키워드" 시트를 채우거나 모니터링 설정 탭에서 등록하세요.');
 }
 
 function installTriggers_() {
@@ -540,7 +540,7 @@ function checkBizmoney() {
     var row = { adv: adv, bizmoney: '', budgetLock: '', state: '', note: '', lastAlert: p.lastAlert, lastAlertState: p.lastAlertState };
 
     if (!adv.customerId) {
-      row.state = BIZ.NOID; row.note = '06 탭에서 customerId를 입력하세요';
+      row.state = BIZ.NOID; row.note = '모니터링 설정 탭에서 customerId를 입력하세요';
     } else {
       try {
         var b = naverApi_('GET', '/billing/bizmoney', adv.customerId) || {};
@@ -604,13 +604,13 @@ function sendBizmoneyAlerts_(settings, alerts, threshold) {
       '<p style="color:#555;margin:0 0 14px">' + nowStr_() + ' 기준</p>' +
       (b.length ? '<h3 style="font-size:14px;margin:12px 0 6px">⚠ 충전이 필요해요</h3><table style="border-collapse:collapse;width:100%;font-size:13px">' + b.map(rowHtml).join('') + '</table>' : '') +
       (r.length ? '<h3 style="font-size:14px;margin:16px 0 6px">✅ 충전이 확인됐어요</h3><table style="border-collapse:collapse;width:100%;font-size:13px">' + r.map(rowHtml).join('') + '</table>' : '') +
-      '<p style="color:#555;font-size:12px;line-height:1.6;margin-top:14px">기준 금액 ' + won_(threshold) + ' 이하 또는 예산 잠금이면 알림이 오고, 계속 부족하면 ' + (settings.BIZMONEY_REALERT_HOURS || 24) + '시간마다 다시 알립니다. 기준은 06 모니터링 설정 탭에서 바꿀 수 있어요.</p>' + tool;
+      '<p style="color:#555;font-size:12px;line-height:1.6;margin-top:14px">기준 금액 ' + won_(threshold) + ' 이하 또는 예산 잠금이면 알림이 오고, 계속 부족하면 ' + (settings.BIZMONEY_REALERT_HOURS || 24) + '시간마다 다시 알립니다. 기준은 모니터링 설정 탭에서 바꿀 수 있어요.</p>' + tool;
     MailApp.sendEmail({ to: to, subject: subject, htmlBody: html });
   });
 }
 
 /* =========================================================
- * 5. 웹앱 (index.html 05·06·07 탭과 통신)
+ * 5. 웹앱 (index.html 노출 모니터링·모니터링 설정·비즈머니 탭과 통신)
  * ========================================================= */
 
 function json_(obj) {
