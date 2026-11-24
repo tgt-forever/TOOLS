@@ -248,53 +248,85 @@ function checkOne_(keyword, media, patterns) {
   if (!block) return { result: RESULT.DOWN, evidence: '브랜드검색 영역 없음', note: '' };
 
   var hit = matchPatterns_(block, patterns);
-  if (hit) return { result: RESULT.UP, evidence: '브랜드검색 영역에서 "' + hit + '" 확인', note: '' };
+  if (hit) {
+    return { result: RESULT.UP, evidence: hit.via === 'url'
+      ? '브랜드검색 표시 URL(' + shortUrl_(block.urls[0]) + ')에서 "' + hit.p + '" 확인'
+      : '브랜드검색 광고 문구에서 "' + hit.p + '" 확인', note: '' };
+  }
 
-  var head = block.text.slice(0, 80);
+  var head = block.text.slice(0, 60);
+  var who = block.urls.length ? '표시 URL ' + block.urls.map(shortUrl_).join(', ') + ' · ' : '';
   return {
     result: RESULT.OTHER,
-    evidence: '브랜드검색 영역은 있으나 식별 문구 불일치 → "' + head + '…"',
-    note: patterns.length ? '' : '식별 문구가 비어 있음 — 광고주 시트에 브랜드명을 넣어 주세요'
+    evidence: '브랜드검색 영역은 있으나 식별 문구 불일치 → ' + who + '"' + head + '…"',
+    note: patterns.length ? '' : '식별 문구가 비어 있음 — 광고주 시트에 브랜드명이나 사이트 주소를 넣어 주세요'
   };
 }
 
-/** 검색 결과 HTML에서 브랜드검색 영역만 잘라 텍스트/링크로 돌려준다 */
+function shortUrl_(u) { return String(u || '').replace(/^https?:\/\//i, '').replace(/^www\./i, '').replace(/\/$/, ''); }
+
+/** 시작 태그부터 짝이 맞는 닫는 태그까지 잘라낸다 (브랜드검색 영역만 정확히 얻기 위함) */
+function balancedElement_(html, start) {
+  var m = /^<(\w+)/.exec(html.substr(start, 40));
+  if (!m) return null;
+  var re = new RegExp('<(/?)' + m[1] + '\\b[^>]*?(/?)>', 'gi');
+  re.lastIndex = start;
+  var depth = 0, t, limit = start + 600000;
+  while ((t = re.exec(html)) && t.index < limit) {
+    if (t[2] === '/') continue;           // <div ... /> 같은 자기 닫힘 태그
+    depth += t[1] ? -1 : 1;
+    if (depth === 0) return html.slice(start, re.lastIndex);
+  }
+  return null;
+}
+
+function decodeEntities_(s) {
+  return String(s || '').replace(/&quot;/g, '"').replace(/&#39;|&#x27;/g, "'").replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&nbsp;/g, ' ').replace(/&amp;/g, '&');
+}
+
+/**
+ * 검색 결과 HTML에서 브랜드검색 영역만 잘라
+ *  - urls : 광고의 표시 URL (네이버가 광고 데이터에 넣어두는 display_url — 광고주를 가장 확실하게 알려줌)
+ *  - text : 화면에 보이는 광고 문구
+ *  - alts : 이미지 대체 텍스트 등
+ * 을 돌려준다.
+ * ※ 영역 안의 숨은 데이터에는 검색어(예: "아이페이스")도 들어 있어서, 원문 HTML 전체를 뒤지면 다른 업체 광고도
+ *   "노출"로 잘못 볼 수 있다. 그래서 표시 URL·보이는 문구·대체 텍스트만 본다.
+ */
 function extractBrandBlock_(html, media) {
   var re = media === 'PC'
     ? /<div[^>]+class="[^"]*\bbrand_search\b[^"]*"/
     : /<section[^>]+class="[^"]*\bsp_brand\b[^"]*"/;
   var m = re.exec(html);
   if (!m) return null;
-  var seg = html.substr(m.index, 120000);
-  var stops = media === 'PC'
-    ? ['<div class="sc_new', '<section class="sc_new', 'data-nlog-area="pwl', '<div class="api_subject_bx']
-    : ['<section class="sc ', '<div class="api_subject_bx', '<section class="sc_new'];
-  var cut = seg.length;
-  stops.forEach(function (s) {
-    var j = seg.indexOf(s, 1500);
-    if (j > 0 && j < cut) cut = j;
-  });
-  seg = seg.slice(0, cut);
+  var seg = balancedElement_(html, m.index) || html.substr(m.index, 60000);
+  var dec = decodeEntities_(seg);
+  var urls = [], um, ure = /"display_?url"\s*:\s*"([^"]+)"/gi;
+  while ((um = ure.exec(dec))) { if (urls.indexOf(um[1]) < 0) urls.push(um[1]); }
   var text = seg
     .replace(/<script[\s\S]*?<\/script>/gi, ' ')
     .replace(/<style[\s\S]*?<\/style>/gi, ' ')
-    .replace(/<[^>]+>/g, ' ')
-    .replace(/&nbsp;|&amp;|&quot;|&#39;|&lt;|&gt;/g, ' ')
-    .replace(/\s+/g, ' ')
-    .trim();
-  var hrefs = (seg.match(/href="https?:\/\/[^"]+"/g) || []).join(' ');
-  var alts = (seg.match(/(?:alt|title|aria-label)="[^"]+"/g) || []).join(' ');
-  return { text: text, hrefs: hrefs, alts: alts };
+    .replace(/<(textarea|template|noscript)[\s\S]*?<\/\1>/gi, ' ')
+    .replace(/<[^>]+>/g, ' ');
+  text = decodeEntities_(text).replace(/\s+/g, ' ').trim();
+  var alts = (seg.match(/(?:alt|aria-label)="[^"]+"/g) || []).join(' ');
+  return { text: text, alts: decodeEntities_(alts), urls: urls };
 }
 
 function norm_(s) { return String(s || '').toLowerCase().replace(/[\s\-_.,·'"()]/g, ''); }
 
+/** 1순위 표시 URL, 2순위 광고 문구·대체 텍스트에서 식별 문구를 찾는다 → { p, via } 또는 null */
 function matchPatterns_(block, patterns) {
   if (!patterns || !patterns.length) return null;
-  var hay = norm_(block.text + ' ' + block.alts) + ' ' + String(block.hrefs).toLowerCase();
+  var urlHay = norm_(block.urls.join(' '));
+  var textHay = norm_(block.text + ' ' + block.alts);
   for (var i = 0; i < patterns.length; i++) {
     var p = norm_(patterns[i]);
-    if (p && hay.indexOf(p) >= 0) return patterns[i];
+    if (p && urlHay.indexOf(p) >= 0) return { p: patterns[i], via: 'url' };
+  }
+  for (var j = 0; j < patterns.length; j++) {
+    var q = norm_(patterns[j]);
+    if (q && textHay.indexOf(q) >= 0) return { p: patterns[j], via: 'text' };
   }
   return null;
 }
