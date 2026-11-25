@@ -696,6 +696,28 @@
   .ed-bottom button{ padding:9px 14px; font-size:13px; }
   .ed-sp{ flex:1; }
 
+  /* 동영상 편집 */
+  .vd-total{ flex:0 0 auto; margin-left:auto; font-family:var(--font-mono); font-size:12px; color:var(--ink-soft); white-space:nowrap; }
+  .vd-thumb{ position:relative; flex:0 0 auto; width:96px; border:2px solid transparent; border-radius:9px; padding:3px; cursor:pointer; text-align:center; }
+  .vd-thumb.on{ border-color:var(--accent-strong); background:var(--accent-soft); }
+  .vd-thumb img{ width:86px; height:50px; object-fit:cover; border-radius:5px; background:#000; display:block; margin:0 auto; }
+  .vd-thumb .nm{ font-size:10.5px; color:var(--ink-soft); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; margin-top:2px; }
+  .vd-thumb .du{ position:absolute; top:6px; right:7px; font-family:var(--font-mono); font-size:10px; font-weight:600; color:#fff; background:rgba(0,0,0,.6); border-radius:4px; padding:0 4px; }
+  .vd-thumb .ctl{ display:flex; justify-content:center; gap:2px; margin-top:1px; }
+  .vd-thumb .ctl button{ all:unset; font-size:10.5px; padding:1px 5px; border-radius:5px; cursor:pointer; color:var(--ink-soft); }
+  .vd-thumb .ctl button:hover{ background:var(--bg-soft); color:var(--ink); }
+  .vd-stage canvas{ background:#000; cursor:default; }
+  .vd-player{ display:flex; align-items:center; gap:10px; margin-top:10px; }
+  .vd-play{ all:unset; box-sizing:border-box; width:38px; height:38px; border-radius:50%; background:var(--accent); color:var(--on-accent); display:flex; align-items:center; justify-content:center; font-size:14px; cursor:pointer; flex:0 0 auto; }
+  .vd-player input[type="range"]{ flex:1; min-width:0; accent-color:var(--accent-strong); }
+  .vd-time, .vd-mono{ font-family:var(--font-mono); font-size:12px; color:var(--ink-soft); white-space:nowrap; }
+  .vd-prog{ height:8px; background:var(--bg-soft); border-radius:99px; overflow:hidden; margin:10px 0 6px; }
+  .vd-prog[hidden]{ display:none; }
+  .vd-prog b{ display:block; height:100%; width:0; background:var(--accent); transition:width .25s; }
+  .vd-result video{ width:100%; border-radius:10px; margin-top:8px; background:#000; display:block; }
+  .vd-result .ed-row{ margin-top:8px; }
+  .ed-seg button:disabled{ opacity:.35; cursor:not-allowed; }
+
   /* 미니 위젯 창 — 핑크 + 잔디 + 복숭아 고양이 (4:3) */
   .wg-body{ margin:0; background:#FFF0F6; font-family:var(--font-body); color:#4A1D2E; font-size:12px; line-height:1.4; overflow:hidden; }
   .wg{ height:100vh; display:flex; flex-direction:column; box-sizing:border-box; }
@@ -819,16 +841,20 @@
         <span class="nav-index">03</span>
         <span class="nav-name">이미지 편집</span>
       </button>
-      <button class="nav-item" data-tab="t5">
+      <button class="nav-item" data-tab="t8">
         <span class="nav-index">04</span>
+        <span class="nav-name">동영상 편집</span>
+      </button>
+      <button class="nav-item" data-tab="t5">
+        <span class="nav-index">05</span>
         <span class="nav-name">노출 모니터링</span>
       </button>
       <button class="nav-item" data-tab="t6">
-        <span class="nav-index">05</span>
+        <span class="nav-index">06</span>
         <span class="nav-name">모니터링 설정</span>
       </button>
       <button class="nav-item" data-tab="t7">
-        <span class="nav-index">06</span>
+        <span class="nav-index">07</span>
         <span class="nav-name">비즈머니</span>
       </button>
     </div>
@@ -1235,10 +1261,192 @@
       </div><!-- /t4_editView -->
     </section>
 
+    <!-- ============ TAB 8 (화면 번호 04 동영상 편집) ============ -->
+    <section class="panel" id="panel-t8">
+      <div class="panel-head">
+        <div class="eyebrow">TOOL 04 · VIDEO</div>
+        <h1>동영상 편집</h1>
+        <p class="lead">영상을 자르고 이어붙이고, 광고 규격에 맞추고, 자막·로고·배경음악을 넣어 MP4로 저장해요. 모든 처리는 브라우저 안에서 끝나고 영상이 서버로 전송되지 않아요.</p>
+      </div>
+
+      <div class="card ed-card">
+        <div class="ed-top">
+          <label class="ed-add">＋ 영상 추가<input type="file" id="vd_file" accept="video/*,.mov,.mkv,.m4v" multiple></label>
+          <div class="ed-strip" id="vd_strip"></div>
+          <span class="vd-total" id="vd_total"></span>
+        </div>
+
+        <div id="vd_empty">
+          <label class="upload-zone" style="margin-top:14px;">
+            <input type="file" id="vd_file2" accept="video/*,.mov,.mkv,.m4v" multiple>
+            <div class="u-icon">🎬</div>
+            <div class="u-title">편집할 영상을 클릭해서 고르거나 끌어다 놓으세요</div>
+            <div class="u-sub">여러 개를 올리면 순서대로 이어붙여요 · MP4·MOV·WebM · 크롬/엣지 권장 · 몇 분 이내 영상이 적당해요</div>
+          </label>
+        </div>
+
+        <div class="ed-main" id="vd_main" style="display:none;">
+          <div class="ed-left">
+            <div class="ed-stage vd-stage" id="vd_stage"><canvas id="vd_canvas"></canvas></div>
+            <div class="vd-player">
+              <button type="button" class="vd-play" id="vd_play" title="재생 / 일시정지 (스페이스바)">▶</button>
+              <input type="range" id="vd_seek" min="0" max="1" step="0.01" value="0">
+              <span class="vd-time" id="vd_time">0:00.0 / 0:00.0</span>
+            </div>
+            <div class="ed-hint">미리보기에서 자막을 끌어서 옮길 수 있어요. 스페이스바로 재생·정지해요.</div>
+          </div>
+
+          <div class="ed-panel">
+            <div class="ed-tools" id="vd_tools">
+              <button type="button" data-tool="trim" class="on" title="앞뒤 자르기·나누기·순서 바꾸기"><i>✂️</i>자르기·순서</button>
+              <button type="button" data-tool="size" title="1:1·9:16 등 광고 규격, 해상도"><i>📐</i>규격</button>
+              <button type="button" data-tool="text" title="자막·문구 넣기"><i>🔤</i>자막·글자</button>
+              <button type="button" data-tool="logo" title="로고 워터마크"><i>💧</i>로고</button>
+              <button type="button" data-tool="sound" title="음소거·볼륨·배경음악"><i>🎵</i>소리</button>
+              <button type="button" data-tool="speed" title="빠르게·느리게·회전·반전"><i>⏩</i>속도·회전</button>
+              <button type="button" data-tool="color" title="밝기·대비·채도·필터"><i>🎨</i>색 보정</button>
+              <button type="button" data-tool="fade" title="처음·끝 서서히 나타나기/사라지기"><i>🌗</i>페이드</button>
+              <button type="button" data-tool="snap" title="썸네일 이미지·GIF 만들기"><i>🖼️</i>썸네일·GIF</button>
+              <button type="button" data-tool="export" title="MP4로 저장"><i>📦</i>저장</button>
+            </div>
+
+            <div class="ed-pane on" data-pane="trim">
+              <div class="ed-label" id="vd_clipName" style="margin-top:0;">-</div>
+              <div class="ed-sl"><div><span>시작</span><b id="vd_startV">0:00.0</b></div><input type="range" id="vd_start" min="0" max="1" step="0.05" value="0"></div>
+              <div class="ed-sl"><div><span>끝</span><b id="vd_endV">0:00.0</b></div><input type="range" id="vd_end" min="0" max="1" step="0.05" value="1"></div>
+              <div class="ed-grid2">
+                <button type="button" class="ghost" id="vd_setStart">⇤ 지금 위치를 시작으로</button>
+                <button type="button" class="ghost" id="vd_setEnd">지금 위치를 끝으로 ⇥</button>
+                <button type="button" class="ghost" id="vd_split">✂ 지금 위치에서 나누기</button>
+                <button type="button" class="ghost" id="vd_resetTrim">자르기 되돌리기</button>
+              </div>
+              <p class="hint">중간 부분을 빼려면: 뺄 부분이 시작되는 곳에서 "나누기" → 끝나는 곳에서 한 번 더 "나누기" → 가운데 조각을 위 목록에서 ✕. 목록의 ◀ ▶로 순서를 바꿔요.</p>
+            </div>
+
+            <div class="ed-pane" data-pane="size">
+              <div class="ed-label" style="margin-top:0;">화면 비율</div>
+              <div class="ed-grid3" id="vd_aspects">
+                <button type="button" data-a="orig" class="on">원본</button><button type="button" data-a="1:1">1:1 정사각</button><button type="button" data-a="9:16">9:16 세로</button>
+                <button type="button" data-a="16:9">16:9 가로</button><button type="button" data-a="4:5">4:5 피드</button>
+              </div>
+              <div class="ed-seg" id="vd_fit"><button type="button" data-f="cover" class="on">꽉 채우기 (잘라냄)</button><button type="button" data-f="contain">여백 넣기</button></div>
+              <div class="ed-row"><label class="ed-c">여백 색 <input type="color" id="vd_bg" value="#000000"></label></div>
+              <div class="ed-label">해상도</div>
+              <div class="ed-seg" id="vd_res"><button type="button" data-r="1080" class="on">1080p</button><button type="button" data-r="720">720p</button><button type="button" data-r="480">480p</button></div>
+              <p class="hint" id="vd_outSize"></p>
+            </div>
+
+            <div class="ed-pane" data-pane="text">
+              <textarea class="ed-ta" id="vd_txt" rows="2">자막을 입력하세요</textarea>
+              <input type="hidden" id="vd_font" value="Pretendard Variable">
+              <div class="ed-fontpick" id="vd_fontPick">
+                <button type="button" class="ed-fontbtn" id="vd_fontBtn"><span id="vd_fontLabel">프리텐다드</span><em>▾</em></button>
+                <div class="ed-fontlist" id="vd_fontList" hidden></div>
+              </div>
+              <div class="ed-sl"><div><span>글자 크기</span><b id="vd_tsizeV">60</b></div><input type="range" id="vd_tsize" min="20" max="200" value="60"></div>
+              <div class="ed-row"><label class="ed-c">글자색 <input type="color" id="vd_tcolor" value="#ffffff"></label><label class="ed-chk"><input type="checkbox" id="vd_tbold" checked> 굵게</label></div>
+              <div class="ed-row"><label class="ed-c">외곽선 <input type="color" id="vd_tstroke" value="#000000"></label><input type="range" id="vd_tstrokeW" min="0" max="10" value="4" style="flex:1;" title="외곽선 두께"></div>
+              <div class="ed-row"><label class="ed-chk"><input type="checkbox" id="vd_tbox"> 배경 박스</label><input type="color" id="vd_tboxColor" value="#000000"><input type="range" id="vd_tboxOp" min="10" max="100" value="55" style="flex:1;" title="박스 진하기"></div>
+              <div class="ed-label">위치 (미리보기에서 끌어서 옮겨도 돼요)</div>
+              <div class="ed-seg" id="vd_tpos"><button type="button" data-p="0.12">위</button><button type="button" data-p="0.5">가운데</button><button type="button" data-p="0.86" class="on">아래</button></div>
+              <div class="ed-label">나오는 시간</div>
+              <div class="ed-row"><label class="ed-chk"><input type="checkbox" id="vd_tall"> 영상 처음부터 끝까지</label></div>
+              <div class="ed-row" id="vd_trange">
+                <button type="button" class="ghost" id="vd_tfrom">시작 = 지금</button><b class="vd-mono" id="vd_tfromV">0:00.0</b>~<b class="vd-mono" id="vd_ttoV">0:03.0</b><button type="button" class="ghost" id="vd_tto">끝 = 지금</button>
+              </div>
+              <button type="button" class="primary ed-full" id="vd_addText">＋ 자막 추가</button>
+              <div class="ed-layers" id="vd_texts" style="margin-top:10px;"></div>
+              <p class="hint">목록에서 자막을 고르면 위 값을 바꿔서 바로 고칠 수 있어요.</p>
+            </div>
+
+            <div class="ed-pane" data-pane="logo">
+              <div style="margin-bottom:10px;"><label class="ed-filebtn">로고 이미지 고르기<input type="file" id="vd_logoFile" accept="image/*"></label><span class="hint" id="vd_logoName" style="margin-left:6px;">없음</span></div>
+              <div class="ed-sl"><div><span>크기</span><b id="vd_logoSizeV">18</b></div><input type="range" id="vd_logoSize" min="3" max="50" value="18"></div>
+              <div class="ed-sl"><div><span>진하기</span><b id="vd_logoOpV">85</b></div><input type="range" id="vd_logoOp" min="10" max="100" value="85"></div>
+              <div class="ed-label">위치</div>
+              <div class="ed-pos" id="vd_logoPos">
+                <button type="button" data-p="tl">↖</button><button type="button" data-p="tc">↑</button><button type="button" data-p="tr" class="on">↗</button>
+                <button type="button" data-p="ml">←</button><button type="button" data-p="mc">●</button><button type="button" data-p="mr">→</button>
+                <button type="button" data-p="bl">↙</button><button type="button" data-p="bc">↓</button><button type="button" data-p="br">↘</button>
+              </div>
+              <button type="button" class="ghost ed-full" id="vd_logoRemove" style="margin-top:12px;">로고 빼기</button>
+            </div>
+
+            <div class="ed-pane" data-pane="sound">
+              <div class="ed-row"><label class="ed-chk"><input type="checkbox" id="vd_mute"> 원본 소리 끄기</label></div>
+              <div class="ed-sl"><div><span>원본 볼륨</span><b id="vd_volV">100%</b></div><input type="range" id="vd_vol" min="0" max="200" value="100"></div>
+              <div class="ed-label">배경음악</div>
+              <div style="margin-bottom:10px;"><label class="ed-filebtn">음악 파일 고르기<input type="file" id="vd_musicFile" accept="audio/*"></label><span class="hint" id="vd_musicName" style="margin-left:6px;">없음</span></div>
+              <div class="ed-sl"><div><span>음악 볼륨</span><b id="vd_mvolV">80%</b></div><input type="range" id="vd_mvol" min="0" max="200" value="80"></div>
+              <div class="ed-sl"><div><span>음악 시작 위치</span><b id="vd_moffV">0:00.0</b></div><input type="range" id="vd_moff" min="0" max="1" step="0.1" value="0"></div>
+              <div class="ed-row"><label class="ed-chk"><input type="checkbox" id="vd_mloop" checked> 영상이 더 길면 음악 반복</label></div>
+              <button type="button" class="ghost ed-full" id="vd_musicRemove">음악 빼기</button>
+              <p class="hint">저작권이 있는 음악을 광고에 쓰면 문제가 될 수 있어요. 사용 권한이 있는 음악만 넣으세요.</p>
+            </div>
+
+            <div class="ed-pane" data-pane="speed">
+              <div class="ed-label" style="margin-top:0;">속도</div>
+              <div class="ed-grid3" id="vd_speeds">
+                <button type="button" data-s="0.5">0.5배</button><button type="button" data-s="0.75">0.75배</button><button type="button" data-s="1" class="on">1배</button>
+                <button type="button" data-s="1.25">1.25배</button><button type="button" data-s="1.5">1.5배</button><button type="button" data-s="2">2배</button>
+              </div>
+              <div class="ed-label">회전·반전</div>
+              <div class="ed-grid2">
+                <button type="button" class="ghost" id="vd_rotL">⟲ 왼쪽 90°</button><button type="button" class="ghost" id="vd_rotR">⟳ 오른쪽 90°</button>
+                <button type="button" class="ghost" id="vd_flipH">⇋ 좌우 뒤집기</button><button type="button" class="ghost" id="vd_flipV">⇵ 상하 뒤집기</button>
+              </div>
+              <p class="hint">속도를 바꾸면 소리도 같이 빨라지거나 느려져요 (목소리 높이는 그대로).</p>
+            </div>
+
+            <div class="ed-pane" data-pane="color">
+              <div class="ed-grid3" id="vd_filters"></div>
+              <div class="ed-sl"><div><span>밝기</span><b data-vv="brightness">0</b></div><input type="range" data-vadj="brightness" min="-100" max="100" value="0"></div>
+              <div class="ed-sl"><div><span>대비</span><b data-vv="contrast">0</b></div><input type="range" data-vadj="contrast" min="-100" max="100" value="0"></div>
+              <div class="ed-sl"><div><span>채도</span><b data-vv="saturation">0</b></div><input type="range" data-vadj="saturation" min="-100" max="100" value="0"></div>
+              <div class="ed-sl"><div><span>색온도 (차갑게 ↔ 따뜻하게)</span><b data-vv="temperature">0</b></div><input type="range" data-vadj="temperature" min="-100" max="100" value="0"></div>
+              <button type="button" class="ghost ed-full" id="vd_colorReset">색 보정 초기화</button>
+            </div>
+
+            <div class="ed-pane" data-pane="fade">
+              <div class="ed-sl"><div><span>처음에 서서히 나타나기</span><b id="vd_fadeInV">0초</b></div><input type="range" id="vd_fadeIn" min="0" max="3" step="0.1" value="0"></div>
+              <div class="ed-sl"><div><span>끝에 서서히 사라지기</span><b id="vd_fadeOutV">0초</b></div><input type="range" id="vd_fadeOut" min="0" max="3" step="0.1" value="0"></div>
+              <div class="ed-row"><label class="ed-chk"><input type="checkbox" id="vd_fadeAudio" checked> 소리도 같이 페이드</label></div>
+            </div>
+
+            <div class="ed-pane" data-pane="snap">
+              <div class="ed-label" style="margin-top:0;">썸네일 이미지</div>
+              <div class="ed-row"><button type="button" class="ghost" id="vd_snapPng">지금 화면 PNG 저장</button><button type="button" class="ghost" id="vd_snapJpg">JPG 저장</button></div>
+              <div class="ed-label">GIF 만들기 (최대 15초)</div>
+              <div class="ed-row"><button type="button" class="ghost" id="vd_gfrom">시작 = 지금</button><b class="vd-mono" id="vd_gfromV">0:00.0</b>~<b class="vd-mono" id="vd_gtoV">0:03.0</b><button type="button" class="ghost" id="vd_gto">끝 = 지금</button></div>
+              <div class="ed-seg" id="vd_gw"><button type="button" data-w="320">작게 320</button><button type="button" data-w="480" class="on">보통 480</button><button type="button" data-w="640">크게 640</button></div>
+              <div class="ed-seg" id="vd_gfps"><button type="button" data-f="10" class="on">10프레임</button><button type="button" data-f="15">15프레임 (부드럽게)</button></div>
+              <button type="button" class="primary ed-full" id="vd_gif">GIF 만들기</button>
+              <div class="vd-prog" id="vd_gifProg" hidden><b></b></div>
+            </div>
+
+            <div class="ed-pane" data-pane="export">
+              <div class="ed-label" style="margin-top:0;">파일 형식</div>
+              <div class="ed-seg" id="vd_fmt"><button type="button" data-f="mp4" class="on">MP4</button><button type="button" data-f="webm">WebM</button></div>
+              <div class="ed-label">화질 · 용량</div>
+              <div class="ed-seg" id="vd_q"><button type="button" data-q="high">높게</button><button type="button" data-q="mid" class="on">보통</button><button type="button" data-q="low">작게</button></div>
+              <p class="hint" id="vd_est"></p>
+              <button type="button" class="primary ed-full" id="vd_export">🎬 동영상 만들기</button>
+              <button type="button" class="ghost ed-full" id="vd_cancel" style="display:none;margin-top:6px;">중지</button>
+              <div class="vd-prog" id="vd_prog" hidden><b></b></div>
+              <div class="hint" id="vd_progText"></div>
+              <div class="vd-result" id="vd_result"></div>
+              <p class="hint">만드는 데 영상 길이만큼 시간이 걸려요. 그동안 <b>이 탭을 화면에 띄워 두세요</b> (다른 탭으로 가면 끊길 수 있어요).</p>
+            </div>
+          </div>
+        </div>
+        <div class="status" id="vd_status"></div>
+      </div>
+    </section>
+
     <!-- ============ TAB 5 ============ -->
     <section class="panel" id="panel-t5">
       <div class="panel-head">
-        <div class="eyebrow">TOOL 04 · MONITOR</div>
+        <div class="eyebrow">TOOL 05 · MONITOR</div>
         <h1>브랜드검색 노출 모니터링</h1>
         <p class="lead">등록한 키워드의 브랜드검색 광고 노출 상태예요. <b>PC</b>·<b>모바일</b> 버튼이 <b>초록이면 노출, 빨강이면 미노출</b>이에요. 광고주·키워드 등록과 알림 설정은 <b>모니터링 설정</b> 탭에서 해요.</p>
       </div>
@@ -1310,7 +1518,7 @@
     <!-- ============ TAB 6 ============ -->
     <section class="panel" id="panel-t6">
       <div class="panel-head">
-        <div class="eyebrow">TOOL 05 · SETTINGS</div>
+        <div class="eyebrow">TOOL 06 · SETTINGS</div>
         <h1>모니터링 설정</h1>
         <p class="lead">노출 모니터링에서 감시할 <b>광고주와 키워드</b>를 등록하고 <b>알림</b>을 설정해요. 처음 한 번은 Apps Script 웹앱에 연결해야 해요 (설치 방법은 저장소의 <b>노출모니터링_설치안내.md</b>).</p>
       </div>
@@ -1438,7 +1646,7 @@
     <!-- ============ TAB 7 ============ -->
     <section class="panel" id="panel-t7">
       <div class="panel-head">
-        <div class="eyebrow">TOOL 06 · BIZMONEY</div>
+        <div class="eyebrow">TOOL 07 · BIZMONEY</div>
         <h1>비즈머니 잔액</h1>
         <p class="lead">모니터링 설정 탭에 등록한 광고주의 네이버 비즈머니 잔액을 <b>노출 확인과 같은 간격(기본 10분)</b>으로 가져와요. 잔액이 기준 금액(기본 10만원) 이하이거나 예산 잠금이 걸리면 이메일로 알려줘요.</p>
       </div>
@@ -3017,6 +3225,8 @@ async function saveWorkbookFile(wb, filename){
   ];
   const FONT_NAME = {};
   FONT_GROUPS.forEach(g => g[1].forEach(f => { FONT_NAME[f[0]] = f[1]; }));
+  window.__FONT_GROUPS = FONT_GROUPS;            // 동영상 편집에서도 같은 글꼴 목록 사용
+  window.__requestAllFonts = () => requestAllFonts();
   let fontsRequested = false;
   function requestAllFonts(){
     if(fontsRequested) return; fontsRequested = true;
@@ -3089,6 +3299,688 @@ async function saveWorkbookFile(wb, filename){
 
   setTool('adjust');
   render();
+})();
+
+/* ================= TOOL 8 : 동영상 편집 (화면 번호 04) =================
+   방식: 영상 파일을 <video>로 재생하면서 매 프레임을 캔버스에 그려(규격·회전·색·자막·로고·페이드 적용)
+   캔버스 화면 + 소리(WebAudio로 원본·배경음악 섞기)를 MediaRecorder로 녹화 → MP4/WebM.
+   - 별도 라이브러리 없이 크롬 기본 기능만 사용. 대신 "실시간" 처리라 저장에 영상 길이만큼 걸림.
+   - 클립 = { 원본 파일, start~end 구간 }. 나누기 하면 같은 원본을 공유하는 클립이 둘이 됨.
+   - 시간은 두 가지: 클립 안 시간(local, 원본 기준) / 전체 타임라인 시간(t, 속도 적용 후 결과 영상 기준). */
+(function(){
+  const $ = id => document.getElementById(id);
+  if(!$('panel-t8')) return;
+  const cv = $('vd_canvas'), cx = cv.getContext('2d');
+  const statusEl = $('vd_status');
+  const show = (el, msg, type) => { el.textContent = msg || ''; el.className = 'status' + (msg ? ' ' + type : ''); };
+  const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  const mk = (w, h) => { const c = document.createElement('canvas'); c.width = Math.max(2, Math.round(w)); c.height = Math.max(2, Math.round(h)); return c; };
+  const fmt = t => { t = Math.max(0, t || 0); const m = Math.floor(t / 60), s = t - m * 60; return m + ':' + (s < 10 ? '0' : '') + s.toFixed(1); };
+  const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
+
+  let clips = [], selId = null, seq = 0, tseq = 0;
+  const P = {
+    aspect:'orig', fit:'cover', bg:'#000000', res:1080, speed:1, rot:0, flipH:false, flipV:false,
+    adj:{ brightness:0, contrast:0, saturation:0, temperature:0 }, filter:'none',
+    fadeIn:0, fadeOut:0, fadeAudio:true,
+    mute:false, vol:100, music:null, mvol:80, moff:0, mloop:true,
+    logo:null, logoSize:18, logoOp:85, logoPos:'tr',
+    texts:[]
+  };
+  let textSel = null, tFrom = 0, tTo = 3, gFrom = 0, gTo = 3;
+  let gt = 0, playing = false, curSeg = -1, raf = 0, prevScale = 1, busy = false;
+
+  /* ---------- 시간 계산 ---------- */
+  function segments(){ let off = 0; return clips.map(c => { const len = Math.max(0, (c.end - c.start) / P.speed); const s = { c, off, len }; off += len; return s; }); }
+  const totalDur = () => segments().reduce((a, s) => a + s.len, 0);
+  function segAt(t){
+    const ss = segments(); if(!ss.length) return null;
+    for(let i = 0; i < ss.length; i++){
+      if(t < ss[i].off + ss[i].len || i === ss.length - 1){
+        const k = clamp(t - ss[i].off, 0, Math.max(0, ss[i].len - 0.001));
+        return { i, s:ss[i], local:ss[i].c.start + k * P.speed };
+      }
+    }
+    return null;
+  }
+  function seekTo(v, t){
+    return new Promise(res => {
+      if(Math.abs(v.currentTime - t) < 0.02 && v.readyState >= 2){ res(); return; }
+      let done = false;
+      const fin = () => { if(done) return; done = true; v.removeEventListener('seeked', fin); res(); };
+      v.addEventListener('seeked', fin); v.currentTime = t; setTimeout(fin, 4000);
+    });
+  }
+
+  /* ---------- 결과 영상 크기 ---------- */
+  function outSize(){
+    const c = clips[0]; if(!c) return [1280, 720];
+    const swap = P.rot % 180 !== 0;
+    const sw = swap ? c.h : c.w, sh = swap ? c.w : c.h;
+    const ar = P.aspect === 'orig' ? sw / sh : ({ '1:1':1, '9:16':9 / 16, '16:9':16 / 9, '4:5':4 / 5 })[P.aspect];
+    const short = P.res;
+    let W, H;
+    if(ar >= 1){ H = short; W = short * ar; } else { W = short; H = short / ar; }
+    W = Math.round(W / 2) * 2; H = Math.round(H / 2) * 2;
+    return [W, H];
+  }
+
+  /* ---------- 한 프레임 그리기 (미리보기·저장·GIF 공통) ---------- */
+  const FPRE = { none:['원본',{}], gray:['흑백',{ grayscale:100 }], sepia:['세피아',{ sepia:80 }], vintage:['빈티지',{ sepia:35, contrast:-10, saturation:-20 }],
+    warm:['따뜻하게',{ temperature:40 }], cool:['차갑게',{ temperature:-40 }], vivid:['쨍하게',{ contrast:15, saturation:40 }], soft:['부드럽게',{ contrast:-15, brightness:6, saturation:-10 }], mono:['강한 흑백',{ grayscale:100, contrast:30 }] };
+  function effAdj(){ const a = { ...P.adj, grayscale:0, sepia:0 }; const p = (FPRE[P.filter] || FPRE.none)[1]; for(const k in p) a[k] = (a[k] || 0) + p[k]; return a; }
+  function filterStr(a){
+    return `brightness(${Math.max(0, 1 + a.brightness / 100).toFixed(3)}) contrast(${Math.max(0, 1 + a.contrast / 100).toFixed(3)}) saturate(${Math.max(0, 1 + a.saturation / 100).toFixed(3)})`
+      + (a.grayscale ? ` grayscale(${Math.min(100, a.grayscale)}%)` : '') + (a.sepia ? ` sepia(${Math.min(100, a.sepia)}%)` : '');
+  }
+  function textActive(o, t){ return o.all || (t >= o.from - 0.001 && t <= o.to + 0.001); }
+  function drawText(x, o, W, H, isPreview){
+    const fs = Math.max(4, o.size / 1000 * H), lines = String(o.text || '').split('\n'), lh = fs * 1.25;
+    x.save();
+    x.font = `${o.bold ? 700 : 400} ${fs}px "${o.font}", "Pretendard Variable", sans-serif`;
+    const ws = lines.map(l => x.measureText(l).width), tw = Math.max(1, ...ws), th = lh * lines.length;
+    const pad = o.box ? fs * 0.35 : 0, bw = tw + pad * 2, bh = th + pad * 2;
+    const bx = clamp(o.x * W - bw / 2, 0, Math.max(0, W - bw)), by = clamp(o.y * H - bh / 2, 0, Math.max(0, H - bh));
+    if(o.box){ x.globalAlpha = o.boxOp / 100; x.fillStyle = o.boxColor; x.beginPath(); x.roundRect(bx, by, bw, bh, fs * 0.25); x.fill(); x.globalAlpha = 1; }
+    x.textBaseline = 'top'; x.textAlign = 'center';
+    lines.forEach((l, i) => {
+      const tx = bx + bw / 2, ty = by + pad + i * lh + (lh - fs) / 2;
+      if(o.strokeW > 0){ x.lineJoin = 'round'; x.lineWidth = o.strokeW / 10 * fs * 0.3; x.strokeStyle = o.strokeColor; x.strokeText(l, tx, ty); }
+      x.fillStyle = o.color; x.fillText(l, tx, ty);
+    });
+    x.restore();
+    if(isPreview) o._bb = { x:bx, y:by, w:bw, h:bh };
+  }
+  function drawFrame(x, W, H, v, t, isPreview){
+    const T = totalDur();
+    x.save();
+    x.fillStyle = P.bg; x.fillRect(0, 0, W, H);
+    if(v && v.readyState >= 2 && v.videoWidth){
+      const vw = v.videoWidth, vh = v.videoHeight, swap = P.rot % 180 !== 0;
+      const sw = swap ? vh : vw, sh = swap ? vw : vh;
+      const s = P.fit === 'cover' ? Math.max(W / sw, H / sh) : Math.min(W / sw, H / sh);
+      const a = effAdj();
+      // save/restore로 감싸야 미리보기·GIF에서 바깥에 걸어둔 축소 비율이 유지됨
+      x.save();
+      x.filter = filterStr(a);
+      x.translate(W / 2, H / 2); x.rotate(P.rot * Math.PI / 180); x.scale(P.flipH ? -1 : 1, P.flipV ? -1 : 1);
+      x.drawImage(v, -vw * s / 2, -vh * s / 2, vw * s, vh * s);
+      x.restore();
+      if(a.temperature){
+        const rw = Math.min(W, sw * s), rh = Math.min(H, sh * s);
+        x.globalCompositeOperation = 'soft-light'; x.globalAlpha = Math.min(1, Math.abs(a.temperature) / 100);
+        x.fillStyle = a.temperature > 0 ? 'rgb(255,150,40)' : 'rgb(40,140,255)';
+        x.fillRect((W - rw) / 2, (H - rh) / 2, rw, rh);
+        x.globalCompositeOperation = 'source-over'; x.globalAlpha = 1;
+      }
+    }
+    // 로고
+    if(P.logo){
+      const lw = P.logoSize / 100 * W, lh = lw * P.logo.height / P.logo.width, m = Math.min(W, H) * 0.035;
+      const row = P.logoPos[0], col = P.logoPos[1];
+      const lx = col === 'l' ? m : col === 'c' ? (W - lw) / 2 : W - m - lw;
+      const ly = row === 't' ? m : row === 'm' ? (H - lh) / 2 : H - m - lh;
+      x.globalAlpha = P.logoOp / 100; x.drawImage(P.logo, lx, ly, lw, lh); x.globalAlpha = 1;
+    }
+    // 자막
+    P.texts.forEach(o => { if(textActive(o, t)) drawText(x, o, W, H, isPreview); else if(isPreview) o._bb = null; });
+    // 페이드 (검은 화면으로 서서히)
+    let fa = 0;
+    if(P.fadeIn > 0 && t < P.fadeIn) fa = Math.max(fa, 1 - t / P.fadeIn);
+    if(P.fadeOut > 0 && t > T - P.fadeOut) fa = Math.max(fa, 1 - (T - t) / P.fadeOut);
+    if(fa > 0){ x.globalAlpha = clamp(fa, 0, 1); x.fillStyle = '#000'; x.fillRect(0, 0, W, H); x.globalAlpha = 1; }
+    x.restore();
+  }
+  function fadeGain(t, T){
+    if(!P.fadeAudio) return 1;
+    let g = 1;
+    if(P.fadeIn > 0 && t < P.fadeIn) g = Math.min(g, t / P.fadeIn);
+    if(P.fadeOut > 0 && t > T - P.fadeOut) g = Math.min(g, (T - t) / P.fadeOut);
+    return clamp(g, 0, 1);
+  }
+
+  /* ---------- 미리보기 ---------- */
+  function previewFrame(){
+    if(!clips.length) return;
+    const [W, H] = outSize();
+    const avail = Math.max(240, $('vd_stage').clientWidth - 24);
+    const s = Math.min(avail / W, 480 / H, 1);
+    const pw = Math.max(2, Math.round(W * s)), ph = Math.max(2, Math.round(H * s));
+    if(cv.width !== pw || cv.height !== ph){ cv.width = pw; cv.height = ph; }
+    prevScale = pw / W;
+    const sa = segAt(gt);
+    cx.save(); cx.scale(pw / W, ph / H);
+    drawFrame(cx, W, H, sa ? sa.s.c.v : null, gt, true);
+    const o = P.texts.find(x => x.id === textSel);
+    if(o && o._bb){ cx.setLineDash([8, 6]); cx.lineWidth = 3 / prevScale; cx.strokeStyle = '#FACC15'; cx.strokeRect(o._bb.x - 4, o._bb.y - 4, o._bb.w + 8, o._bb.h + 8); }
+    cx.restore();
+  }
+  function updateTimeUI(){
+    const T = totalDur();
+    $('vd_seek').max = Math.max(0.01, T).toFixed(2);
+    if(document.activeElement !== $('vd_seek')) $('vd_seek').value = gt.toFixed(2);
+    $('vd_time').textContent = `${fmt(gt)} / ${fmt(T)}`;
+    $('vd_total').textContent = clips.length ? `전체 ${fmt(T)}` : '';
+  }
+  let musicEl = null;
+  function musicTimeAt(t){
+    if(!P.music) return null;
+    let mt = P.moff + t; const d = P.music.dur || 0;
+    if(d > 0 && mt >= d){ if(!P.mloop) return null; mt = mt % d; }
+    return mt;
+  }
+  function syncMusic(){
+    if(!P.music){ if(musicEl) musicEl.pause(); return; }
+    if(!musicEl || musicEl._url !== P.music.url){ if(musicEl) musicEl.pause(); musicEl = new Audio(P.music.url); musicEl._url = P.music.url; }
+    musicEl.volume = Math.min(1, P.mvol / 100);
+    const mt = musicTimeAt(gt);
+    if(!playing || mt == null){ musicEl.pause(); return; }
+    musicEl.currentTime = mt; musicEl.play().catch(() => {});
+  }
+  async function startSegAt(t){
+    const sa = segAt(t); if(!sa){ stop(); return; }
+    curSeg = sa.i;
+    const v = sa.s.c.v;
+    clips.forEach(c => { if(c.v !== v) c.v.pause(); });
+    v.playbackRate = P.speed; v.muted = P.mute; v.volume = Math.min(1, P.vol / 100);
+    await seekTo(v, sa.local);
+    if(!playing) return;
+    try{ await v.play(); }catch(e){}
+  }
+  function tick(){
+    if(!playing) return;
+    const ss = segments(), s = ss[curSeg];
+    if(s){
+      const v = s.c.v;
+      if(!v.seeking && v.currentTime >= s.c.start - 0.05) gt = s.off + (v.currentTime - s.c.start) / P.speed;
+      if(!v.seeking && (v.currentTime >= s.c.end - 0.04 || v.ended)){
+        v.pause();
+        if(curSeg + 1 < ss.length){ gt = ss[curSeg + 1].off; startSegAt(gt + 0.001); }
+        else{ gt = totalDur(); stop(); return; }
+      }
+    }
+    updateTimeUI(); previewFrame();
+    raf = requestAnimationFrame(tick);
+  }
+  function play(){
+    if(!clips.length || busy) return;
+    if(gt >= totalDur() - 0.05) gt = 0;
+    playing = true; $('vd_play').textContent = '⏸';
+    startSegAt(gt); syncMusic();
+    cancelAnimationFrame(raf); raf = requestAnimationFrame(tick);
+  }
+  function stop(){
+    playing = false; $('vd_play').textContent = '▶';
+    cancelAnimationFrame(raf);
+    clips.forEach(c => c.v.pause()); if(musicEl) musicEl.pause();
+    updateTimeUI(); previewFrame();
+  }
+  let seekTok = 0;
+  async function showAt(t){
+    gt = clamp(t, 0, totalDur());
+    if(playing){ startSegAt(gt); syncMusic(); return; }
+    const tok = ++seekTok, sa = segAt(gt);
+    updateTimeUI();
+    if(!sa){ previewFrame(); return; }
+    await seekTo(sa.s.c.v, sa.local);
+    if(tok !== seekTok) return;
+    curSeg = sa.i; previewFrame();
+  }
+  $('vd_play').addEventListener('click', () => playing ? stop() : play());
+  $('vd_seek').addEventListener('input', () => showAt(+$('vd_seek').value));
+  document.addEventListener('keydown', e => {
+    if(!$('panel-t8').classList.contains('active') || !clips.length) return;
+    const tag = (e.target.tagName || '').toLowerCase();
+    if(tag === 'input' || tag === 'textarea' || tag === 'select' || tag === 'button') return;
+    if(e.code === 'Space'){ e.preventDefault(); playing ? stop() : play(); }
+    if((e.key === 'Delete' || e.key === 'Backspace') && textSel){ e.preventDefault(); P.texts = P.texts.filter(o => o.id !== textSel); textSel = null; renderTexts(); previewFrame(); }
+  });
+  document.querySelectorAll('.nav-item').forEach(b => b.addEventListener('click', () => { if(b.dataset.tab !== 't8'){ if(playing) stop(); } else setTimeout(() => { previewFrame(); }, 0); }));
+  let rzT = null;
+  window.addEventListener('resize', () => { clearTimeout(rzT); rzT = setTimeout(() => { if($('panel-t8').classList.contains('active')) previewFrame(); }, 120); });
+
+  /* ---------- 영상 불러오기 ---------- */
+  function loadMeta(el){
+    return new Promise((res, rej) => {
+      const ok = () => { cleanup(); res(); }, bad = () => { cleanup(); rej(new Error('열 수 없는 형식')); };
+      const to = setTimeout(() => { cleanup(); rej(new Error('시간 초과')); }, 20000);
+      const cleanup = () => { clearTimeout(to); el.removeEventListener('loadedmetadata', ok); el.removeEventListener('error', bad); };
+      el.addEventListener('loadedmetadata', ok); el.addEventListener('error', bad);
+    });
+  }
+  async function realDuration(v){
+    if(isFinite(v.duration) && v.duration > 0) return v.duration;
+    // 일부 WebM은 길이가 Infinity로 나옴 → 끝으로 보내서 실제 길이 확인
+    await new Promise(r => { const f = () => { v.removeEventListener('durationchange', f); r(); }; v.addEventListener('durationchange', f); v.currentTime = 1e9; setTimeout(f, 3000); });
+    const d = v.duration; v.currentTime = 0; return isFinite(d) ? d : 0;
+  }
+  async function makeThumb(v, t){
+    await seekTo(v, t);
+    const c = mk(172, 100), x = c.getContext('2d');
+    const s = Math.max(c.width / v.videoWidth, c.height / v.videoHeight);
+    x.drawImage(v, (c.width - v.videoWidth * s) / 2, (c.height - v.videoHeight * s) / 2, v.videoWidth * s, v.videoHeight * s);
+    return c.toDataURL('image/jpeg', 0.7);
+  }
+  async function addFiles(list){
+    const files = Array.from(list || []).filter(f => (f.type || '').startsWith('video/') || /\.(mp4|mov|webm|m4v|mkv)$/i.test(f.name));
+    if(!files.length) return;
+    stop();
+    show(statusEl, '영상을 불러오는 중…', 'warn');
+    let added = 0;
+    for(const f of files){
+      const url = URL.createObjectURL(f);
+      const v = document.createElement('video');
+      v.preload = 'auto'; v.playsInline = true; v.src = url;
+      try{
+        await loadMeta(v);
+        if(!v.videoWidth) throw new Error('화면이 없는 파일');
+        const dur = await realDuration(v);
+        if(!(dur > 0.1)) throw new Error('길이를 알 수 없음');
+        const c = { id:'c' + (++seq), name:f.name, url, v, dur, w:v.videoWidth, h:v.videoHeight, start:0, end:dur, thumb:'' };
+        c.thumb = await makeThumb(v, Math.min(0.5, dur / 2));
+        clips.push(c); added++;
+        if(!selId) selId = c.id;
+      }catch(e){
+        URL.revokeObjectURL(url);
+        show(statusEl, `${f.name}: 이 영상은 열 수 없어요. 아이폰 HEVC(H.265) 영상은 크롬에서 안 열릴 수 있어요. MP4(H.264)로 바꿔서 올려 주세요.`, 'error');
+      }
+    }
+    $('vd_file').value = ''; $('vd_file2').value = '';
+    if(added){ show(statusEl, `영상 ${added}개를 불러왔어요.`, 'ok'); if(tTo <= tFrom) tTo = tFrom + 3; }
+    refreshAll();
+    showAt(gt);
+  }
+  $('vd_file').addEventListener('change', e => addFiles(e.target.files));
+  $('vd_file2').addEventListener('change', e => addFiles(e.target.files));
+  $('panel-t8').addEventListener('dragover', e => e.preventDefault());
+  $('panel-t8').addEventListener('drop', e => { e.preventDefault(); if(e.dataTransfer && e.dataTransfer.files.length) addFiles(e.dataTransfer.files); });
+
+  function refreshAll(){
+    const has = clips.length > 0;
+    $('vd_empty').style.display = has ? 'none' : '';
+    $('vd_main').style.display = has ? '' : 'none';
+    renderStrip(); renderTrim(); renderTexts(); renderOutInfo(); updateTimeUI();
+    if(has) previewFrame();
+  }
+  function renderStrip(){
+    $('vd_strip').innerHTML = clips.map((c, i) => `<div class="vd-thumb${c.id === selId ? ' on' : ''}" data-id="${c.id}" title="${esc(c.name)}">
+        <img src="${c.thumb}" alt=""><span class="du">${fmt((c.end - c.start) / P.speed)}</span>
+        <div class="nm">${i + 1}. ${esc(c.name)}</div>
+        <div class="ctl"><button type="button" data-a="l" title="앞으로">◀</button><button type="button" data-a="r" title="뒤로">▶</button><button type="button" data-a="x" title="빼기">✕</button></div></div>`).join('');
+    $('vd_strip').querySelectorAll('.vd-thumb').forEach(el => el.addEventListener('click', e => {
+      const i = clips.findIndex(c => c.id === el.dataset.id); if(i < 0) return;
+      const a = e.target.dataset.a;
+      if(a === 'l' && i > 0){ [clips[i - 1], clips[i]] = [clips[i], clips[i - 1]]; }
+      else if(a === 'r' && i < clips.length - 1){ [clips[i + 1], clips[i]] = [clips[i], clips[i + 1]]; }
+      else if(a === 'x'){
+        stop();
+        const c = clips[i]; clips.splice(i, 1);
+        if(!clips.some(o => o.url === c.url)){ c.v.removeAttribute('src'); c.v.load(); URL.revokeObjectURL(c.url); }
+        if(selId === c.id) selId = clips[Math.min(i, clips.length - 1)] ? clips[Math.min(i, clips.length - 1)].id : null;
+        gt = Math.min(gt, totalDur());
+      }else{
+        selId = clips[i].id;
+        const s = segments()[i]; refreshAll(); showAt(s.off); return;
+      }
+      refreshAll(); showAt(Math.min(gt, totalDur()));
+    }));
+  }
+
+  /* ---------- 도구 패널 ---------- */
+  function setTool(t){
+    document.querySelectorAll('#vd_tools button').forEach(b => b.classList.toggle('on', b.dataset.tool === t));
+    document.querySelectorAll('#panel-t8 .ed-pane').forEach(p => p.classList.toggle('on', p.dataset.pane === t));
+    if(t === 'export') renderEstimate();
+    if(t === 'text' && window.__requestAllFonts) window.__requestAllFonts();
+  }
+  document.querySelectorAll('#vd_tools button').forEach(b => b.addEventListener('click', () => setTool(b.dataset.tool)));
+  const segBind = (id, attr, fn) => document.querySelectorAll(`#${id} button`).forEach(b => b.addEventListener('click', () => {
+    if(b.disabled) return;
+    document.querySelectorAll(`#${id} button`).forEach(x => x.classList.toggle('on', x === b)); fn(b.dataset[attr], b);
+  }));
+
+  // 자르기·순서
+  const selClip = () => clips.find(c => c.id === selId) || null;
+  function renderTrim(){
+    const c = selClip(); if(!c){ $('vd_clipName').textContent = '-'; return; }
+    $('vd_clipName').textContent = `${clips.indexOf(c) + 1}번 클립 · ${c.name} (원본 ${fmt(c.dur)})`;
+    ['vd_start', 'vd_end'].forEach(id => { $(id).max = c.dur.toFixed(2); });
+    $('vd_start').value = c.start; $('vd_end').value = c.end;
+    $('vd_startV').textContent = fmt(c.start); $('vd_endV').textContent = fmt(c.end);
+  }
+  function clipOffset(c){ const s = segments().find(x => x.c === c); return s ? s.off : 0; }
+  $('vd_start').addEventListener('input', () => { const c = selClip(); if(!c) return; stop(); c.start = Math.min(+$('vd_start').value, c.end - 0.1); renderTrim(); renderStrip(); showAt(clipOffset(c)); });
+  $('vd_end').addEventListener('input', () => { const c = selClip(); if(!c) return; stop(); c.end = Math.max(+$('vd_end').value, c.start + 0.1); renderTrim(); renderStrip(); showAt(clipOffset(c) + (c.end - c.start) / P.speed - 0.05); });
+  function clipAtNow(){ const sa = segAt(gt); if(!sa) return null; selId = sa.s.c.id; return sa; }
+  $('vd_setStart').addEventListener('click', () => { const sa = clipAtNow(); if(!sa) return; stop(); const c = sa.s.c; c.start = Math.min(sa.local, c.end - 0.1); refreshAll(); showAt(clipOffset(c)); });
+  $('vd_setEnd').addEventListener('click', () => { const sa = clipAtNow(); if(!sa) return; stop(); const c = sa.s.c; c.end = Math.max(sa.local, c.start + 0.1); refreshAll(); showAt(Math.min(gt, totalDur())); });
+  $('vd_split').addEventListener('click', () => {
+    const sa = clipAtNow(); if(!sa) return; stop();
+    const c = sa.s.c, at = sa.local;
+    if(at - c.start < 0.1 || c.end - at < 0.1){ show(statusEl, '클립의 맨 앞이나 맨 끝에서는 나눌 수 없어요. 재생 위치를 가운데로 옮겨 주세요.', 'warn'); return; }
+    const n = { ...c, id:'c' + (++seq), start:at };
+    c.end = at;
+    clips.splice(clips.indexOf(c) + 1, 0, n);
+    selId = n.id; refreshAll(); showAt(clipOffset(n));
+    show(statusEl, `${fmt(at)} 지점에서 둘로 나눴어요. 필요 없는 조각은 위 목록에서 ✕를 누르세요.`, 'ok');
+  });
+  $('vd_resetTrim').addEventListener('click', () => { const c = selClip(); if(!c) return; stop(); c.start = 0; c.end = c.dur; refreshAll(); showAt(clipOffset(c)); });
+
+  // 규격
+  function renderOutInfo(){ const [W, H] = outSize(); $('vd_outSize').textContent = clips.length ? `저장될 크기: ${W} × ${H}px` : ''; }
+  segBind('vd_aspects', 'a', v => { P.aspect = v; renderOutInfo(); previewFrame(); });
+  segBind('vd_fit', 'f', v => { P.fit = v; previewFrame(); });
+  segBind('vd_res', 'r', v => { P.res = +v; renderOutInfo(); previewFrame(); });
+  $('vd_bg').addEventListener('input', () => { P.bg = $('vd_bg').value; previewFrame(); });
+
+  // 자막
+  function readText(){
+    return { text:$('vd_txt').value, font:$('vd_font').value, size:+$('vd_tsize').value, color:$('vd_tcolor').value, bold:$('vd_tbold').checked,
+      strokeColor:$('vd_tstroke').value, strokeW:+$('vd_tstrokeW').value, box:$('vd_tbox').checked, boxColor:$('vd_tboxColor').value, boxOp:+$('vd_tboxOp').value,
+      all:$('vd_tall').checked };
+  }
+  function renderTRange(){ $('vd_tfromV').textContent = fmt(tFrom); $('vd_ttoV').textContent = fmt(tTo); $('vd_trange').style.opacity = $('vd_tall').checked ? .4 : 1; }
+  function renderTexts(){
+    renderTRange();
+    $('vd_texts').innerHTML = P.texts.length ? P.texts.slice().sort((a, b) => (a.all ? -1 : a.from) - (b.all ? -1 : b.from)).map(o => `<div class="ed-layer${o.id === textSel ? ' on' : ''}" data-id="${o.id}">
+        <span class="vd-mono" style="flex:0 0 auto;">${o.all ? '전체' : fmt(o.from) + '~' + fmt(o.to)}</span><span class="nm">${esc(String(o.text).split('\n')[0] || '(빈 자막)')}</span>
+        <button type="button" data-a="del" title="삭제">✕</button></div>`).join('')
+      : '<div class="ed-empty-msg">아직 자막이 없어요.</div>';
+    $('vd_texts').querySelectorAll('.ed-layer').forEach(row => row.addEventListener('click', e => {
+      const o = P.texts.find(x => x.id === row.dataset.id); if(!o) return;
+      if(e.target.dataset.a === 'del'){ P.texts = P.texts.filter(x => x !== o); if(textSel === o.id) textSel = null; renderTexts(); previewFrame(); return; }
+      selectText(o, true);
+    }));
+  }
+  function selectText(o, seek){
+    textSel = o.id;
+    $('vd_txt').value = o.text; $('vd_font').value = o.font; setFontLabel(o.font); $('vd_tsize').value = o.size; $('vd_tsizeV').textContent = o.size;
+    $('vd_tcolor').value = o.color; $('vd_tbold').checked = o.bold; $('vd_tstroke').value = o.strokeColor; $('vd_tstrokeW').value = o.strokeW;
+    $('vd_tbox').checked = o.box; $('vd_tboxColor').value = o.boxColor; $('vd_tboxOp').value = o.boxOp; $('vd_tall').checked = o.all;
+    tFrom = o.from; tTo = o.to; renderTexts(); setTool('text');
+    if(seek && !o.all) showAt(o.from + 0.01); else previewFrame();
+  }
+  ['vd_txt','vd_font','vd_tsize','vd_tcolor','vd_tbold','vd_tstroke','vd_tstrokeW','vd_tbox','vd_tboxColor','vd_tboxOp','vd_tall'].forEach(id => {
+    $(id).addEventListener('input', () => {
+      $('vd_tsizeV').textContent = $('vd_tsize').value; renderTRange();
+      const o = P.texts.find(x => x.id === textSel);
+      if(o){ Object.assign(o, readText()); renderTexts(); }
+      previewFrame();
+    });
+  });
+  $('vd_tfrom').addEventListener('click', () => { tFrom = gt; if(tTo <= tFrom) tTo = Math.min(totalDur(), tFrom + 3); const o = P.texts.find(x => x.id === textSel); if(o){ o.from = tFrom; o.to = tTo; } renderTexts(); previewFrame(); });
+  $('vd_tto').addEventListener('click', () => { if(gt <= tFrom){ show(statusEl, '끝 시간은 시작보다 뒤여야 해요.', 'warn'); return; } tTo = gt; const o = P.texts.find(x => x.id === textSel); if(o){ o.to = tTo; } renderTexts(); previewFrame(); });
+  document.querySelectorAll('#vd_tpos button').forEach(b => b.addEventListener('click', () => {
+    document.querySelectorAll('#vd_tpos button').forEach(x => x.classList.toggle('on', x === b));
+    const o = P.texts.find(x => x.id === textSel); if(o){ o.x = 0.5; o.y = +b.dataset.p; previewFrame(); }
+  }));
+  $('vd_addText').addEventListener('click', () => {
+    if(!clips.length) return;
+    const yb = document.querySelector('#vd_tpos button.on');
+    if(!$('vd_tall').checked && tTo <= tFrom){ tFrom = gt; tTo = Math.min(totalDur(), gt + 3); }
+    const o = { id:'t' + (++tseq), x:0.5, y:yb ? +yb.dataset.p : 0.86, from:tFrom, to:tTo, ...readText() };
+    if(!String(o.text).trim()) o.text = '자막';
+    P.texts.push(o); textSel = o.id;
+    // 다음 자막은 이어서 3초 뒤로 잡아둠 (연달아 자막 넣기 편하게)
+    tFrom = o.all ? tFrom : o.to; tTo = Math.min(totalDur(), tFrom + 3);
+    renderTexts(); if(!o.all) showAt(o.from + 0.01); else previewFrame();
+    if(document.fonts) document.fonts.load(`700 40px "${o.font}"`).then(() => previewFrame()).catch(() => {});
+  });
+  // 미리보기에서 자막 끌어서 옮기기
+  let tdrag = null;
+  const evOut = e => { const r = cv.getBoundingClientRect(); return { x:(e.clientX - r.left) * cv.width / r.width / prevScale, y:(e.clientY - r.top) * cv.height / r.height / prevScale }; };
+  cv.addEventListener('pointerdown', e => {
+    const p = evOut(e);
+    const hit = P.texts.slice().reverse().find(o => o._bb && textActive(o, gt) && p.x >= o._bb.x && p.x <= o._bb.x + o._bb.w && p.y >= o._bb.y && p.y <= o._bb.y + o._bb.h);
+    if(!hit){ if(textSel){ textSel = null; renderTexts(); previewFrame(); } return; }
+    try{ cv.setPointerCapture(e.pointerId); }catch(err){}
+    if(textSel !== hit.id) selectText(hit, false);
+    const [W, H] = outSize();
+    tdrag = { o:hit, sx:p.x, sy:p.y, ox:hit.x, oy:hit.y, W, H };
+  });
+  cv.addEventListener('pointermove', e => {
+    if(!tdrag) return;
+    const p = evOut(e), o = tdrag.o;
+    o.x = clamp(tdrag.ox + (p.x - tdrag.sx) / tdrag.W, 0, 1); o.y = clamp(tdrag.oy + (p.y - tdrag.sy) / tdrag.H, 0, 1);
+    previewFrame();
+  });
+  const endT = () => { tdrag = null; };
+  cv.addEventListener('pointerup', endT); cv.addEventListener('pointercancel', endT);
+
+  // 자막 글꼴 고르기 (이미지 수정과 같은 목록, 이름을 그 글꼴로 미리 보여줌)
+  const FG = window.__FONT_GROUPS || [['기본', [['Pretendard Variable', '프리텐다드', null]]]];
+  const FNAME = {}; FG.forEach(g => g[1].forEach(f => { FNAME[f[0]] = f[1]; }));
+  function setFontLabel(f){
+    $('vd_fontLabel').textContent = FNAME[f] || f;
+    $('vd_fontLabel').style.fontFamily = `"${f}", "Pretendard Variable", sans-serif`;
+    document.querySelectorAll('#vd_fontList button').forEach(b => b.classList.toggle('on', b.dataset.f === f));
+  }
+  $('vd_fontList').innerHTML = FG.map(g => `<div class="grp">${esc(g[0])}</div>` + g[1].map(f =>
+    `<button type="button" data-f="${esc(f[0])}" style="font-family:'${f[0]}','Pretendard Variable',sans-serif;"><span class="fn">${esc(f[1])}</span><span class="fs">가나다 Abc 123</span></button>`).join('')).join('');
+  $('vd_fontList').querySelectorAll('button').forEach(b => b.addEventListener('click', () => {
+    $('vd_font').value = b.dataset.f; setFontLabel(b.dataset.f); $('vd_fontList').hidden = true;
+    if(document.fonts) document.fonts.load(`700 40px "${b.dataset.f}"`).then(() => previewFrame()).catch(() => {});
+    $('vd_font').dispatchEvent(new Event('input'));
+  }));
+  $('vd_fontBtn').addEventListener('click', e => { e.stopPropagation(); if(window.__requestAllFonts) window.__requestAllFonts(); $('vd_fontList').hidden = !$('vd_fontList').hidden; });
+  document.addEventListener('click', e => { if(!$('vd_fontPick').contains(e.target)) $('vd_fontList').hidden = true; });
+  setFontLabel($('vd_font').value);
+
+  // 로고
+  $('vd_logoFile').addEventListener('change', async e => {
+    const f = e.target.files[0]; if(!f) return;
+    try{ const bmp = await createImageBitmap(f); const c = mk(bmp.width, bmp.height); c.getContext('2d').drawImage(bmp, 0, 0); P.logo = c; $('vd_logoName').textContent = f.name; previewFrame(); }
+    catch(err){ $('vd_logoName').textContent = '이 이미지는 열 수 없어요'; }
+    e.target.value = '';
+  });
+  $('vd_logoSize').addEventListener('input', () => { P.logoSize = +$('vd_logoSize').value; $('vd_logoSizeV').textContent = P.logoSize; previewFrame(); });
+  $('vd_logoOp').addEventListener('input', () => { P.logoOp = +$('vd_logoOp').value; $('vd_logoOpV').textContent = P.logoOp; previewFrame(); });
+  segBind('vd_logoPos', 'p', v => { P.logoPos = v; previewFrame(); });
+  $('vd_logoRemove').addEventListener('click', () => { P.logo = null; $('vd_logoName').textContent = '없음'; previewFrame(); });
+
+  // 소리
+  $('vd_mute').addEventListener('change', () => { P.mute = $('vd_mute').checked; clips.forEach(c => { c.v.muted = P.mute; }); });
+  $('vd_vol').addEventListener('input', () => { P.vol = +$('vd_vol').value; $('vd_volV').textContent = P.vol + '%'; clips.forEach(c => { c.v.volume = Math.min(1, P.vol / 100); }); });
+  $('vd_musicFile').addEventListener('change', async e => {
+    const f = e.target.files[0]; if(!f) return;
+    const url = URL.createObjectURL(f), a = new Audio(url);
+    try{
+      await loadMeta(a);
+      if(P.music) URL.revokeObjectURL(P.music.url);
+      P.music = { url, name:f.name, dur:isFinite(a.duration) ? a.duration : 0 };
+      $('vd_musicName').textContent = f.name; $('vd_moff').max = Math.max(0.1, P.music.dur - 0.5).toFixed(1); $('vd_moff').value = 0; P.moff = 0; $('vd_moffV').textContent = fmt(0);
+      syncMusic();
+    }catch(err){ URL.revokeObjectURL(url); $('vd_musicName').textContent = '이 음악 파일은 열 수 없어요'; }
+    e.target.value = '';
+  });
+  $('vd_mvol').addEventListener('input', () => { P.mvol = +$('vd_mvol').value; $('vd_mvolV').textContent = P.mvol + '%'; if(musicEl) musicEl.volume = Math.min(1, P.mvol / 100); });
+  $('vd_moff').addEventListener('input', () => { P.moff = +$('vd_moff').value; $('vd_moffV').textContent = fmt(P.moff); if(playing) syncMusic(); });
+  $('vd_mloop').addEventListener('change', () => { P.mloop = $('vd_mloop').checked; });
+  $('vd_musicRemove').addEventListener('click', () => { if(P.music) URL.revokeObjectURL(P.music.url); P.music = null; if(musicEl) musicEl.pause(); musicEl = null; $('vd_musicName').textContent = '없음'; });
+
+  // 속도·회전
+  segBind('vd_speeds', 's', v => { const ratio = P.speed / +v; stop(); P.speed = +v; gt = clamp(gt * ratio, 0, totalDur()); refreshAll(); showAt(gt); });
+  $('vd_rotL').addEventListener('click', () => { P.rot = (P.rot + 270) % 360; renderOutInfo(); previewFrame(); });
+  $('vd_rotR').addEventListener('click', () => { P.rot = (P.rot + 90) % 360; renderOutInfo(); previewFrame(); });
+  $('vd_flipH').addEventListener('click', () => { P.flipH = !P.flipH; previewFrame(); });
+  $('vd_flipV').addEventListener('click', () => { P.flipV = !P.flipV; previewFrame(); });
+
+  // 색 보정
+  $('vd_filters').innerHTML = Object.entries(FPRE).map(([k, v]) => `<button type="button" data-f="${k}"${k === 'none' ? ' class="on"' : ''}>${v[0]}</button>`).join('');
+  segBind('vd_filters', 'f', v => { P.filter = v; previewFrame(); });
+  document.querySelectorAll('[data-vadj]').forEach(el => el.addEventListener('input', () => {
+    P.adj[el.dataset.vadj] = +el.value; document.querySelector(`[data-vv="${el.dataset.vadj}"]`).textContent = el.value; previewFrame();
+  }));
+  $('vd_colorReset').addEventListener('click', () => {
+    P.adj = { brightness:0, contrast:0, saturation:0, temperature:0 }; P.filter = 'none';
+    document.querySelectorAll('[data-vadj]').forEach(el => { el.value = 0; document.querySelector(`[data-vv="${el.dataset.vadj}"]`).textContent = 0; });
+    document.querySelectorAll('#vd_filters button').forEach(b => b.classList.toggle('on', b.dataset.f === 'none'));
+    previewFrame();
+  });
+
+  // 페이드
+  $('vd_fadeIn').addEventListener('input', () => { P.fadeIn = +$('vd_fadeIn').value; $('vd_fadeInV').textContent = P.fadeIn + '초'; previewFrame(); });
+  $('vd_fadeOut').addEventListener('input', () => { P.fadeOut = +$('vd_fadeOut').value; $('vd_fadeOutV').textContent = P.fadeOut + '초'; previewFrame(); });
+  $('vd_fadeAudio').addEventListener('change', () => { P.fadeAudio = $('vd_fadeAudio').checked; });
+
+  /* ---------- 썸네일·GIF ---------- */
+  const baseName = () => (clips[0] ? clips[0].name.replace(/\.[^.]+$/, '') : '동영상') + '_편집';
+  async function snap(type){
+    if(!clips.length) return;
+    stop();
+    const sa = segAt(gt); if(!sa) return;
+    await seekTo(sa.s.c.v, sa.local);
+    const [W, H] = outSize(), c = mk(W, H);
+    drawFrame(c.getContext('2d'), W, H, sa.s.c.v, gt, false);
+    const blob = await new Promise(r => c.toBlob(r, type, 0.92));
+    try{ await saveFile(`${baseName()}_${fmt(gt).replace(':', '분').replace('.', '_')}초.${type === 'image/png' ? 'png' : 'jpg'}`, blob); show(statusEl, `${fmt(gt)} 화면을 이미지로 저장했어요.`, 'ok'); }
+    catch(err){ show(statusEl, downloadErrorMessage(err), 'error'); }
+  }
+  $('vd_snapPng').addEventListener('click', () => snap('image/png'));
+  $('vd_snapJpg').addEventListener('click', () => snap('image/jpeg'));
+  let gifW = 480, gifFps = 10;
+  function renderGRange(){ $('vd_gfromV').textContent = fmt(gFrom); $('vd_gtoV').textContent = fmt(gTo); }
+  $('vd_gfrom').addEventListener('click', () => { gFrom = gt; if(gTo <= gFrom) gTo = Math.min(totalDur(), gFrom + 3); renderGRange(); });
+  $('vd_gto').addEventListener('click', () => { if(gt <= gFrom){ show(statusEl, 'GIF 끝은 시작보다 뒤여야 해요.', 'warn'); return; } gTo = Math.min(gt, gFrom + 15); renderGRange(); });
+  segBind('vd_gw', 'w', v => { gifW = +v; });
+  segBind('vd_gfps', 'f', v => { gifFps = +v; });
+  let gifLib = null;
+  $('vd_gif').addEventListener('click', async () => {
+    if(!clips.length || busy) return;
+    const T = totalDur(), from = clamp(gFrom, 0, T), to = clamp(Math.min(gTo, from + 15), 0, T);
+    if(to - from < 0.2){ show(statusEl, 'GIF 구간이 너무 짧아요. 시작·끝을 다시 정해 주세요.', 'warn'); return; }
+    stop(); busy = true;
+    const prog = $('vd_gifProg'); prog.hidden = false; prog.firstElementChild.style.width = '0%';
+    try{
+      show(statusEl, 'GIF를 만드는 중…', 'warn');
+      if(!gifLib) gifLib = await import('https://cdn.jsdelivr.net/npm/gifenc@1.0.3/+esm');
+      const { GIFEncoder, quantize, applyPalette } = gifLib;
+      const [W, H] = outSize(), gw = gifW, gh = Math.max(2, Math.round(H * gw / W));
+      const c = mk(gw, gh), x = c.getContext('2d', { willReadFrequently:true });
+      const enc = GIFEncoder(), step = 1 / gifFps, delay = Math.round(1000 / gifFps), n = Math.max(1, Math.floor((to - from) / step));
+      for(let i = 0; i < n; i++){
+        const t = from + i * step, sa = segAt(t);
+        await seekTo(sa.s.c.v, sa.local);
+        x.save(); x.scale(gw / W, gh / H); drawFrame(x, W, H, sa.s.c.v, t, false); x.restore();
+        const d = x.getImageData(0, 0, gw, gh).data, pal = quantize(d, 256), idx = applyPalette(d, pal);
+        enc.writeFrame(idx, gw, gh, { palette:pal, delay });
+        prog.firstElementChild.style.width = Math.round((i + 1) / n * 100) + '%';
+      }
+      enc.finish();
+      const blob = new Blob([enc.bytes()], { type:'image/gif' });
+      await saveFile(baseName() + '.gif', blob);
+      show(statusEl, `GIF를 저장했어요 (${(blob.size / 1024 / 1024).toFixed(1)}MB, ${gw}×${gh}, ${(to - from).toFixed(1)}초).`, 'ok');
+    }catch(err){ show(statusEl, 'GIF를 만들지 못했어요. 인터넷 연결을 확인하고 다시 시도해 주세요. (' + (err && err.message ? err.message : err) + ')', 'error'); }
+    finally{ busy = false; prog.hidden = true; showAt(gt); }
+  });
+
+  /* ---------- 동영상 저장 ---------- */
+  const MIMES = {
+    mp4:['video/mp4;codecs=avc1.640028,mp4a.40.2', 'video/mp4;codecs=avc1.4d0028,mp4a.40.2', 'video/mp4;codecs=avc1.42E01F,mp4a.40.2', 'video/mp4;codecs=avc1,mp4a', 'video/mp4'],
+    webm:['video/webm;codecs=vp9,opus', 'video/webm;codecs=vp8,opus', 'video/webm']
+  };
+  const pickMime = f => (window.MediaRecorder ? MIMES[f].find(m => MediaRecorder.isTypeSupported(m)) : null) || null;
+  let outFmt = pickMime('mp4') ? 'mp4' : 'webm', quality = 'mid';
+  document.querySelectorAll('#vd_fmt button').forEach(b => { if(!pickMime(b.dataset.f)){ b.disabled = true; b.title = '이 브라우저에서는 이 형식으로 저장할 수 없어요'; } b.classList.toggle('on', b.dataset.f === outFmt); });
+  segBind('vd_fmt', 'f', v => { outFmt = v; renderEstimate(); });
+  segBind('vd_q', 'q', v => { quality = v; renderEstimate(); });
+  function vBitrate(W, H){ const k = { high:0.15, mid:0.08, low:0.035 }[quality]; return Math.round(clamp(W * H * 30 * k, 500e3, 16e6)); }
+  function renderEstimate(){
+    if(!clips.length){ $('vd_est').textContent = ''; return; }
+    const [W, H] = outSize(), T = totalDur(), br = vBitrate(W, H) + 128e3;
+    $('vd_est').textContent = `${W}×${H} · ${fmt(T)} · 예상 용량 약 ${(br * T / 8 / 1024 / 1024).toFixed(1)}MB · 만드는 시간 약 ${fmt(T)}`
+      + (window.MediaRecorder ? '' : ' · ⚠ 이 브라우저는 동영상 저장을 지원하지 않아요 (크롬·엣지 권장)');
+  }
+  let job = null;
+  $('vd_cancel').addEventListener('click', () => { if(job) job.cancel = true; });
+  $('vd_export').addEventListener('click', async () => {
+    if(!clips.length || busy) return;
+    const mime = pickMime(outFmt);
+    if(!mime){ show(statusEl, '이 브라우저에서는 동영상 저장을 할 수 없어요. 크롬이나 엣지에서 열어 주세요.', 'error'); return; }
+    stop(); busy = true; job = { cancel:false };
+    const btn = $('vd_export'), cancelBtn = $('vd_cancel'), prog = $('vd_prog'), ptxt = $('vd_progText');
+    btn.disabled = true; cancelBtn.style.display = ''; prog.hidden = false; prog.firstElementChild.style.width = '0%'; $('vd_result').innerHTML = '';
+    const [W, H] = outSize(), T = totalDur(), ss = segments();
+    const c = mk(W, H), x = c.getContext('2d');
+    let ac = null, players = [];
+    try{
+      // 소리 섞기: 원본 영상 소리 + 배경음악 → 하나의 소리 트랙
+      ac = new AudioContext(); await ac.resume();
+      const dest = ac.createMediaStreamDestination(), master = ac.createGain(); master.connect(dest);
+      const byUrl = {};
+      for(const cl of clips){
+        if(byUrl[cl.url]) continue;
+        const v = document.createElement('video'); v.preload = 'auto'; v.playsInline = true; v.src = cl.url;
+        await loadMeta(v);
+        const g = ac.createGain(); g.gain.value = P.mute ? 0 : P.vol / 100;
+        ac.createMediaElementSource(v).connect(g); g.connect(master);
+        byUrl[cl.url] = v; players.push(v);
+      }
+      let music = null;
+      if(P.music){
+        const a = new Audio(P.music.url); await loadMeta(a);
+        const g = ac.createGain(); g.gain.value = P.mvol / 100;
+        ac.createMediaElementSource(a).connect(g); g.connect(master);
+        music = a; players.push(a);
+      }
+      const stream = new MediaStream([...c.captureStream(30).getVideoTracks(), ...dest.stream.getAudioTracks()]);
+      const rec = new MediaRecorder(stream, { mimeType:mime, videoBitsPerSecond:vBitrate(W, H), audioBitsPerSecond:128000 });
+      const chunks = []; rec.ondataavailable = e => { if(e.data && e.data.size) chunks.push(e.data); };
+      const stopped = new Promise(r => { rec.onstop = r; });
+      let started = false;
+      for(const s of ss){
+        if(job.cancel) break;
+        const v = byUrl[s.c.url];
+        v.playbackRate = P.speed;
+        await seekTo(v, s.c.start);
+        master.gain.value = fadeGain(s.off, T);
+        drawFrame(x, W, H, v, s.off, false);
+        if(music){ const mt = musicTimeAt(s.off); if(mt != null){ music.currentTime = mt; music.play().catch(() => {}); } }
+        await v.play();
+        if(!started){ rec.start(1000); started = true; } else rec.resume();
+        await new Promise(res => {
+          let fin = false;
+          const done = () => { if(fin) return; fin = true; clearInterval(watch); res(); };
+          const frame = () => {
+            if(fin) return;
+            const t = Math.min(T, s.off + (v.currentTime - s.c.start) / P.speed);
+            master.gain.value = fadeGain(t, T);
+            drawFrame(x, W, H, v, t, false);
+            prog.firstElementChild.style.width = Math.round(t / T * 100) + '%';
+            ptxt.textContent = `만드는 중… ${fmt(t)} / ${fmt(T)}`;
+            if(music && musicTimeAt(t) == null) music.pause();
+            if(job.cancel || v.currentTime >= s.c.end - 0.02 || v.ended){ done(); return; }
+            if(v.requestVideoFrameCallback) v.requestVideoFrameCallback(frame); else requestAnimationFrame(frame);
+          };
+          // 영상이 끝나거나 프레임 알림이 멈춰도 다음으로 넘어가도록 감시
+          const watch = setInterval(() => { if(job.cancel || v.currentTime >= s.c.end - 0.02 || v.ended) done(); }, 120);
+          frame();
+        });
+        v.pause(); if(music) music.pause();
+        if(started && rec.state === 'recording') rec.pause();
+      }
+      if(started) rec.stop(); else rec.stop();
+      await stopped;
+      if(job.cancel){ show(statusEl, '동영상 만들기를 중지했어요.', 'warn'); return; }
+      const blob = new Blob(chunks, { type:mime.split(';')[0] });
+      const ext = outFmt === 'mp4' ? 'mp4' : 'webm', name = baseName() + '.' + ext;
+      const url = URL.createObjectURL(blob);
+      $('vd_result').innerHTML = `<video src="${url}" controls playsinline></video><div class="ed-row"><button type="button" class="dark" id="vd_dl">⬇ ${esc(name)} 저장 (${(blob.size / 1024 / 1024).toFixed(1)}MB)</button></div>`;
+      $('vd_dl').addEventListener('click', async () => { try{ await saveFile(name, blob); }catch(err){ show(statusEl, downloadErrorMessage(err), 'error'); } });
+      ptxt.textContent = `완성! ${W}×${H} · ${fmt(T)} · ${(blob.size / 1024 / 1024).toFixed(1)}MB`;
+      try{ await saveFile(name, blob); }catch(err){}
+      show(statusEl, '동영상을 만들었어요. 아래 미리보기에서 확인하고, 저장이 안 됐으면 저장 버튼을 누르세요.', 'ok');
+    }catch(err){
+      show(statusEl, '동영상을 만들지 못했어요. (' + (err && err.message ? err.message : err) + ')', 'error');
+    }finally{
+      players.forEach(p => { try{ p.pause(); p.removeAttribute('src'); p.load(); }catch(e){} });
+      if(ac) ac.close().catch(() => {});
+      busy = false; job = null; btn.disabled = false; cancelBtn.style.display = 'none'; prog.hidden = true;
+      showAt(gt);
+    }
+  });
+
+  renderGRange(); refreshAll();
 })();
 
 /* ================= Tool 5/6 : 브랜드검색 노출 모니터링 (05 현황) + 모니터링 설정 (06) — Apps Script 웹앱 연동 ================= */
