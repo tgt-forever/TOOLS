@@ -754,6 +754,18 @@
   .wg-bad{ background:#FCE7F3; color:#BE185D; border-radius:999px; padding:1px 9px; font-family:var(--font-body); font-size:11px; font-weight:700; }
   .wg-good{ color:#4D7C0F; font-family:var(--font-body); font-size:11px; font-weight:700; }
   .wg-ok{ color:#4D7C0F; font-weight:600; padding:6px 0; }
+  /* 경고 깜빡임: 미노출·타사노출, 비즈머니 부족·임박이 있을 때 */
+  .wg-alertbadge{ flex:0 0 auto; font-size:11px; font-weight:700; background:#BE185D; color:#fff; border-radius:999px; padding:2px 8px; white-space:nowrap; }
+  @keyframes wgFrame{ 0%,100%{ box-shadow:inset 0 0 0 0 rgba(225,29,72,0); } 50%{ box-shadow:inset 0 0 0 5px rgba(225,29,72,.9); } }
+  @keyframes wgHead{ 0%,100%{ background:#F9A8CB; color:#5B1530; } 50%{ background:#E11D48; color:#fff; } }
+  @keyframes wgRow{ 0%,100%{ background:transparent; } 50%{ background:#FFE4E6; } }
+  @keyframes wgBadge{ 0%,100%{ transform:scale(1); } 50%{ transform:scale(1.15); } }
+  .wg.wg-alert{ animation:wgFrame 1s ease-in-out infinite; }
+  .wg.wg-alert .wg-hd{ animation:wgHead 1s ease-in-out infinite; }
+  .wg.wg-alert .wg-hd .wg-tm, .wg.wg-alert .wg-hd .wg-refresh{ color:inherit; }
+  .wg.wg-alert .wg-alertbadge{ animation:wgBadge 1s ease-in-out infinite; background:#fff; color:#BE185D; }
+  .wg.wg-alert .wg-r.wg-hot{ animation:wgRow 1s ease-in-out infinite; border-radius:8px; margin:0 -6px; padding-left:6px; padding-right:6px; }
+  @media (prefers-reduced-motion: reduce){ .wg.wg-alert, .wg.wg-alert *{ animation-duration:2.5s !important; } }
   .mon-search input[type="search"]{ flex:1; min-width:0; font-size:13.5px; border:1px solid var(--line); border-radius:8px; padding:10px 12px; background:var(--surface-2); color:var(--ink); }
   .mon-search input[type="search"]:focus{ outline:2px solid var(--accent-strong); outline-offset:2px; }
   .mon-money{ font-family:var(--font-mono); font-weight:700; font-variant-numeric:tabular-nums; white-space:nowrap; }
@@ -4244,7 +4256,10 @@ async function saveWorkbookFile(wb, filename){
       const cls = st === '노출' ? 'up' : (st === '미노출' || st === '타사노출') ? 'down' : st === '확인실패' ? 'fail' : 'none';
       return `<span class="wg-p ${cls}" title="${esc((st || '미확인') + (k.lastChecked ? ' · ' + k.lastChecked : ''))}">${label}</span>`;
     };
-    const bRow = g => `<div class="wg-r"><span class="wg-n" title="${esc(g.advertiser + ' · ' + g.keyword)}">${esc(g.keyword)}<em>${esc(g.advertiser)}</em></span>${wPill(g.PC,'PC')}${wPill(g.M,'M')}</div>`;
+    // 경고(깜빡임) 대상: 브검 미노출·타사노출, 비즈머니 부족·임박 (확인실패·조회실패는 네이버 쪽 문제일 수 있어 제외)
+    const hotBrand = g => live(g).some(k => k.lastStatus === '미노출' || k.lastStatus === '타사노출');
+    const hotBiz = b => b.state === '잔액 부족 임박' || b.state === '잔액 부족';
+    const bRow = g => `<div class="wg-r${hotBrand(g) ? ' wg-hot' : ''}"><span class="wg-n" title="${esc(g.advertiser + ' · ' + g.keyword)}">${esc(g.keyword)}<em>${esc(g.advertiser)}</em></span>${wPill(g.PC,'PC')}${wPill(g.M,'M')}</div>`;
 
     // 비즈머니: 잔액 적은 순
     const biz = (state.bizmoney || []).slice().sort((a, b) => (a.bizmoney ?? -1) - (b.bizmoney ?? -1));
@@ -4252,7 +4267,7 @@ async function saveWorkbookFile(wb, filename){
     const bizOk = biz.filter(b => b.state === '정상');
     const won = n => (n == null || n === '') ? '-' : Math.round(Number(n)).toLocaleString('ko-KR') + '원';
     const ZB = { '잔액 부족 임박':['low','임박'], '잔액 부족':['empty','부족'], '조회 실패':['fail','실패'], 'customerId 없음':['none','ID없음'] };
-    const zRow = b => { const z = ZB[b.state]; return `<div class="wg-r"><span class="wg-n" title="${esc(b.note || b.advertiser)}">${esc(b.advertiser)}</span><span class="wg-amt ${z ? z[0] : ''}">${won(b.bizmoney)}</span>${z ? `<span class="wg-p ${z[0]}">${z[1]}</span>` : ''}</div>`; };
+    const zRow = b => { const z = ZB[b.state]; return `<div class="wg-r${hotBiz(b) ? ' wg-hot' : ''}"><span class="wg-n" title="${esc(b.note || b.advertiser)}">${esc(b.advertiser)}</span><span class="wg-amt ${z ? z[0] : ''}">${won(b.bizmoney)}</span>${z ? `<span class="wg-p ${z[0]}">${z[1]}</span>` : ''}</div>`; };
 
     const col = (title, badge, rows, empty) => `<div class="wg-col"><div class="wg-colh">${title} ${badge}</div>${rows || `<div class="wg-ok">${empty}</div>`}</div>`;
     const badB = n => `<span class="wg-bad">${n}</span>`, goodB = n => `<span class="wg-good">${n}</span>`;
@@ -4266,9 +4281,15 @@ async function saveWorkbookFile(wb, filename){
                + col('비즈머니', badB('확인 ' + bad.length), bad.map(zRow).join(''), biz.length ? '모두 정상 ✓' : '잔액 정보 없음');
     }
 
+    const alertN = groups.filter(hotBrand).length + biz.filter(hotBiz).length;
+    let blinkOn = true;
+    try{ blinkOn = localStorage.getItem('wb_wg_blink') !== 'off'; }catch(e){}
+    root.className = 'wg' + (alertN && blinkOn ? ' wg-alert' : '');
     root.innerHTML = `
       <div class="wg-hd">${WG_KITTY}<span class="wg-ttl">브랜드 검색/비즈머니 모니터링</span>
+        ${alertN ? `<span class="wg-alertbadge" title="미노출·타사노출 또는 비즈머니 부족·임박">⚠ ${alertN}</span>` : ''}
         <span class="wg-tm"><b>${esc(acc ? acc.name : '')}</b>${esc((state.serverTime || '').slice(11))} 갱신</span>
+        <button class="wg-refresh" id="wg_bell" title="${blinkOn ? '깜빡임 끄기' : '깜빡임 켜기'}">${blinkOn ? '🔔' : '🔕'}</button>
         <button class="wg-refresh" id="wg_refresh" title="새로고침">↻</button></div>
       <div class="wg-grass"></div>
       <div class="wg-tabsrow"><div class="wg-tabs">
@@ -4278,6 +4299,10 @@ async function saveWorkbookFile(wb, filename){
       </div></div>
       <div class="wg-bd">${bodyHtml}</div>`;
     wd.getElementById('wg_refresh').addEventListener('click', () => load(true));
+    wd.getElementById('wg_bell').addEventListener('click', () => {
+      try{ localStorage.setItem('wb_wg_blink', blinkOn ? 'off' : 'on'); }catch(e){}
+      renderWidget();
+    });
     wd.querySelectorAll('.wg-tabs button').forEach(b => b.addEventListener('click', () => { wgTab = b.dataset.t; renderWidget(); }));
   }
 
